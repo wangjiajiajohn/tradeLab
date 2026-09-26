@@ -586,6 +586,7 @@ private struct AISettingsView: View {
                         if isLoadingModels {
                             HStack(spacing: 8) {
                                 ProgressView()
+                                    .tint(.white)
                                 Text("provider.ai.loading_models")
                             }
                         } else {
@@ -599,7 +600,9 @@ private struct AISettingsView: View {
                     .frame(maxWidth: .infinity, minHeight: 50)
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(trimmedAPIKey.isEmpty || isLoadingModels)
+                .tint(.blue)
+                .disabled(trimmedAPIKey.isEmpty)
+                .allowsHitTesting(!isLoadingModels && !trimmedAPIKey.isEmpty)
                 .padding(.horizontal)
                 .padding(.vertical, 10)
                 .background(.bar)
