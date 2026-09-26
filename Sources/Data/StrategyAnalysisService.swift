@@ -263,6 +263,29 @@ enum AIModelCatalogService {
         return models
     }
 
+    static func preferredModel(
+        for provider: AIProvider,
+        from models: [AIModelOption]
+    ) -> AIModelOption? {
+        let usableModels = models.filter { model in
+            let id = model.id.lowercased()
+            let unsupportedKinds = [
+                "embedding", "moderation", "whisper", "transcribe", "tts",
+                "audio", "image", "dall-e", "realtime", "live", "search"
+            ]
+            return !unsupportedKinds.contains(where: id.contains)
+        }
+
+        guard !usableModels.isEmpty else { return nil }
+
+        return usableModels.sorted { lhs, rhs in
+            let lhsScore = preferenceScore(for: lhs, provider: provider)
+            let rhsScore = preferenceScore(for: rhs, provider: provider)
+            if lhsScore != rhsScore { return lhsScore > rhsScore }
+            return lhs.id.localizedStandardCompare(rhs.id) == .orderedDescending
+        }.first
+    }
+
     static func fetchModels(
         for provider: AIProvider,
         apiKey: String,
@@ -336,6 +359,34 @@ enum AIModelCatalogService {
 
     private static func cacheKey(for provider: AIProvider) -> String {
         "v2.ai-model-catalog.\(provider.rawValue)"
+    }
+
+    private static func preferenceScore(for model: AIModelOption, provider: AIProvider) -> Int {
+        let value = "\(model.id) \(model.displayName)".lowercased()
+        let preferredTerms: [(String, Int)]
+
+        switch provider {
+        case .disabled:
+            preferredTerms = []
+        case .openAI:
+            preferredTerms = [("gpt", 30), ("mini", 24), ("chat", 12)]
+        case .deepSeek:
+            preferredTerms = [("chat", 45), ("reasoner", 25)]
+        case .claude:
+            preferredTerms = [("sonnet", 45), ("haiku", 28), ("opus", 12)]
+        case .gemini:
+            preferredTerms = [("flash", 45), ("pro", 28), ("lite", 10)]
+        case .kimi:
+            preferredTerms = [("kimi", 40), ("moonshot", 28), ("chat", 12)]
+        }
+
+        var score = preferredTerms.reduce(0) { result, term in
+            result + (value.contains(term.0) ? term.1 : 0)
+        }
+        if value.contains("preview") || value.contains("experimental") || value.contains("exp-") {
+            score -= 8
+        }
+        return score
     }
 
     private static func friendlyName(for id: String) -> String {

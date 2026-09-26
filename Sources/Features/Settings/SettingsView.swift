@@ -689,14 +689,22 @@ private struct AISettingsView: View {
                 apiKey: trimmedKey
             )
             validatedAPIKey = trimmedKey
-            if !selectedModelID.isEmpty,
-               !availableModels.contains(where: { $0.id == selectedModelID }) {
-                modelLoadMessage = AppLocalization.string(
-                    "provider.ai.saved_model_unavailable",
-                    locale: model.language.locale
-                )
-            } else if !selectedModelID.isEmpty {
+            if availableModels.contains(where: { $0.id == selectedModelID }) {
                 saveConfiguration()
+            } else {
+                if !selectedModelID.isEmpty {
+                    modelLoadMessage = AppLocalization.string(
+                        "provider.ai.saved_model_unavailable",
+                        locale: model.language.locale
+                    )
+                }
+                if let preferredModel = AIModelCatalogService.preferredModel(
+                    for: model.aiProvider,
+                    from: availableModels
+                ) {
+                    selectedModelID = preferredModel.id
+                    saveConfiguration()
+                }
             }
         } catch {
             availableModels = []
