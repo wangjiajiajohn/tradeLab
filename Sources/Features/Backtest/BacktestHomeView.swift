@@ -139,8 +139,10 @@ private struct ResultSections: View {
             Button(action: runAgain) {
                 Label("result.run_again", systemImage: "arrow.clockwise")
                     .frame(maxWidth: .infinity)
+                    .frame(minHeight: 50)
             }
             .buttonStyle(.borderedProminent)
+            .controlSize(.large)
         }
 
         Section("result.price_signals") {
