@@ -158,6 +158,7 @@
 "strategies.add" = "新增策略";
 "strategies.built_in" = "內置策略";
 "strategies.custom.empty" = "尚無自訂策略";
+"strategies.custom.empty_prompt" = "點擊右上角，建立自己的策略";
 "strategies.custom.later" = "結構化策略建立功能將在下一階段加入。";
 "strategies.demo_badge" = "示範";
 "strategies.create" = "新增策略";

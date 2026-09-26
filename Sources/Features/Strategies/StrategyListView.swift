@@ -13,9 +13,8 @@ struct StrategyListView: View {
                 Section("strategies.custom") {
                     if customStrategies.isEmpty {
                         ContentUnavailableView(
-                            "strategies.custom.empty",
-                            systemImage: "slider.horizontal.3",
-                            description: Text("strategies.custom.description")
+                            "strategies.custom.empty_prompt",
+                            systemImage: "slider.horizontal.3"
                         )
                     } else {
                         ForEach(customStrategies) { strategy in

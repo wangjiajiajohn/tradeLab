@@ -158,6 +158,7 @@
 "strategies.add" = "Add Strategy";
 "strategies.built_in" = "Built-in";
 "strategies.custom.empty" = "No Custom Strategies";
+"strategies.custom.empty_prompt" = "Tap the top-right button to create your own strategy";
 "strategies.custom.later" = "Structured strategy creation will be added in the next implementation slice.";
 "strategies.demo_badge" = "Demo";
 "strategies.create" = "New Strategy";
