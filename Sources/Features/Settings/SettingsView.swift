@@ -93,10 +93,9 @@ struct MarketDataSettingsView: View {
     }
 
     private var canSave: Bool {
-        model.marketDataSource == .offline
-            || !appKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                && !appSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                && !accessToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !appKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !appSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !accessToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
@@ -150,7 +149,11 @@ struct MarketDataSettingsView: View {
                 }
             }
 
-            Section {
+        }
+        .navigationTitle("settings.market_data_provider")
+        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if model.marketDataSource == .longbridge {
                 Button {
                     save()
                 } label: {
@@ -158,14 +161,16 @@ struct MarketDataSettingsView: View {
                         LocalizedStringKey(didSave ? "status.saved" : "action.save"),
                         systemImage: didSave ? "checkmark" : "square.and.arrow.down"
                     )
-                        .frame(maxWidth: .infinity)
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, minHeight: 50)
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(!canSave)
+                .padding(.horizontal)
+                .padding(.vertical, 10)
+                .background(.bar)
             }
         }
-        .navigationTitle("settings.market_data_provider")
-        .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             loadCredentials()
             guard presentsProviderPickerOnAppear, !hasPresentedProviderPicker else { return }
@@ -174,6 +179,9 @@ struct MarketDataSettingsView: View {
                 showingProviderPicker = true
             }
         }
+        .onChange(of: appKey) { _, _ in didSave = false }
+        .onChange(of: appSecret) { _, _ in didSave = false }
+        .onChange(of: accessToken) { _, _ in didSave = false }
         .alert("error.title", isPresented: errorPresented) {
             Button("action.ok", role: .cancel) { errorMessage = nil }
         } message: {
