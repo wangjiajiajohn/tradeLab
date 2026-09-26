@@ -87,6 +87,14 @@
 "review.restore" = "使用這組條件再次驗證";
 "review.restore_hint" = "恢復股票、策略和回測設定，然後返回回測頁。不會直接執行。";
 "review.restore_unavailable" = "這條記錄使用的股票或自訂策略已不可用。";
+"review.compare" = "比較";
+"review.compare_selected_format" = "比較已選的 %d/2 條記錄";
+"review.comparison" = "回測比較";
+"review.test_format" = "回測 %d";
+"review.compare_note" = "綠色標記表示該項相對較佳。收益越高越好；最大回撤越低越好。不同股票、區間或資金條件的結果只能作為參考。";
+"review.selected" = "已選擇";
+"review.not_selected" = "未選擇";
+"review.better_result" = "相對較佳";
 
 "settings.appearance" = "外觀";
 "settings.capital" = "初始資金";

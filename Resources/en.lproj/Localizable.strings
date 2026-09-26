@@ -87,6 +87,14 @@
 "review.restore" = "Test These Conditions Again";
 "review.restore_hint" = "Restores the stock, strategy, and settings, then returns to Backtest. It will not run automatically.";
 "review.restore_unavailable" = "The stock or custom strategy used by this record is no longer available.";
+"review.compare" = "Compare";
+"review.compare_selected_format" = "Compare Selected %d/2";
+"review.comparison" = "Backtest Comparison";
+"review.test_format" = "Test %d";
+"review.compare_note" = "A green mark highlights the relatively better value. Higher returns are better; lower drawdown is better. Results with different stocks, periods, or capital assumptions are not directly equivalent.";
+"review.selected" = "Selected";
+"review.not_selected" = "Not selected";
+"review.better_result" = "Relatively better";
 
 "settings.appearance" = "Appearance";
 "settings.capital" = "Initial Capital";
