@@ -59,6 +59,23 @@ final class BacktestEngineTests: XCTestCase {
         }
     }
 
+    func testBacktestDiagnosticsAlwaysExplainTheCurrentResult() throws {
+        let provider = DemoMarketDataProvider()
+        for strategy in TradingStrategy.builtIn {
+            let result = try BacktestEngine.run(
+                security: provider.security,
+                candles: provider.candles(),
+                strategy: strategy,
+                settings: .demo
+            )
+            let diagnostics = BacktestDiagnostics.analyze(result)
+
+            XCTAssertFalse(diagnostics.isEmpty, strategy.name)
+            XCTAssertLessThanOrEqual(diagnostics.count, 4, strategy.name)
+            XCTAssertEqual(Set(diagnostics.map(\.id)).count, diagnostics.count, strategy.name)
+        }
+    }
+
     func testRejectsInsufficientData() {
         let provider = DemoMarketDataProvider()
         XCTAssertThrowsError(

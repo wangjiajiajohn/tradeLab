@@ -11,6 +11,7 @@
 		0F3C48BD903324C82CE4D580 /* TradeLabV2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD03B2B8639C2319C5E95B0 /* TradeLabV2App.swift */; };
 		0FA673DBE3EEB6CD369456A0 /* TradeJournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A894B034C10E919C4E8D7D5 /* TradeJournalView.swift */; };
 		12C70EDFF773B9CA2A3BDCA2 /* BacktestEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3BD4F556C17750CCC16B76 /* BacktestEngine.swift */; };
+		1A93E6CD4D4A4DDC8105B702 /* BacktestDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A93E6CD4D4A4DDC8105B701 /* BacktestDiagnostics.swift */; };
 		14265642F35669E7FF1159CD /* NVDA.US-1m.csv.gz in Resources */ = {isa = PBXBuildFile; fileRef = D273EB0F39131242FAEDBBC6 /* NVDA.US-1m.csv.gz */; };
 		18BBB7282FF6CBB6142F08F2 /* 700.HK-daily.csv in Resources */ = {isa = PBXBuildFile; fileRef = 2440EAC17F4533637E040B50 /* 700.HK-daily.csv */; };
 		1D92CF661AC6F49B272C6A14 /* TradeJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BE509E834293388C49EDAD /* TradeJournal.swift */; };
@@ -66,6 +67,7 @@
 		018441FB7DEC3974C8927155 /* AAPL.US-daily.csv */ = {isa = PBXFileReference; path = "AAPL.US-daily.csv"; sourceTree = "<group>"; };
 		166DBE5654B7AAEB9104738C /* all-symbols-daily.csv */ = {isa = PBXFileReference; path = "all-symbols-daily.csv"; sourceTree = "<group>"; };
 		1A3CB2C31E7982BDC02D6833 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		1A93E6CD4D4A4DDC8105B701 /* BacktestDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BacktestDiagnostics.swift; sourceTree = "<group>"; };
 		2440EAC17F4533637E040B50 /* 700.HK-daily.csv */ = {isa = PBXFileReference; path = "700.HK-daily.csv"; sourceTree = "<group>"; };
 		258D8396826D51DF9E8682C7 /* AppLocalization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocalization.swift; sourceTree = "<group>"; };
 		36E3B096E09A56BAF0E35C5E /* ReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewView.swift; sourceTree = "<group>"; };
@@ -220,6 +222,7 @@
 			isa = PBXGroup;
 			children = (
 				8A3BD4F556C17750CCC16B76 /* BacktestEngine.swift */,
+				1A93E6CD4D4A4DDC8105B701 /* BacktestDiagnostics.swift */,
 				A48AE88F464594592178D033 /* Models.swift */,
 				59BE509E834293388C49EDAD /* TradeJournal.swift */,
 			);
@@ -411,6 +414,7 @@
 				084186873C8C404FAB4BD5ED /* AppLocalization.swift in Sources */,
 				F18BA57F4C33D1D6BE0A196D /* AppModel.swift in Sources */,
 				12C70EDFF773B9CA2A3BDCA2 /* BacktestEngine.swift in Sources */,
+				1A93E6CD4D4A4DDC8105B702 /* BacktestDiagnostics.swift in Sources */,
 				238FDEE7837C46D483204C2D /* BacktestHomeView.swift in Sources */,
 				F2886537BC67D28616DFA430 /* BuiltInMarketDataProvider.swift in Sources */,
 				34531AE6F0392E5E6C2A16D3 /* CSVExports.swift in Sources */,

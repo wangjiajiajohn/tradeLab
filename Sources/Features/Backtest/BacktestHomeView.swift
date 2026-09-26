@@ -126,6 +126,16 @@ private struct ResultSections: View {
                 .foregroundStyle(.secondary)
         }
 
+        Section {
+            ForEach(diagnostics) { diagnostic in
+                StrategyDiagnosticRow(diagnostic: diagnostic)
+            }
+        } header: {
+            Text("result.diagnostics")
+        } footer: {
+            Text("result.diagnostics_scope")
+        }
+
         Section("result.next_test") {
             Button(action: changeStock) {
                 Label("result.change_stock", systemImage: "chart.line.uptrend.xyaxis")
@@ -236,6 +246,107 @@ private struct ResultSections: View {
         return String(
             format: AppLocalization.string(key, locale: locale),
             value
+        )
+    }
+
+    private var diagnostics: [BacktestDiagnostic] {
+        BacktestDiagnostics.analyze(result)
+    }
+}
+
+private struct StrategyDiagnosticRow: View {
+    let diagnostic: BacktestDiagnostic
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: iconName)
+                .foregroundStyle(iconColor)
+                .font(.title3)
+                .frame(width: 24)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                Text(detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private var iconName: String {
+        switch diagnostic.severity {
+        case .critical: "exclamationmark.octagon.fill"
+        case .warning: "exclamationmark.triangle.fill"
+        case .information: "info.circle.fill"
+        }
+    }
+
+    private var iconColor: Color {
+        switch diagnostic.severity {
+        case .critical: .red
+        case .warning: .orange
+        case .information: .blue
+        }
+    }
+
+    private var title: String {
+        localized("result.diagnostic.\(key).title")
+    }
+
+    private var detail: String {
+        switch diagnostic.kind {
+        case let .risingMarketDCA(gap), let .underperformed(gap):
+            return formattedDetail(percent(gap))
+        case let .noDownsideProtection(drawdown), let .deepDrawdown(drawdown):
+            return formattedDetail(percent(drawdown))
+        case let .tooFewSignals(entries):
+            return formattedDetail(entries)
+        case let .whipsaw(losses, closedTrades):
+            return formattedDetail(closedTrades, losses)
+        case let .missedTrend(exposure), let .highCosts(exposure):
+            return formattedDetail(percent(exposure))
+        case let .shortSample(days):
+            return formattedDetail(days)
+        case let .noClearEdge(gap):
+            return formattedDetail(percent(abs(gap)))
+        case .noObviousIssue:
+            return localized("result.diagnostic.no_obvious_issue.detail")
+        }
+    }
+
+    private var key: String {
+        switch diagnostic.kind {
+        case .risingMarketDCA: "dca_lag"
+        case .underperformed: "underperformed"
+        case .noDownsideProtection: "limited_protection"
+        case .deepDrawdown: "deep_drawdown"
+        case .tooFewSignals: "few_signals"
+        case .whipsaw: "whipsaw"
+        case .missedTrend: "missed_trend"
+        case .highCosts: "high_costs"
+        case .shortSample: "short_sample"
+        case .noClearEdge: "no_clear_edge"
+        case .noObviousIssue: "no_obvious_issue"
+        }
+    }
+
+    private func localized(_ key: String) -> String {
+        AppLocalization.string(key, locale: locale)
+    }
+
+    private func formattedDetail(_ arguments: CVarArg...) -> String {
+        String(format: localized("result.diagnostic.\(key).detail"), arguments: arguments)
+    }
+
+    private func percent(_ value: Double) -> String {
+        value.formatted(
+            .percent
+                .precision(.fractionLength(1))
+                .locale(locale)
         )
     }
 }
