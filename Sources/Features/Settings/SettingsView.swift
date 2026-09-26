@@ -473,6 +473,11 @@ private struct AISettingsView: View {
         apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    private var needsModelVerification: Bool {
+        !trimmedAPIKey.isEmpty
+            && (validatedAPIKey != trimmedAPIKey || availableModels.isEmpty)
+    }
+
     private var canChooseModel: Bool {
         !trimmedAPIKey.isEmpty
             && !availableModels.isEmpty
@@ -505,7 +510,6 @@ private struct AISettingsView: View {
                 if canChooseModel {
                     Section {
                         Picker("provider.ai.model", selection: $selectedModelID) {
-                            Text("provider.ai.choose_model").tag("")
                             ForEach(availableModels) { option in
                                 Text(option.displayName).tag(option.id)
                             }
@@ -578,7 +582,7 @@ private struct AISettingsView: View {
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if model.aiProvider != .disabled {
+            if model.aiProvider != .disabled && needsModelVerification {
                 Button {
                     Task { await refreshModels() }
                 } label: {
@@ -606,8 +610,10 @@ private struct AISettingsView: View {
                 .padding(.horizontal)
                 .padding(.vertical, 10)
                 .background(.bar)
+                .transition(.opacity)
             }
         }
+        .animation(.easeOut(duration: 0.2), value: needsModelVerification)
         .onAppear { loadConfiguration(for: model.aiProvider) }
         .onChange(of: model.aiProvider) { _, provider in
             loadConfiguration(for: provider)
