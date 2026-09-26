@@ -226,6 +226,7 @@
 "provider.ai.model_auto_save" = "Choose a model to save the API key and model together. Later model changes are saved automatically.";
 "provider.keychain_note" = "Credentials are stored in the system Keychain on this device and never written to logs or backtest records.";
 "provider.remove_credentials" = "Remove Saved Credentials";
+"provider.remove_credentials.message" = "This removes the saved API credentials from this device.";
 "provider.show_secret" = "Show credential";
 "provider.hide_secret" = "Hide credential";
 "error.keychain_format" = "The system Keychain could not be accessed (error %d).";

@@ -102,6 +102,7 @@ struct MarketDataSettingsView: View {
     @State private var didSave = false
     @State private var showingProviderPicker = false
     @State private var hasPresentedProviderPicker = false
+    @State private var showingRemoveCredentialsConfirmation = false
     @FocusState private var isCredentialFieldFocused: Bool
 
     init(presentsProviderPickerOnAppear: Bool = false) {
@@ -161,11 +162,6 @@ struct MarketDataSettingsView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
-                if model.hasSelectedMarketDataCredentials {
-                    Section {
-                        Button("provider.remove_credentials", role: .destructive) { removeCredentials() }
-                    }
-                }
             }
 
         }
@@ -177,6 +173,18 @@ struct MarketDataSettingsView: View {
         }
         .navigationTitle("settings.market_data_provider")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if model.hasSelectedMarketDataCredentials {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(role: .destructive) {
+                        showingRemoveCredentialsConfirmation = true
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .accessibilityLabel(Text("provider.remove_credentials"))
+                }
+            }
+        }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if model.marketDataSource != .offline {
                 Button {
@@ -212,6 +220,16 @@ struct MarketDataSettingsView: View {
             Button("action.ok", role: .cancel) { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
+        }
+        .confirmationDialog(
+            "provider.remove_credentials",
+            isPresented: $showingRemoveCredentialsConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("provider.remove_credentials", role: .destructive) { removeCredentials() }
+            Button("action.cancel", role: .cancel) {}
+        } message: {
+            Text("provider.remove_credentials.message")
         }
     }
 
@@ -394,6 +412,7 @@ private struct AISettingsView: View {
     @State private var showsManualModelEntry = false
     @State private var selectedModelID = ""
     @State private var validatedAPIKey = ""
+    @State private var showingRemoveCredentialsConfirmation = false
     @FocusState private var isCredentialFieldFocused: Bool
 
     private var trimmedAPIKey: String {
@@ -491,11 +510,6 @@ private struct AISettingsView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
-                if model.hasAIAPIKey {
-                    Section {
-                        Button("provider.remove_credentials", role: .destructive) { removeCredential() }
-                    }
-                }
             }
 
         }
@@ -507,6 +521,18 @@ private struct AISettingsView: View {
         }
         .navigationTitle("settings.ai_provider")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if model.hasAIAPIKey {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(role: .destructive) {
+                        showingRemoveCredentialsConfirmation = true
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .accessibilityLabel(Text("provider.remove_credentials"))
+                }
+            }
+        }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if model.aiProvider != .disabled && needsModelVerification {
                 Button {
@@ -539,6 +565,16 @@ private struct AISettingsView: View {
             Button("action.ok", role: .cancel) { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
+        }
+        .confirmationDialog(
+            "provider.remove_credentials",
+            isPresented: $showingRemoveCredentialsConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("provider.remove_credentials", role: .destructive) { removeCredential() }
+            Button("action.cancel", role: .cancel) {}
+        } message: {
+            Text("provider.remove_credentials.message")
         }
     }
 

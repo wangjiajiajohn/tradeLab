@@ -226,6 +226,7 @@
 "provider.ai.model_auto_save" = "选择模型后，API Key 与模型会一起保存；以后切换模型将自动保存。";
 "provider.keychain_note" = "凭证保存在本机系统钥匙串中，不会写入日志或回测记录。";
 "provider.remove_credentials" = "删除已保存的凭证";
+"provider.remove_credentials.message" = "这会从本机钥匙串中删除已保存的 API 凭证。";
 "provider.show_secret" = "显示凭证";
 "provider.hide_secret" = "隐藏凭证";
 "error.keychain_format" = "无法访问系统钥匙串（错误 %d）。";

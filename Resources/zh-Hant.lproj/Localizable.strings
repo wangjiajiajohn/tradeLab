@@ -226,6 +226,7 @@
 "provider.ai.model_auto_save" = "選擇模型後，API Key 與模型會一起儲存；之後切換模型將自動儲存。";
 "provider.keychain_note" = "憑證儲存在本機系統鑰匙圈中，不會寫入記錄或回測紀錄。";
 "provider.remove_credentials" = "刪除已儲存的憑證";
+"provider.remove_credentials.message" = "這會從本機鑰匙圈中刪除已儲存的 API 憑證。";
 "provider.show_secret" = "顯示憑證";
 "provider.hide_secret" = "隱藏憑證";
 "error.keychain_format" = "無法存取系統鑰匙圈（錯誤 %d）。";
