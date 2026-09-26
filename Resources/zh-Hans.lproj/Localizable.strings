@@ -170,6 +170,8 @@
 "strategies.name.placeholder" = "例如：我的趋势策略";
 "strategies.no_parameters" = "该策略类型无需额外参数。";
 "strategies.parameters" = "规则参数";
+"strategies.rule_summary" = "规则说明";
+"strategies.selection_note" = "这里用于查看和管理策略。请在回测流程中选择本次使用的策略。";
 "strategies.save" = "保存";
 "strategies.short_window" = "短期均线周期";
 "strategies.summary.breakout_format" = "收盘价突破前 %d 日高点时买入，跌破前 %d 日低点时卖出。";

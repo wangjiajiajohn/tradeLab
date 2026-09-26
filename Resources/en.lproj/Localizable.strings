@@ -170,6 +170,8 @@
 "strategies.name.placeholder" = "For example, My Trend Strategy";
 "strategies.no_parameters" = "This strategy type has no additional parameters.";
 "strategies.parameters" = "Rule Parameters";
+"strategies.rule_summary" = "Rule Summary";
+"strategies.selection_note" = "View and manage strategies here. Choose the strategy for a backtest from the backtest workflow.";
 "strategies.save" = "Save";
 "strategies.short_window" = "Short Moving Average";
 "strategies.summary.breakout_format" = "Buy when the close breaks above the prior %d-day high; sell when it falls below the prior %d-day low.";

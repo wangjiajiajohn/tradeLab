@@ -46,25 +46,63 @@ struct StrategyListView: View {
     }
 
     private func strategyRow(_ strategy: TradingStrategy) -> some View {
-        Button {
-            model.selectStrategy(strategy)
+        NavigationLink {
+            StrategyDetailView(strategy: strategy)
         } label: {
             VStack(alignment: .leading, spacing: 5) {
-                HStack {
-                    Text(strategy.name).font(.headline)
-                    Spacer()
-                    if model.selectedStrategyID == strategy.id {
-                        Image(systemName: "checkmark")
-                            .foregroundStyle(.tint)
-                    }
-                }
+                Text(strategy.name).font(.headline)
                 Text(strategy.summary)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
         }
-        .buttonStyle(.plain)
         .padding(.vertical, 4)
+    }
+}
+
+private struct StrategyDetailView: View {
+    let strategy: TradingStrategy
+
+    var body: some View {
+        List {
+            Section("strategies.rule_summary") {
+                Text(strategy.summary)
+            }
+
+            Section("strategies.parameters") {
+                LabeledContent("strategies.type") {
+                    Text(typeName)
+                }
+                switch strategy.rule {
+                case .dualMovingAverage(let short, let long):
+                    LabeledContent("strategies.short_window", value: "\(short)")
+                    LabeledContent("strategies.long_window", value: "\(long)")
+                case .breakout(let entry, let exit):
+                    LabeledContent("strategies.entry_window", value: "\(entry)")
+                    LabeledContent("strategies.exit_window", value: "\(exit)")
+                case .buyAndHold, .monthlyDCA:
+                    Text("strategies.no_parameters")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Section {
+                Label("strategies.selection_note", systemImage: "info.circle")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .navigationTitle(strategy.name)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var typeName: LocalizedStringKey {
+        switch strategy.rule {
+        case .buyAndHold: "strategies.type.buy_hold"
+        case .monthlyDCA: "strategies.type.dca"
+        case .dualMovingAverage: "strategies.type.moving_average"
+        case .breakout: "strategies.type.breakout"
+        }
     }
 }
 
