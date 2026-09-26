@@ -1,0 +1,100 @@
+"action.back" = "返回";
+"action.continue" = "继续";
+"action.ok" = "好";
+
+"backtest.conditions" = "回测设置";
+"backtest.empty.description" = "选择股票和策略后，运行一次历史模拟。";
+"backtest.empty.title" = "还没有回测结果";
+"backtest.run" = "运行回测";
+"backtest.stock" = "股票";
+"backtest.strategy" = "策略";
+"backtest.workflow" = "回测流程";
+
+"demo.security.subtitle" = "AAPL · 内置合成日线数据";
+"demo.synthetic_disclosure" = "内置数据仅用于产品演示，并非 Apple 的真实市场数据。";
+
+"error.incomplete_setup" = "请先选择股票和策略，并确认回测设置。";
+"error.insufficient_data" = "价格数据不足，无法运行此策略。";
+"error.invalid_capital" = "初始资金必须大于零。";
+"error.invalid_strategy" = "策略参数无效。";
+"error.title" = "无法运行回测";
+
+"onboarding.answer" = "用一次历史回测找到答案。";
+"onboarding.offline" = "无需账户 · 无需联网 · 约 2 分钟";
+"onboarding.progress_format" = "第 %d 步，共 4 步";
+"onboarding.progress.run" = "开始回测";
+"onboarding.progress.settings" = "回测设置";
+"onboarding.progress.stock" = "选择股票";
+"onboarding.progress.strategy" = "选择策略";
+"onboarding.question" = "你的策略，真的经得起市场吗？";
+"onboarding.run.button" = "运行第一次回测";
+"onboarding.run.conditions_ready" = "回测设置已确认";
+"onboarding.run.subtitle" = "数据只在本机处理。运行模拟，看看历史证据。";
+"onboarding.run.title" = "验证这个想法";
+"onboarding.settings.confirm" = "确认回测设置";
+"onboarding.settings.subtitle" = "检查时间区间、初始资金、佣金和滑点。";
+"onboarding.settings.title" = "设置回测条件";
+"onboarding.start" = "开始验证";
+"onboarding.stock.subtitle" = "先用内置离线样本体验，之后再连接真实数据。";
+"onboarding.stock.title" = "选择一只股票";
+"onboarding.strategy.subtitle" = "先用一套透明、可以准确复现的交易规则。";
+"onboarding.strategy.title" = "选择一个策略";
+
+"result.benchmark" = "买入并持有";
+"result.drawdown" = "最大回撤";
+"result.equity" = "资金曲线";
+"result.excess" = "超额收益";
+"result.price_signals" = "价格与信号";
+"result.return" = "累计收益";
+"result.strategy_value" = "策略";
+"result.summary" = "结果摘要";
+"result.trade_count" = "订单数";
+"result.trades" = "交易记录";
+
+"review.empty.description" = "保存的回测会显示在这里，便于对比复盘。";
+"review.empty.title" = "暂无可复盘内容";
+
+"settings.appearance" = "外观";
+"settings.capital" = "初始资金";
+"settings.costs" = "佣金 / 滑点";
+"settings.data" = "行情数据";
+"settings.demo_data" = "离线演示数据";
+"settings.network_first_run" = "首次启动联网";
+"settings.on_device" = "仅本机";
+"settings.online_provider" = "在线数据源";
+"settings.period" = "时间区间";
+"settings.privacy" = "隐私";
+"settings.research_disclaimer" = "回测仅用于研究，不构成投资建议，也不代表未来表现。";
+"settings.reset_onboarding" = "重新体验第一次回测";
+"settings.storage" = "演示数据存储";
+"settings.theme" = "主题";
+
+"status.confirmed" = "已确认";
+"status.disabled" = "已关闭";
+"status.not_configured" = "未配置";
+"status.not_confirmed" = "未确认";
+"status.not_selected" = "未选择";
+"status.ready" = "可用";
+
+"strategies.add" = "添加策略";
+"strategies.built_in" = "内置策略";
+"strategies.custom.empty" = "还没有自定义策略";
+"strategies.custom.later" = "结构化策略创建将在下一阶段加入。";
+"strategies.demo_badge" = "演示";
+"strategy.demo.name" = "10/30 趋势跟随";
+"strategy.demo.summary" = "10 日均线上穿 30 日均线时买入，反向下穿时卖出。";
+
+"tab.backtest" = "回测";
+"tab.review" = "复盘";
+"tab.settings" = "设置";
+"tab.strategies" = "策略";
+
+"theme.dark" = "深色";
+"theme.light" = "浅色";
+"theme.system" = "跟随系统";
+
+"trade.buy" = "买入";
+"trade.sell" = "卖出";
+"trade.reason.cross_down" = "短期均线下穿长期均线";
+"trade.reason.cross_up" = "短期均线上穿长期均线";
+"trade.reason.period_end" = "回测周期结束";

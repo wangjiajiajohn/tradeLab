@@ -1,0 +1,181 @@
+import Foundation
+
+enum BacktestError: LocalizedError {
+    case insufficientData
+    case invalidStrategy
+    case invalidCapital
+
+    var errorDescription: String? {
+        switch self {
+        case .insufficientData: String(localized: "error.insufficient_data")
+        case .invalidStrategy: String(localized: "error.invalid_strategy")
+        case .invalidCapital: String(localized: "error.invalid_capital")
+        }
+    }
+}
+
+enum BacktestEngine {
+    static func run(
+        security: Security,
+        candles: [Candle],
+        strategy: TradingStrategy,
+        settings: BacktestSettings
+    ) throws -> BacktestResult {
+        guard settings.initialCapital > 0 else { throw BacktestError.invalidCapital }
+        let candles = candles.sorted { $0.date < $1.date }
+
+        let shortWindow: Int
+        let longWindow: Int
+        switch strategy.rule {
+        case let .dualMovingAverage(short, long):
+            guard short > 0, long > short else { throw BacktestError.invalidStrategy }
+            shortWindow = short
+            longWindow = long
+        }
+
+        guard candles.count > longWindow + 2 else { throw BacktestError.insufficientData }
+
+        var cash = settings.initialCapital
+        var quantity = 0
+        var trades: [SimulatedTrade] = []
+        var equityCurve: [EquityPoint] = []
+        var previousShort: Double?
+        var previousLong: Double?
+        let firstClose = candles[0].close
+
+        for index in candles.indices {
+            let candle = candles[index]
+
+            if index >= longWindow - 1 {
+                let shortAverage = meanClose(in: candles, endingAt: index, window: shortWindow)
+                let longAverage = meanClose(in: candles, endingAt: index, window: longWindow)
+
+                if let previousShort, let previousLong {
+                    let crossesUp = previousShort <= previousLong && shortAverage > longAverage
+                    let crossesDown = previousShort >= previousLong && shortAverage < longAverage
+
+                    if crossesUp, quantity == 0 {
+                        let executionPrice = candle.close * (1 + settings.slippageRate)
+                        let unitCost = executionPrice * (1 + settings.commissionRate)
+                        let purchasable = Int(floor(cash / unitCost))
+                        if purchasable > 0 {
+                            let gross = executionPrice * Double(purchasable)
+                            let fee = gross * settings.commissionRate
+                            cash -= gross + fee
+                            quantity = purchasable
+                            trades.append(
+                                SimulatedTrade(
+                                    id: UUID(),
+                                    date: candle.date,
+                                    side: .buy,
+                                    price: executionPrice,
+                                    quantity: purchasable,
+                                    fee: fee,
+                                    reason: String(localized: "trade.reason.cross_up")
+                                )
+                            )
+                        }
+                    } else if crossesDown, quantity > 0 {
+                        sellAll(
+                            candle: candle,
+                            settings: settings,
+                            reason: String(localized: "trade.reason.cross_down"),
+                            cash: &cash,
+                            quantity: &quantity,
+                            trades: &trades
+                        )
+                    }
+                }
+
+                previousShort = shortAverage
+                previousLong = longAverage
+            }
+
+            equityCurve.append(
+                EquityPoint(
+                    date: candle.date,
+                    strategyValue: cash + Double(quantity) * candle.close,
+                    benchmarkValue: settings.initialCapital * candle.close / firstClose
+                )
+            )
+        }
+
+        if quantity > 0, let last = candles.last {
+            sellAll(
+                candle: last,
+                settings: settings,
+                reason: String(localized: "trade.reason.period_end"),
+                cash: &cash,
+                quantity: &quantity,
+                trades: &trades
+            )
+            if let lastPoint = equityCurve.last {
+                equityCurve[equityCurve.count - 1] = EquityPoint(
+                    date: lastPoint.date,
+                    strategyValue: cash,
+                    benchmarkValue: lastPoint.benchmarkValue
+                )
+            }
+        }
+
+        let finalValue = equityCurve.last?.strategyValue ?? settings.initialCapital
+        let cumulativeReturn = finalValue / settings.initialCapital - 1
+        let benchmarkReturn = (candles.last?.close ?? firstClose) / firstClose - 1
+
+        return BacktestResult(
+            security: security,
+            strategy: strategy,
+            settings: settings,
+            candles: candles,
+            trades: trades,
+            equityCurve: equityCurve,
+            finalValue: finalValue,
+            cumulativeReturn: cumulativeReturn,
+            benchmarkReturn: benchmarkReturn,
+            maxDrawdown: maximumDrawdown(equityCurve.map(\.strategyValue))
+        )
+    }
+
+    private static func meanClose(in candles: [Candle], endingAt index: Int, window: Int) -> Double {
+        let start = index - window + 1
+        return candles[start...index].reduce(0) { $0 + $1.close } / Double(window)
+    }
+
+    private static func sellAll(
+        candle: Candle,
+        settings: BacktestSettings,
+        reason: String,
+        cash: inout Double,
+        quantity: inout Int,
+        trades: inout [SimulatedTrade]
+    ) {
+        let executionPrice = candle.close * (1 - settings.slippageRate)
+        let gross = executionPrice * Double(quantity)
+        let fee = gross * settings.commissionRate
+        cash += gross - fee
+        trades.append(
+            SimulatedTrade(
+                id: UUID(),
+                date: candle.date,
+                side: .sell,
+                price: executionPrice,
+                quantity: quantity,
+                fee: fee,
+                reason: reason
+            )
+        )
+        quantity = 0
+    }
+
+    private static func maximumDrawdown(_ values: [Double]) -> Double {
+        var peak = values.first ?? 0
+        var maximum = 0.0
+        for value in values {
+            peak = max(peak, value)
+            guard peak > 0 else { continue }
+            maximum = max(maximum, (peak - value) / peak)
+        }
+        return maximum
+    }
+}
+

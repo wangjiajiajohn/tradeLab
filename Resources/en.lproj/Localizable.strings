@@ -1,0 +1,100 @@
+"action.back" = "Back";
+"action.continue" = "Continue";
+"action.ok" = "OK";
+
+"backtest.conditions" = "Backtest Settings";
+"backtest.empty.description" = "Select a stock and strategy, then run a historical simulation.";
+"backtest.empty.title" = "No Backtest Yet";
+"backtest.run" = "Run Backtest";
+"backtest.stock" = "Stock";
+"backtest.strategy" = "Strategy";
+"backtest.workflow" = "Backtest Workflow";
+
+"demo.security.subtitle" = "AAPL · Synthetic daily demo data";
+"demo.synthetic_disclosure" = "Built-in synthetic data for product demonstration only. It is not actual AAPL market data.";
+
+"error.incomplete_setup" = "Choose a stock and strategy, then confirm the backtest settings.";
+"error.insufficient_data" = "There is not enough price data for this strategy.";
+"error.invalid_capital" = "Initial capital must be greater than zero.";
+"error.invalid_strategy" = "The strategy parameters are invalid.";
+"error.title" = "Unable to Run Backtest";
+
+"onboarding.answer" = "Use one historical backtest to find out.";
+"onboarding.offline" = "No account · No network · About 2 minutes";
+"onboarding.progress_format" = "Step %d of 4";
+"onboarding.progress.run" = "Run";
+"onboarding.progress.settings" = "Settings";
+"onboarding.progress.stock" = "Stock";
+"onboarding.progress.strategy" = "Strategy";
+"onboarding.question" = "Would your strategy have survived the market?";
+"onboarding.run.button" = "Run My First Backtest";
+"onboarding.run.conditions_ready" = "Backtest settings confirmed";
+"onboarding.run.subtitle" = "Everything stays on this device. Run the simulation and inspect the evidence.";
+"onboarding.run.title" = "Test the Idea";
+"onboarding.settings.confirm" = "Confirm Settings";
+"onboarding.settings.subtitle" = "Review the period, starting capital, commission, and slippage.";
+"onboarding.settings.title" = "Set the Assumptions";
+"onboarding.start" = "Start Testing";
+"onboarding.stock.subtitle" = "Use the built-in offline sample first. You can connect real data later.";
+"onboarding.stock.title" = "Choose a Stock";
+"onboarding.strategy.subtitle" = "Start with a transparent rule that can be reproduced exactly.";
+"onboarding.strategy.title" = "Choose a Strategy";
+
+"result.benchmark" = "Buy & Hold";
+"result.drawdown" = "Maximum Drawdown";
+"result.equity" = "Equity Curve";
+"result.excess" = "Excess Return";
+"result.price_signals" = "Price & Signals";
+"result.return" = "Cumulative Return";
+"result.strategy_value" = "Strategy";
+"result.summary" = "Summary";
+"result.trade_count" = "Orders";
+"result.trades" = "Trades";
+
+"review.empty.description" = "Saved backtests will appear here for side-by-side review.";
+"review.empty.title" = "Nothing to Review Yet";
+
+"settings.appearance" = "Appearance";
+"settings.capital" = "Initial Capital";
+"settings.costs" = "Commission / Slippage";
+"settings.data" = "Market Data";
+"settings.demo_data" = "Offline Demo Data";
+"settings.network_first_run" = "Network on First Run";
+"settings.on_device" = "On Device";
+"settings.online_provider" = "Online Provider";
+"settings.period" = "Period";
+"settings.privacy" = "Privacy";
+"settings.research_disclaimer" = "Backtests are research tools, not investment advice or a promise of future performance.";
+"settings.reset_onboarding" = "Show First Backtest Again";
+"settings.storage" = "Demo Data Storage";
+"settings.theme" = "Theme";
+
+"status.confirmed" = "Confirmed";
+"status.disabled" = "Disabled";
+"status.not_configured" = "Not Configured";
+"status.not_confirmed" = "Not Confirmed";
+"status.not_selected" = "Not Selected";
+"status.ready" = "Ready";
+
+"strategies.add" = "Add Strategy";
+"strategies.built_in" = "Built-in";
+"strategies.custom.empty" = "No Custom Strategies";
+"strategies.custom.later" = "Structured strategy creation will be added in the next implementation slice.";
+"strategies.demo_badge" = "Demo";
+"strategy.demo.name" = "10/30 Trend Following";
+"strategy.demo.summary" = "Buy when the 10-day average crosses above the 30-day average; exit on the reverse cross.";
+
+"tab.backtest" = "Backtest";
+"tab.review" = "Review";
+"tab.settings" = "Settings";
+"tab.strategies" = "Strategies";
+
+"theme.dark" = "Dark";
+"theme.light" = "Light";
+"theme.system" = "System";
+
+"trade.buy" = "Buy";
+"trade.sell" = "Sell";
+"trade.reason.cross_down" = "Fast average crossed below slow average";
+"trade.reason.cross_up" = "Fast average crossed above slow average";
+"trade.reason.period_end" = "Backtest period ended";

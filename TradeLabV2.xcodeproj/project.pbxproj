@@ -1,0 +1,511 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0F3C48BD903324C82CE4D580 /* TradeLabV2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD03B2B8639C2319C5E95B0 /* TradeLabV2App.swift */; };
+		12C70EDFF773B9CA2A3BDCA2 /* BacktestEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3BD4F556C17750CCC16B76 /* BacktestEngine.swift */; };
+		238FDEE7837C46D483204C2D /* BacktestHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8733EF46FEAD463CC2910BD /* BacktestHomeView.swift */; };
+		3B0D9021AC7A8657FA57AFCD /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A48AE88F464594592178D033 /* Models.swift */; };
+		4991CC45732691215F00E008 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967A3DA3F2D3FA360F7E9E02 /* RootView.swift */; };
+		7392CDD05DA2D5D61F1DCCE0 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3CB2C31E7982BDC02D6833 /* SettingsView.swift */; };
+		8406FBF52AEB8BA2384D59E8 /* DemoMarketDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E0B43C4D9A12A7671FE746D /* DemoMarketDataProvider.swift */; };
+		915A6E71F719F44873BD114D /* FirstBacktestFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4417A80DC6823FF37E1D17 /* FirstBacktestFlowView.swift */; };
+		B98D3F402A8D55CEB05E3FF8 /* StrategyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA32C5EFF7917518807914 /* StrategyListView.swift */; };
+		D99D9F560B6BC0E9AFA0219B /* BacktestEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F051947413FF9FC4E7C0E4 /* BacktestEngineTests.swift */; };
+		E0CF6703C94593CCCBDB6DC7 /* ReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E3B096E09A56BAF0E35C5E /* ReviewView.swift */; };
+		F18BA57F4C33D1D6BE0A196D /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81FAF6E854ACC4BF99C426A /* AppModel.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D5775E405D7EFEE21BA56631 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F8DCA3335B64CBD3681E20C8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F39E11AC6CF8787E69283311;
+			remoteInfo = TradeLabV2;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		1A3CB2C31E7982BDC02D6833 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		36E3B096E09A56BAF0E35C5E /* ReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewView.swift; sourceTree = "<group>"; };
+		4BEA32C5EFF7917518807914 /* StrategyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategyListView.swift; sourceTree = "<group>"; };
+		4D1FF667481CD5D1661BFAF8 /* TradeLabV2.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TradeLabV2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4D9AA01A0FAB8649C95C4B9A /* TradeLabV2Tests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TradeLabV2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7E0B43C4D9A12A7671FE746D /* DemoMarketDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMarketDataProvider.swift; sourceTree = "<group>"; };
+		8A3BD4F556C17750CCC16B76 /* BacktestEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BacktestEngine.swift; sourceTree = "<group>"; };
+		8A4417A80DC6823FF37E1D17 /* FirstBacktestFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstBacktestFlowView.swift; sourceTree = "<group>"; };
+		967A3DA3F2D3FA360F7E9E02 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		A48AE88F464594592178D033 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		A8733EF46FEAD463CC2910BD /* BacktestHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BacktestHomeView.swift; sourceTree = "<group>"; };
+		AFD03B2B8639C2319C5E95B0 /* TradeLabV2App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeLabV2App.swift; sourceTree = "<group>"; };
+		D3F051947413FF9FC4E7C0E4 /* BacktestEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BacktestEngineTests.swift; sourceTree = "<group>"; };
+		E81FAF6E854ACC4BF99C426A /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		099B1AABCFBF19ADC7FC410F /* App */ = {
+			isa = PBXGroup;
+			children = (
+				E81FAF6E854ACC4BF99C426A /* AppModel.swift */,
+				AFD03B2B8639C2319C5E95B0 /* TradeLabV2App.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		4C2F709A94C4093E7F8768A7 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				967A3DA3F2D3FA360F7E9E02 /* RootView.swift */,
+				B15B2C5708B8E3AE7F8031B1 /* Backtest */,
+				95882E9234ADD9B0A31FB9F7 /* Onboarding */,
+				6BAB1FE0BF9D89EA92842AAE /* Review */,
+				9A3F0872BFD140C58D136DA6 /* Settings */,
+				DA87DC98828FAB6F81FFF869 /* Strategies */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		6BAB1FE0BF9D89EA92842AAE /* Review */ = {
+			isa = PBXGroup;
+			children = (
+				36E3B096E09A56BAF0E35C5E /* ReviewView.swift */,
+			);
+			path = Review;
+			sourceTree = "<group>";
+		};
+		747645FB7B51EEEB6A3DDD18 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				099B1AABCFBF19ADC7FC410F /* App */,
+				91301FEB84E0CC36956BD9A4 /* Data */,
+				95FF2A4274717ECF1B963F2B /* Domain */,
+				4C2F709A94C4093E7F8768A7 /* Features */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		8F1C87AAD9FB6C05AD675DCE /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				D3F051947413FF9FC4E7C0E4 /* BacktestEngineTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		91301FEB84E0CC36956BD9A4 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				7E0B43C4D9A12A7671FE746D /* DemoMarketDataProvider.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		95882E9234ADD9B0A31FB9F7 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				8A4417A80DC6823FF37E1D17 /* FirstBacktestFlowView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		95FF2A4274717ECF1B963F2B /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				8A3BD4F556C17750CCC16B76 /* BacktestEngine.swift */,
+				A48AE88F464594592178D033 /* Models.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		9A3F0872BFD140C58D136DA6 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				1A3CB2C31E7982BDC02D6833 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		B15B2C5708B8E3AE7F8031B1 /* Backtest */ = {
+			isa = PBXGroup;
+			children = (
+				A8733EF46FEAD463CC2910BD /* BacktestHomeView.swift */,
+			);
+			path = Backtest;
+			sourceTree = "<group>";
+		};
+		C1FD1FC6FD51965404AF296D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4D1FF667481CD5D1661BFAF8 /* TradeLabV2.app */,
+				4D9AA01A0FAB8649C95C4B9A /* TradeLabV2Tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C71902D4A571E18C1DCCFEBC = {
+			isa = PBXGroup;
+			children = (
+				747645FB7B51EEEB6A3DDD18 /* Sources */,
+				8F1C87AAD9FB6C05AD675DCE /* Tests */,
+				C1FD1FC6FD51965404AF296D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DA87DC98828FAB6F81FFF869 /* Strategies */ = {
+			isa = PBXGroup;
+			children = (
+				4BEA32C5EFF7917518807914 /* StrategyListView.swift */,
+			);
+			path = Strategies;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A43A252FE1C7536863C5DE86 /* TradeLabV2Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4004F820DE7DF71C268FD432 /* Build configuration list for PBXNativeTarget "TradeLabV2Tests" */;
+			buildPhases = (
+				D6A5F8A8706948370C9CCD30 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5D10B593E851E3291C5B0867 /* PBXTargetDependency */,
+			);
+			name = TradeLabV2Tests;
+			packageProductDependencies = (
+			);
+			productName = TradeLabV2Tests;
+			productReference = 4D9AA01A0FAB8649C95C4B9A /* TradeLabV2Tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F39E11AC6CF8787E69283311 /* TradeLabV2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A0FFF7873E176B21E7EAC038 /* Build configuration list for PBXNativeTarget "TradeLabV2" */;
+			buildPhases = (
+				4A96BAA306CD64830F9D9466 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TradeLabV2;
+			packageProductDependencies = (
+			);
+			productName = TradeLabV2;
+			productReference = 4D1FF667481CD5D1661BFAF8 /* TradeLabV2.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F8DCA3335B64CBD3681E20C8 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					A43A252FE1C7536863C5DE86 = {
+						DevelopmentTeam = 4JLZPF9655;
+						ProvisioningStyle = Automatic;
+					};
+					F39E11AC6CF8787E69283311 = {
+						DevelopmentTeam = 4JLZPF9655;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 44A30F36C926921DA3ED36D7 /* Build configuration list for PBXProject "TradeLabV2" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = C71902D4A571E18C1DCCFEBC;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C1FD1FC6FD51965404AF296D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F39E11AC6CF8787E69283311 /* TradeLabV2 */,
+				A43A252FE1C7536863C5DE86 /* TradeLabV2Tests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4A96BAA306CD64830F9D9466 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F18BA57F4C33D1D6BE0A196D /* AppModel.swift in Sources */,
+				12C70EDFF773B9CA2A3BDCA2 /* BacktestEngine.swift in Sources */,
+				238FDEE7837C46D483204C2D /* BacktestHomeView.swift in Sources */,
+				8406FBF52AEB8BA2384D59E8 /* DemoMarketDataProvider.swift in Sources */,
+				915A6E71F719F44873BD114D /* FirstBacktestFlowView.swift in Sources */,
+				3B0D9021AC7A8657FA57AFCD /* Models.swift in Sources */,
+				E0CF6703C94593CCCBDB6DC7 /* ReviewView.swift in Sources */,
+				4991CC45732691215F00E008 /* RootView.swift in Sources */,
+				7392CDD05DA2D5D61F1DCCE0 /* SettingsView.swift in Sources */,
+				B98D3F402A8D55CEB05E3FF8 /* StrategyListView.swift in Sources */,
+				0F3C48BD903324C82CE4D580 /* TradeLabV2App.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D6A5F8A8706948370C9CCD30 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D99D9F560B6BC0E9AFA0219B /* BacktestEngineTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5D10B593E851E3291C5B0867 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F39E11AC6CF8787E69283311 /* TradeLabV2 */;
+			targetProxy = D5775E405D7EFEE21BA56631 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2E90FB6DB28754C79B70809E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tradelab.backtest.v2.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TradeLabV2.app/TradeLabV2";
+			};
+			name = Release;
+		};
+		353816E7FAEEF87430815B9C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_LANGUAGE = en;
+				DEVELOPMENT_TEAM = 4JLZPF9655;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		37BD78CA2107A56CFE9888C6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Support/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tradelab.backtest.v2;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		39083C2D3F69CC89A50ADACB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tradelab.backtest.v2.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TradeLabV2.app/TradeLabV2";
+			};
+			name = Debug;
+		};
+		40A2B224A72BC06DF4A1F845 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Support/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tradelab.backtest.v2;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		BD41EA2F460C81ED5B4DE1CE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_LANGUAGE = en;
+				DEVELOPMENT_TEAM = 4JLZPF9655;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4004F820DE7DF71C268FD432 /* Build configuration list for PBXNativeTarget "TradeLabV2Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				39083C2D3F69CC89A50ADACB /* Debug */,
+				2E90FB6DB28754C79B70809E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		44A30F36C926921DA3ED36D7 /* Build configuration list for PBXProject "TradeLabV2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				353816E7FAEEF87430815B9C /* Debug */,
+				BD41EA2F460C81ED5B4DE1CE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A0FFF7873E176B21E7EAC038 /* Build configuration list for PBXNativeTarget "TradeLabV2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37BD78CA2107A56CFE9888C6 /* Debug */,
+				40A2B224A72BC06DF4A1F845 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F8DCA3335B64CBD3681E20C8 /* Project object */;
+}

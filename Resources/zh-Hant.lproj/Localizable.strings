@@ -1,0 +1,100 @@
+"action.back" = "返回";
+"action.continue" = "繼續";
+"action.ok" = "好";
+
+"backtest.conditions" = "回測設定";
+"backtest.empty.description" = "選擇股票和策略後，執行一次歷史模擬。";
+"backtest.empty.title" = "尚無回測結果";
+"backtest.run" = "執行回測";
+"backtest.stock" = "股票";
+"backtest.strategy" = "策略";
+"backtest.workflow" = "回測流程";
+
+"demo.security.subtitle" = "AAPL · 內置合成日線資料";
+"demo.synthetic_disclosure" = "內置資料僅供產品示範，並非 Apple 的真實市場資料。";
+
+"error.incomplete_setup" = "請先選擇股票和策略，並確認回測設定。";
+"error.insufficient_data" = "價格資料不足，無法執行此策略。";
+"error.invalid_capital" = "初始資金必須大於零。";
+"error.invalid_strategy" = "策略參數無效。";
+"error.title" = "無法執行回測";
+
+"onboarding.answer" = "用一次歷史回測找到答案。";
+"onboarding.offline" = "無需帳戶 · 無需連線 · 約 2 分鐘";
+"onboarding.progress_format" = "第 %d 步，共 4 步";
+"onboarding.progress.run" = "開始回測";
+"onboarding.progress.settings" = "回測設定";
+"onboarding.progress.stock" = "選擇股票";
+"onboarding.progress.strategy" = "選擇策略";
+"onboarding.question" = "你的策略，真的經得起市場嗎？";
+"onboarding.run.button" = "執行第一次回測";
+"onboarding.run.conditions_ready" = "回測設定已確認";
+"onboarding.run.subtitle" = "資料只在本機處理。執行模擬，查看歷史證據。";
+"onboarding.run.title" = "驗證這個想法";
+"onboarding.settings.confirm" = "確認回測設定";
+"onboarding.settings.subtitle" = "檢查時間區間、初始資金、佣金和滑點。";
+"onboarding.settings.title" = "設定回測條件";
+"onboarding.start" = "開始驗證";
+"onboarding.stock.subtitle" = "先用內置離線樣本體驗，之後再連接真實資料。";
+"onboarding.stock.title" = "選擇一隻股票";
+"onboarding.strategy.subtitle" = "先用一套透明、可以準確重現的交易規則。";
+"onboarding.strategy.title" = "選擇一個策略";
+
+"result.benchmark" = "買入並持有";
+"result.drawdown" = "最大回撤";
+"result.equity" = "資金曲線";
+"result.excess" = "超額收益";
+"result.price_signals" = "價格與訊號";
+"result.return" = "累計收益";
+"result.strategy_value" = "策略";
+"result.summary" = "結果摘要";
+"result.trade_count" = "訂單數";
+"result.trades" = "交易記錄";
+
+"review.empty.description" = "儲存的回測會顯示在這裡，方便比較和複盤。";
+"review.empty.title" = "暫無可複盤內容";
+
+"settings.appearance" = "外觀";
+"settings.capital" = "初始資金";
+"settings.costs" = "佣金 / 滑點";
+"settings.data" = "行情資料";
+"settings.demo_data" = "離線示範資料";
+"settings.network_first_run" = "首次啟動連線";
+"settings.on_device" = "僅本機";
+"settings.online_provider" = "線上資料來源";
+"settings.period" = "時間區間";
+"settings.privacy" = "私隱";
+"settings.research_disclaimer" = "回測僅供研究，不構成投資建議，也不代表未來表現。";
+"settings.reset_onboarding" = "重新體驗第一次回測";
+"settings.storage" = "示範資料儲存";
+"settings.theme" = "主題";
+
+"status.confirmed" = "已確認";
+"status.disabled" = "已關閉";
+"status.not_configured" = "未設定";
+"status.not_confirmed" = "未確認";
+"status.not_selected" = "未選擇";
+"status.ready" = "可用";
+
+"strategies.add" = "新增策略";
+"strategies.built_in" = "內置策略";
+"strategies.custom.empty" = "尚無自訂策略";
+"strategies.custom.later" = "結構化策略建立功能將在下一階段加入。";
+"strategies.demo_badge" = "示範";
+"strategy.demo.name" = "10/30 趨勢跟隨";
+"strategy.demo.summary" = "10 日均線上穿 30 日均線時買入，反向下穿時賣出。";
+
+"tab.backtest" = "回測";
+"tab.review" = "複盤";
+"tab.settings" = "設定";
+"tab.strategies" = "策略";
+
+"theme.dark" = "深色";
+"theme.light" = "淺色";
+"theme.system" = "跟隨系統";
+
+"trade.buy" = "買入";
+"trade.sell" = "賣出";
+"trade.reason.cross_down" = "短期均線下穿長期均線";
+"trade.reason.cross_up" = "短期均線上穿長期均線";
+"trade.reason.period_end" = "回測週期結束";
