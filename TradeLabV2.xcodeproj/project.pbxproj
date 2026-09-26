@@ -8,8 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		0F3C48BD903324C82CE4D580 /* TradeLabV2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD03B2B8639C2319C5E95B0 /* TradeLabV2App.swift */; };
+		0FA673DBE3EEB6CD369456A0 /* TradeJournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A894B034C10E919C4E8D7D5 /* TradeJournalView.swift */; };
 		12C70EDFF773B9CA2A3BDCA2 /* BacktestEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3BD4F556C17750CCC16B76 /* BacktestEngine.swift */; };
+		1D92CF661AC6F49B272C6A14 /* TradeJournal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BE509E834293388C49EDAD /* TradeJournal.swift */; };
 		238FDEE7837C46D483204C2D /* BacktestHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8733EF46FEAD463CC2910BD /* BacktestHomeView.swift */; };
+		38004594F3768F534EEAECE8 /* TradeCSVImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830F4FD4FB5DBCD9CE56DEE5 /* TradeCSVImporter.swift */; };
 		3B0D9021AC7A8657FA57AFCD /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A48AE88F464594592178D033 /* Models.swift */; };
 		4991CC45732691215F00E008 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967A3DA3F2D3FA360F7E9E02 /* RootView.swift */; };
 		7392CDD05DA2D5D61F1DCCE0 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3CB2C31E7982BDC02D6833 /* SettingsView.swift */; };
@@ -45,12 +48,15 @@
 		4BEA32C5EFF7917518807914 /* StrategyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategyListView.swift; sourceTree = "<group>"; };
 		4D1FF667481CD5D1661BFAF8 /* TradeLabV2.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = TradeLabV2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D9AA01A0FAB8649C95C4B9A /* TradeLabV2Tests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TradeLabV2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		59BE509E834293388C49EDAD /* TradeJournal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeJournal.swift; sourceTree = "<group>"; };
 		5FD3319FB349D957933C1D26 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		7E0B43C4D9A12A7671FE746D /* DemoMarketDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMarketDataProvider.swift; sourceTree = "<group>"; };
+		830F4FD4FB5DBCD9CE56DEE5 /* TradeCSVImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeCSVImporter.swift; sourceTree = "<group>"; };
 		85B650C8E8763E3124A3C56B /* StrategyAnalysisService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategyAnalysisService.swift; sourceTree = "<group>"; };
 		8A3BD4F556C17750CCC16B76 /* BacktestEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BacktestEngine.swift; sourceTree = "<group>"; };
 		8A4417A80DC6823FF37E1D17 /* FirstBacktestFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstBacktestFlowView.swift; sourceTree = "<group>"; };
 		967A3DA3F2D3FA360F7E9E02 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		9A894B034C10E919C4E8D7D5 /* TradeJournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeJournalView.swift; sourceTree = "<group>"; };
 		A35F38692BAF617B3A632158 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		A48AE88F464594592178D033 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		A8733EF46FEAD463CC2910BD /* BacktestHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BacktestHomeView.swift; sourceTree = "<group>"; };
@@ -89,6 +95,7 @@
 			isa = PBXGroup;
 			children = (
 				36E3B096E09A56BAF0E35C5E /* ReviewView.swift */,
+				9A894B034C10E919C4E8D7D5 /* TradeJournalView.swift */,
 			);
 			path = Review;
 			sourceTree = "<group>";
@@ -119,6 +126,7 @@
 				CEE53C26A4C35763B87641F6 /* CredentialStore.swift */,
 				7E0B43C4D9A12A7671FE746D /* DemoMarketDataProvider.swift */,
 				85B650C8E8763E3124A3C56B /* StrategyAnalysisService.swift */,
+				830F4FD4FB5DBCD9CE56DEE5 /* TradeCSVImporter.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -136,6 +144,7 @@
 			children = (
 				8A3BD4F556C17750CCC16B76 /* BacktestEngine.swift */,
 				A48AE88F464594592178D033 /* Models.swift */,
+				59BE509E834293388C49EDAD /* TradeJournal.swift */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -327,6 +336,9 @@
 				7392CDD05DA2D5D61F1DCCE0 /* SettingsView.swift in Sources */,
 				A379ABE5998101F858F000E3 /* StrategyAnalysisService.swift in Sources */,
 				B98D3F402A8D55CEB05E3FF8 /* StrategyListView.swift in Sources */,
+				38004594F3768F534EEAECE8 /* TradeCSVImporter.swift in Sources */,
+				1D92CF661AC6F49B272C6A14 /* TradeJournal.swift in Sources */,
+				0FA673DBE3EEB6CD369456A0 /* TradeJournalView.swift in Sources */,
 				0F3C48BD903324C82CE4D580 /* TradeLabV2App.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

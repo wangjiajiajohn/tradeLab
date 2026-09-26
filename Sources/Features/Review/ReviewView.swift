@@ -1,7 +1,14 @@
 import SwiftUI
 
 struct ReviewView: View {
+    private enum ReviewMode: String, CaseIterable, Identifiable {
+        case backtests
+        case trades
+        var id: String { rawValue }
+    }
+
     @EnvironmentObject private var model: AppModel
+    @State private var mode: ReviewMode = .backtests
     @State private var isSelectingForComparison = false
     @State private var selectedRecordIDs: [UUID] = []
     @State private var showingComparison = false
@@ -14,8 +21,18 @@ struct ReviewView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if model.backtestHistory.isEmpty {
+            VStack(spacing: 0) {
+                Picker("review.mode", selection: $mode) {
+                    Text("review.mode.backtests").tag(ReviewMode.backtests)
+                    Text("review.mode.trades").tag(ReviewMode.trades)
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+                .padding(.vertical, 8)
+
+                if mode == .trades {
+                    TradeJournalView()
+                } else if model.backtestHistory.isEmpty {
                     ContentUnavailableView(
                         "review.empty.title",
                         systemImage: "book.pages",
@@ -47,7 +64,7 @@ struct ReviewView: View {
             }
             .navigationTitle("tab.review")
             .toolbar {
-                if !model.backtestHistory.isEmpty {
+                if mode == .backtests && !model.backtestHistory.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(isSelectingForComparison ? "action.cancel" : "review.compare") {
                             withAnimation(.easeInOut(duration: 0.2)) {
@@ -59,7 +76,7 @@ struct ReviewView: View {
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                if isSelectingForComparison {
+                if mode == .backtests && isSelectingForComparison {
                     Button {
                         showingComparison = true
                     } label: {

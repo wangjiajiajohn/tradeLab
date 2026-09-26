@@ -211,4 +211,51 @@ final class BacktestEngineTests: XCTestCase {
             }
         }
     }
+
+    func testTradeJournalCalculatesFIFORealizedProfitAndPosition() {
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        let trades = [
+            JournalTrade(date: date, symbol: "AAPL", side: .buy, quantity: 10, price: 100, fee: 10, currency: "USD"),
+            JournalTrade(date: date.addingTimeInterval(60), symbol: "AAPL", side: .buy, quantity: 10, price: 120, fee: 0, currency: "USD"),
+            JournalTrade(date: date.addingTimeInterval(120), symbol: "AAPL", side: .sell, quantity: 15, price: 150, fee: 5, currency: "USD")
+        ]
+
+        let analysis = TradeJournalAnalyzer.analyze(trades)
+        let usd = try! XCTUnwrap(analysis.summaries.first { $0.currency == "USD" })
+        let position = try! XCTUnwrap(analysis.positions.first { $0.symbol == "AAPL" })
+
+        XCTAssertEqual(usd.realizedProfit, 635, accuracy: 0.000_001)
+        XCTAssertEqual(usd.fees, 15, accuracy: 0.000_001)
+        XCTAssertEqual(position.quantity, 5, accuracy: 0.000_001)
+        XCTAssertEqual(position.averageCost, 120, accuracy: 0.000_001)
+        XCTAssertTrue(analysis.oversoldSymbols.isEmpty)
+    }
+
+    func testTradeJournalReportsSellWithoutRecordedHoldings() {
+        let trade = JournalTrade(
+            date: .now,
+            symbol: "700.HK",
+            side: .sell,
+            quantity: 100,
+            price: 400,
+            currency: "HKD"
+        )
+        let analysis = TradeJournalAnalyzer.analyze([trade])
+        XCTAssertEqual(analysis.oversoldSymbols, ["700.HK"])
+        XCTAssertEqual(analysis.summaries.first?.realizedProfit, 0)
+    }
+
+    func testCSVImporterSupportsEnglishAndChineseColumns() throws {
+        let english = "date,symbol,side,quantity,price,fee,currency\n2026-09-01,AAPL,buy,10,200,1,USD\n"
+        let chinese = "交易日期,股票代码,方向,数量,成交价,手续费,币种\n2026/09/02,700.HK,卖出,100,410,12,HKD\n"
+
+        let first = try TradeCSVImporter.parse(data: Data(english.utf8))
+        let second = try TradeCSVImporter.parse(data: Data(chinese.utf8))
+
+        XCTAssertEqual(first.trades.first?.symbol, "AAPL")
+        XCTAssertEqual(first.trades.first?.side, .buy)
+        XCTAssertEqual(second.trades.first?.symbol, "700.HK")
+        XCTAssertEqual(second.trades.first?.side, .sell)
+        XCTAssertEqual(second.rejectedRows, 0)
+    }
 }

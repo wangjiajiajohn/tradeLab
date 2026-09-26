@@ -35,6 +35,7 @@ final class AppModel: ObservableObject {
         static let marketDataSource = "v2.market-data-source"
         static let aiProvider = "v2.ai-provider"
         static let aiModel = "v2.ai-model"
+        static let journalTrades = "v2.journal-trades"
     }
 
     private let defaults: UserDefaults
@@ -62,6 +63,7 @@ final class AppModel: ObservableObject {
     }
     @Published private(set) var hasLongbridgeCredentials = false
     @Published private(set) var hasAIAPIKey = false
+    @Published private(set) var journalTrades: [JournalTrade]
     @Published var appearance: Appearance {
         didSet { defaults.set(appearance.rawValue, forKey: Keys.appearance) }
     }
@@ -78,6 +80,7 @@ final class AppModel: ObservableObject {
         marketDataSource = MarketDataSource(rawValue: defaults.string(forKey: Keys.marketDataSource) ?? "") ?? .offline
         aiProvider = AIProvider(rawValue: defaults.string(forKey: Keys.aiProvider) ?? "") ?? .disabled
         aiModel = defaults.string(forKey: Keys.aiModel) ?? "deepseek-chat"
+        journalTrades = Self.loadJournalTrades(from: defaults)
         refreshCredentialStatus()
     }
 
@@ -207,6 +210,27 @@ final class AppModel: ObservableObject {
         hasAIAPIKey = CredentialStore.hasValue(for: .aiAPIKey)
     }
 
+    func addJournalTrade(_ trade: JournalTrade) {
+        journalTrades.append(trade)
+        journalTrades.sort { $0.date > $1.date }
+        saveJournalTrades()
+    }
+
+    func addJournalTrades(_ trades: [JournalTrade]) {
+        journalTrades.append(contentsOf: trades)
+        journalTrades.sort { $0.date > $1.date }
+        saveJournalTrades()
+    }
+
+    func deleteJournalTrades(at offsets: IndexSet) {
+        journalTrades.remove(atOffsets: offsets)
+        saveJournalTrades()
+    }
+
+    var journalAnalysis: TradeJournalAnalysis {
+        TradeJournalAnalyzer.analyze(journalTrades)
+    }
+
     private func saveToHistory(_ result: BacktestResult) {
         backtestHistory.insert(BacktestRecord(result: result), at: 0)
         backtestHistory = Array(backtestHistory.prefix(50))
@@ -219,6 +243,18 @@ final class AppModel: ObservableObject {
               let history = try? JSONDecoder().decode([BacktestRecord].self, from: data)
         else { return [] }
         return history.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    private func saveJournalTrades() {
+        guard let data = try? JSONEncoder().encode(journalTrades) else { return }
+        defaults.set(data, forKey: Keys.journalTrades)
+    }
+
+    private static func loadJournalTrades(from defaults: UserDefaults) -> [JournalTrade] {
+        guard let data = defaults.data(forKey: Keys.journalTrades),
+              let trades = try? JSONDecoder().decode([JournalTrade].self, from: data)
+        else { return [] }
+        return trades.sorted { $0.date > $1.date }
     }
 
     private func strategySummary(for rule: TradingStrategy.Rule) -> String {

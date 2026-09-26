@@ -6,9 +6,12 @@ TradeLab V2 is a clean iOS implementation of an offline-first strategy backtesti
 
 - Four-step first-backtest flow: stock, strategy, settings, run
 - Seven selectable offline stocks with no first-run network request
-- Three reproducible strategies: buy-and-hold, 10/30 moving average, and 20-day breakout
+- Four reproducible strategies: monthly DCA, buy-and-hold, 10/30 moving average, and 20-day breakout
 - Commission and slippage-aware execution
-- Price/signals, equity comparison, summary metrics, and trade history
+- Price/signals, equity comparison, risk-adjusted metrics, saved results, and side-by-side comparison
+- Manual real-trade journaling, flexible CSV import, FIFO realized profit, fees, positions, and data-quality warnings
+- Optional OpenAI or DeepSeek strategy drafting with credentials stored in the system Keychain
+- Optional user-configured market-data credentials; first-run remains fully offline
 - English, Simplified Chinese, and Traditional Chinese resources
 - System appearance support and privacy manifest
 - Unit tests plus a host-side engine smoke check
@@ -46,9 +49,6 @@ xcrun swiftc -disable-sandbox \
 /tmp/tradelab-v2-engine-check
 ```
 
-## Next slices
+## Data boundaries
 
-1. Structured strategy creation and validation
-2. CSV import with broker-format mapping and data-quality reporting
-3. Saved backtests and side-by-side review
-4. Optional user-configured market-data and AI providers
+Backtests are deterministic and run on device. AI is used only to turn a natural-language idea into a constrained local strategy draft. Imported trades and provider credentials remain on device; secrets are stored in the system Keychain.
