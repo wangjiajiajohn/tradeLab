@@ -74,6 +74,9 @@
 "result.summary" = "結果摘要";
 "result.trade_count" = "訂單數";
 "result.trades" = "交易記錄";
+"result.view_all_orders" = "查看所有訂單";
+"result.all_orders" = "全部訂單";
+"result.orders.empty" = "本次回測沒有產生訂單";
 "result.final_value" = "回測期末資產";
 "result.total_bought" = "累計買入";
 "result.annualized_return" = "年化收益";

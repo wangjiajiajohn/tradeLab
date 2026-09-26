@@ -196,19 +196,13 @@ private struct ResultSections: View {
         }
 
         Section("result.trades") {
-            LabeledContent("result.trade_count", value: "\(result.trades.count)")
-            ForEach(result.trades.prefix(6)) { trade in
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack {
-                        Text(trade.side == .buy ? "trade.buy" : "trade.sell")
-                            .foregroundStyle(trade.side == .buy ? .green : .red)
-                        Spacer()
-                        Text(trade.price, format: .currency(code: result.security.currency))
-                    }
-                    Text(trade.date, format: .dateTime.year().month().day())
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+            NavigationLink {
+                BacktestOrdersView(
+                    trades: result.trades,
+                    currencyCode: result.security.currency
+                )
+            } label: {
+                LabeledContent("result.view_all_orders", value: "\(result.trades.count)")
             }
         }
 
@@ -233,6 +227,49 @@ private struct ResultSections: View {
             format: AppLocalization.string(key, locale: locale),
             value
         )
+    }
+}
+
+private struct BacktestOrdersView: View {
+    let trades: [SimulatedTrade]
+    let currencyCode: String
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        List {
+            if trades.isEmpty {
+                ContentUnavailableView(
+                    "result.orders.empty",
+                    systemImage: "list.bullet.rectangle"
+                )
+            } else {
+                ForEach(trades) { trade in
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack {
+                            Text(trade.side == .buy ? "trade.buy" : "trade.sell")
+                                .font(.headline)
+                                .foregroundStyle(trade.side == .buy ? .green : .red)
+                            Spacer()
+                            Text(trade.price, format: .currency(code: currencyCode))
+                                .font(.headline)
+                        }
+                        HStack {
+                            Text(trade.date.formatted(
+                                Date.FormatStyle(date: .abbreviated, time: .omitted, locale: locale)
+                            ))
+                            Spacer()
+                            Text("\(trade.quantity)")
+                                .accessibilityLabel("\(trade.quantity) \(AppLocalization.string("trades.quantity", locale: locale))")
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+        }
+        .navigationTitle("result.all_orders")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

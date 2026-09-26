@@ -74,6 +74,9 @@
 "result.summary" = "Summary";
 "result.trade_count" = "Orders";
 "result.trades" = "Trades";
+"result.view_all_orders" = "View All Orders";
+"result.all_orders" = "All Orders";
+"result.orders.empty" = "No Orders in This Backtest";
 "result.final_value" = "Ending Value";
 "result.total_bought" = "Total Purchased";
 "result.annualized_return" = "Annualized Return";

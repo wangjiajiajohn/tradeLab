@@ -74,6 +74,9 @@
 "result.summary" = "结果摘要";
 "result.trade_count" = "订单数";
 "result.trades" = "交易记录";
+"result.view_all_orders" = "查看所有订单";
+"result.all_orders" = "全部订单";
+"result.orders.empty" = "本次回测没有产生订单";
 "result.final_value" = "回测期末资产";
 "result.total_bought" = "累计买入";
 "result.annualized_return" = "年化收益";
