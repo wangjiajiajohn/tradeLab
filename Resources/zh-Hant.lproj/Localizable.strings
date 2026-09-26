@@ -218,7 +218,7 @@
 "strategy_analysis.http_error_format" = "AI 服務請求失敗（HTTP %d）。";
 "review.mode" = "覆盤類型";
 "review.mode.backtests" = "回測";
-"review.mode.trades" = "實盤交易";
+"review.mode.trades" = "交易復盤";
 "trades.add" = "輸入交易";
 "trades.import" = "匯入 CSV";
 "trades.import.help" = "支援 UTF-8 CSV。必要欄：日期、股票代碼、買賣方向、數量及成交價；手續費、幣種可選。";

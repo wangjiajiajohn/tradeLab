@@ -218,7 +218,7 @@
 "strategy_analysis.http_error_format" = "The AI request failed (HTTP %d).";
 "review.mode" = "Review Type";
 "review.mode.backtests" = "Backtests";
-"review.mode.trades" = "Trades";
+"review.mode.trades" = "Trade Review";
 "trades.add" = "Add Trade";
 "trades.import" = "Import CSV";
 "trades.import.help" = "Supports UTF-8 CSV files. Required columns: date, symbol, side, quantity, and price. Fee and currency are optional.";

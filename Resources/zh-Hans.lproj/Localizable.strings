@@ -218,7 +218,7 @@
 "strategy_analysis.http_error_format" = "AI 服务请求失败（HTTP %d）。";
 "review.mode" = "复盘类型";
 "review.mode.backtests" = "回测";
-"review.mode.trades" = "实盘交易";
+"review.mode.trades" = "交易复盘";
 "trades.add" = "录入交易";
 "trades.import" = "导入 CSV";
 "trades.import.help" = "支持 UTF-8 CSV。必需列：日期、股票代码、买卖方向、数量和成交价；手续费、币种可选。";
