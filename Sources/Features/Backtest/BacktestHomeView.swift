@@ -777,10 +777,10 @@ private struct StockPickerView: View {
             .navigationTitle("result.change_stock")
             .navigationBarTitleDisplayMode(.inline)
             .overlay {
-                if isSearching {
+                if isSearching && filteredSecurities.isEmpty {
                     ProgressView()
                         .controlSize(.large)
-                } else if let searchError {
+                } else if let searchError, filteredSecurities.isEmpty {
                     ContentUnavailableView {
                         Label("stock.search.failed", systemImage: "wifi.exclamationmark")
                     } description: {
@@ -803,26 +803,45 @@ private struct StockPickerView: View {
                 }
             }
             .task(id: searchText) {
-                onlineSearchResults = []
-                searchError = nil
-                let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !needsDataSourceSetup, !query.isEmpty else {
-                    isSearching = false
-                    return
-                }
-                do {
-                    try await Task.sleep(for: .milliseconds(350))
-                    isSearching = true
-                    onlineSearchResults = try await model.searchSecurities(matching: query)
-                    isSearching = false
-                } catch is CancellationError {
-                    isSearching = false
-                } catch {
-                    isSearching = false
-                    searchError = error.localizedDescription
-                }
+                await performSearch(for: searchText)
             }
         }
+    }
+
+    @MainActor
+    private func performSearch(for rawQuery: String) async {
+        let query = normalizedQuery(rawQuery)
+        onlineSearchResults = []
+        searchError = nil
+
+        guard !needsDataSourceSetup, !query.isEmpty else {
+            isSearching = false
+            return
+        }
+
+        isSearching = true
+        do {
+            try await Task.sleep(for: .milliseconds(350))
+            try Task.checkCancellation()
+            let results = try await model.searchSecurities(matching: query)
+            try Task.checkCancellation()
+            guard normalizedQuery(searchText) == query else { return }
+            onlineSearchResults = results
+            searchError = nil
+            isSearching = false
+        } catch {
+            guard !Task.isCancelled, normalizedQuery(searchText) == query else { return }
+            isSearching = false
+            if let marketError = error as? OnlineMarketDataError {
+                searchError = marketError.localizedDescription(locale: locale)
+            } else {
+                searchError = error.localizedDescription
+            }
+        }
+    }
+
+    private func normalizedQuery(_ value: String) -> String {
+        value.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private var stockList: some View {
@@ -892,7 +911,7 @@ private struct StockPickerView: View {
     }
 
     private var filteredSecurities: [Security] {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let query = normalizedQuery(searchText)
         guard !query.isEmpty else { return model.securities }
         let localMatches = (model.securities + model.discoveredSecurities).filter { security in
             security.name.localizedStandardContains(query)
