@@ -162,6 +162,7 @@ struct MarketDataSettingsView: View {
     @State private var showingRemoveCredentialsConfirmation = false
     @State private var selectedSource: MarketDataSource = .offline
     @State private var isValidating = false
+    @State private var validationSecondsRemaining = 15
     @State private var verifiedCredentialSignature = ""
     @FocusState private var isCredentialFieldFocused: Bool
 
@@ -195,6 +196,16 @@ struct MarketDataSettingsView: View {
         return selectedSource != model.marketDataSource
             || !hasStoredCredentials(for: selectedSource)
             || verifiedCredentialSignature != credentialSignature
+    }
+
+    private var verificationCountdownText: String {
+        String(
+            format: AppLocalization.string(
+                "provider.market_data.verifying_countdown",
+                locale: model.language.locale
+            ),
+            validationSecondsRemaining
+        )
     }
 
     var body: some View {
@@ -273,7 +284,8 @@ struct MarketDataSettingsView: View {
                             HStack(spacing: 8) {
                                 ProgressView()
                                     .tint(.white)
-                                Text("provider.market_data.verifying")
+                                Text(verificationCountdownText)
+                                    .monospacedDigit()
                             }
                         } else {
                             Label(
@@ -449,8 +461,20 @@ struct MarketDataSettingsView: View {
         guard canSave, selectedSource != .offline else { return }
         isCredentialFieldFocused = false
         isValidating = true
+        validationSecondsRemaining = 15
         errorMessage = nil
-        defer { isValidating = false }
+        let countdownTask = Task { @MainActor in
+            while !Task.isCancelled, validationSecondsRemaining > 1 {
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                validationSecondsRemaining -= 1
+            }
+        }
+        defer {
+            countdownTask.cancel()
+            validationSecondsRemaining = 15
+            isValidating = false
+        }
 
         do {
             let trimmedAppKey = appKey.trimmingCharacters(in: .whitespacesAndNewlines)

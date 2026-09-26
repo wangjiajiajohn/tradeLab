@@ -212,6 +212,7 @@
 "provider.twelve_data.api_key" = "API Key";
 "provider.market_data.verify_and_save" = "Verify and Save";
 "provider.market_data.verifying" = "Verifying market data access…";
+"provider.market_data.verifying_countdown" = "Verifying… %d sec";
 "provider.market_data.connected" = "Connected and Active";
 "provider.market_data.configuration_error" = "Market Data Configuration Failed";
 "provider.ai.disabled" = "Do Not Use AI";

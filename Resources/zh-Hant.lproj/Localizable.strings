@@ -212,6 +212,7 @@
 "provider.twelve_data.api_key" = "API Key";
 "provider.market_data.verify_and_save" = "驗證並儲存";
 "provider.market_data.verifying" = "正在驗證行情連線…";
+"provider.market_data.verifying_countdown" = "正在驗證… %d 秒";
 "provider.market_data.connected" = "已連線並啟用";
 "provider.market_data.configuration_error" = "行情資料來源設定失敗";
 "provider.ai.disabled" = "不使用 AI";
