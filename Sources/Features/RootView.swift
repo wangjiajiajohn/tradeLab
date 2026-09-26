@@ -50,9 +50,18 @@ extension View {
 
 }
 
+@MainActor
+enum AppHaptics {
+    private static let toolbarImpact = UIImpactFeedbackGenerator(style: .rigid)
+
+    static func toolbarTap() {
+        toolbarImpact.prepare()
+        toolbarImpact.impactOccurred(intensity: 1)
+    }
+}
+
 private struct TabToolbarJellyModifier: ViewModifier {
     @GestureState private var isPressed = false
-    @State private var hasTriggeredHaptic = false
 
     func body(content: Content) -> some View {
         content
@@ -64,16 +73,6 @@ private struct TabToolbarJellyModifier: ViewModifier {
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .updating($isPressed) { _, state, _ in state = true }
-                    .onChanged { _ in
-                        guard !hasTriggeredHaptic else { return }
-                        hasTriggeredHaptic = true
-                        let generator = UIImpactFeedbackGenerator(style: .medium)
-                        generator.prepare()
-                        generator.impactOccurred(intensity: 0.9)
-                    }
-                    .onEnded { _ in
-                        hasTriggeredHaptic = false
-                    }
             )
     }
 }

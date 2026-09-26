@@ -77,6 +77,7 @@ struct ReviewView: View {
                     ToolbarItem(placement: .topBarTrailing) {
                         if isSelectingForComparison {
                             Button("action.cancel") {
+                                AppHaptics.toolbarTap()
                                 withAnimation(.easeInOut(duration: 0.2)) {
                                     isSelectingForComparison = false
                                     selectedRecordIDs.removeAll()
@@ -86,6 +87,7 @@ struct ReviewView: View {
                         } else {
                             Menu {
                                 Button {
+                                    AppHaptics.toolbarTap()
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         isSelectingForComparison = true
                                         selectedRecordIDs.removeAll()

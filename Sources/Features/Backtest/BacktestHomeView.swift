@@ -48,6 +48,7 @@ struct BacktestHomeView: View {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             guard !model.isRunningBacktest else { return }
+                            AppHaptics.toolbarTap()
                             Task {
                                 showsBacktestCompletion = false
                                 guard await model.runBacktest() else { return }

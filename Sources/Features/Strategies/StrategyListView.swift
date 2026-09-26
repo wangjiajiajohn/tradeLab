@@ -35,7 +35,10 @@ struct StrategyListView: View {
             .navigationTitle(model.language.localized("tab.strategies"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("strategies.add", systemImage: "plus") { showingCreator = true }
+                    Button("strategies.add", systemImage: "plus") {
+                        AppHaptics.toolbarTap()
+                        showingCreator = true
+                    }
                         .tabToolbarJellyEffect()
                 }
             }

@@ -322,6 +322,7 @@ struct MarketDataSettingsView: View {
             if hasStoredCredentials(for: selectedSource) {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(role: .destructive) {
+                        AppHaptics.toolbarTap()
                         showingRemoveCredentialsConfirmation = true
                     } label: {
                         Image(systemName: "trash")
@@ -753,6 +754,7 @@ private struct AISettingsView: View {
             if model.hasAIAPIKey {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(role: .destructive) {
+                        AppHaptics.toolbarTap()
                         showingRemoveCredentialsConfirmation = true
                     } label: {
                         Image(systemName: "trash")
