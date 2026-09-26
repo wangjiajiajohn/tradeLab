@@ -929,6 +929,8 @@ private struct StockPickerView: View {
                 .buttonStyle(.plain)
             }
         }
+        .contentMargins(.top, 8, for: .scrollContent)
+        .listSectionSpacing(12)
     }
 
     private var needsDataSourceSetup: Bool {
