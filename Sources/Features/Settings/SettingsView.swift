@@ -327,6 +327,7 @@ struct MarketDataSettingsView: View {
                         Image(systemName: "trash")
                     }
                     .accessibilityLabel(Text("provider.remove_credentials"))
+                    .tabToolbarJellyEffect()
                 }
             }
         }
@@ -757,6 +758,7 @@ private struct AISettingsView: View {
                         Image(systemName: "trash")
                     }
                     .accessibilityLabel(Text("provider.remove_credentials"))
+                    .tabToolbarJellyEffect()
                 }
             }
         }

@@ -63,5 +63,8 @@ private struct TabToolbarJellyModifier: ViewModifier {
                 DragGesture(minimumDistance: 0)
                     .updating($isPressed) { _, state, _ in state = true }
             )
+            .sensoryFeedback(.impact(weight: .light), trigger: isPressed) { oldValue, newValue in
+                !oldValue && newValue
+            }
     }
 }
