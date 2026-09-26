@@ -27,9 +27,27 @@ final class AppModel: ObservableObject {
         }
     }
 
+    enum AppLanguage: String, CaseIterable, Identifiable {
+        case english = "en"
+        case simplifiedChinese = "zh-Hans"
+        case traditionalChinese = "zh-Hant"
+
+        var id: String { rawValue }
+        var locale: Locale { Locale(identifier: rawValue) }
+
+        var displayName: String {
+            switch self {
+            case .english: "English"
+            case .simplifiedChinese: "简体中文"
+            case .traditionalChinese: "繁體中文"
+            }
+        }
+    }
+
     private enum Keys {
         static let completedFirstBacktest = "v2.completed-first-backtest"
         static let appearance = "v2.appearance"
+        static let language = "v2.language"
         static let backtestHistory = "v2.backtest-history"
         static let customStrategies = "v2.custom-strategies"
         static let marketDataSource = "v2.market-data-source"
@@ -39,9 +57,9 @@ final class AppModel: ObservableObject {
     }
 
     private let defaults: UserDefaults
-    let securities: [Security]
+    @Published private(set) var securities: [Security]
     @Published private(set) var strategies: [TradingStrategy]
-    private let marketData: MarketDataLibrary
+    private var marketData: MarketDataLibrary
 
     @Published var selectedSecurityID: String?
     @Published var selectedStrategyID: UUID?
@@ -72,13 +90,24 @@ final class AppModel: ObservableObject {
     @Published var appearance: Appearance {
         didSet { defaults.set(appearance.rawValue, forKey: Keys.appearance) }
     }
+    @Published var language: AppLanguage {
+        didSet {
+            defaults.set(language.rawValue, forKey: Keys.language)
+            reloadLocalizedContent()
+        }
+    }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        let library = BuiltInMarketDataProvider.load()
+        let initialLanguage = AppLanguage(
+            rawValue: defaults.string(forKey: Keys.language) ?? ""
+        ) ?? .english
+        language = initialLanguage
+        let library = BuiltInMarketDataProvider.load(locale: initialLanguage.locale)
         marketData = library
         securities = library.securities
-        strategies = TradingStrategy.builtIn + Self.loadCustomStrategies(from: defaults)
+        strategies = TradingStrategy.builtIn(locale: initialLanguage.locale)
+            + Self.loadCustomStrategies(from: defaults)
         hasCompletedFirstBacktest = defaults.bool(forKey: Keys.completedFirstBacktest)
         appearance = Appearance(rawValue: defaults.string(forKey: Keys.appearance) ?? "") ?? .system
         backtestHistory = Self.loadHistory(from: defaults)
@@ -87,6 +116,14 @@ final class AppModel: ObservableObject {
         aiModel = defaults.string(forKey: Keys.aiModel) ?? "deepseek-chat"
         journalTrades = Self.loadJournalTrades(from: defaults)
         refreshCredentialStatus()
+    }
+
+    private func reloadLocalizedContent() {
+        let customStrategies = strategies.filter { !$0.isBuiltIn }
+        let library = BuiltInMarketDataProvider.load(locale: language.locale)
+        marketData = library
+        securities = library.securities
+        strategies = TradingStrategy.builtIn(locale: language.locale) + customStrategies
     }
 
     var selectedSecurity: Security? {

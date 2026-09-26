@@ -48,11 +48,11 @@ enum BuiltInMarketDataProvider {
         Descriptor(id: "9988.HK", symbol: "9988", nameKey: "security.alibaba", market: .hk, currency: "HKD"),
     ]
 
-    static func load(bundle: Bundle = .main) -> MarketDataLibrary {
+    static func load(bundle: Bundle = .main, locale: Locale = .current) -> MarketDataLibrary {
         if let payload = loadDevelopmentPayload(bundle: bundle) {
-            return makeLibrary(payload: payload)
+            return makeLibrary(payload: payload, locale: locale)
         }
-        return makeSyntheticLibrary()
+        return makeSyntheticLibrary(locale: locale)
     }
 
     private static func loadDevelopmentPayload(bundle: Bundle) -> BundlePayload? {
@@ -67,7 +67,7 @@ enum BuiltInMarketDataProvider {
         #endif
     }
 
-    private static func makeLibrary(payload: BundlePayload) -> MarketDataLibrary {
+    private static func makeLibrary(payload: BundlePayload, locale: Locale) -> MarketDataLibrary {
         let dateFormatter = ISO8601DateFormatter()
         let payloadByID = Dictionary(uniqueKeysWithValues: payload.securities.map { ($0.symbol, $0) })
         var securities: [Security] = []
@@ -91,7 +91,7 @@ enum BuiltInMarketDataProvider {
             let security = Security(
                 id: descriptor.id,
                 symbol: descriptor.symbol,
-                name: String(localized: String.LocalizationValue(descriptor.nameKey)),
+                name: String(localized: String.LocalizationValue(descriptor.nameKey), locale: locale),
                 market: market,
                 currency: item.currency,
                 isSyntheticDemo: false
@@ -102,14 +102,14 @@ enum BuiltInMarketDataProvider {
         return MarketDataLibrary(securities: securities, candlesBySecurityID: candlesByID)
     }
 
-    private static func makeSyntheticLibrary() -> MarketDataLibrary {
+    private static func makeSyntheticLibrary(locale: Locale) -> MarketDataLibrary {
         var securities: [Security] = []
         var candlesByID: [String: [Candle]] = [:]
         for (index, descriptor) in descriptors.enumerated() {
             let security = Security(
                 id: descriptor.id,
                 symbol: descriptor.symbol,
-                name: String(localized: String.LocalizationValue(descriptor.nameKey)),
+                name: String(localized: String.LocalizationValue(descriptor.nameKey), locale: locale),
                 market: descriptor.market,
                 currency: descriptor.currency,
                 isSyntheticDemo: true

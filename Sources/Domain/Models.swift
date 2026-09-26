@@ -90,6 +90,39 @@ struct TradingStrategy: Identifiable, Hashable, Codable, Sendable {
     static var builtIn: [TradingStrategy] {
         [.monthlyDCADemo, .buyAndHoldDemo, .dualMovingAverageDemo, .breakoutDemo]
     }
+
+    static func builtIn(locale: Locale) -> [TradingStrategy] {
+        [
+            TradingStrategy(
+                id: monthlyDCADemo.id,
+                name: String(localized: "strategy.dca.name", locale: locale),
+                summary: String(localized: "strategy.dca.summary", locale: locale),
+                rule: .monthlyDCA,
+                isBuiltIn: true
+            ),
+            TradingStrategy(
+                id: buyAndHoldDemo.id,
+                name: String(localized: "strategy.buy_hold.name", locale: locale),
+                summary: String(localized: "strategy.buy_hold.summary", locale: locale),
+                rule: .buyAndHold,
+                isBuiltIn: true
+            ),
+            TradingStrategy(
+                id: dualMovingAverageDemo.id,
+                name: String(localized: "strategy.demo.name", locale: locale),
+                summary: String(localized: "strategy.demo.summary", locale: locale),
+                rule: .dualMovingAverage(short: 10, long: 30),
+                isBuiltIn: true
+            ),
+            TradingStrategy(
+                id: breakoutDemo.id,
+                name: String(localized: "strategy.breakout.name", locale: locale),
+                summary: String(localized: "strategy.breakout.summary", locale: locale),
+                rule: .breakout(entryWindow: 20, exitWindow: 10),
+                isBuiltIn: true
+            ),
+        ]
+    }
 }
 
 struct BacktestSettings: Hashable, Codable, Sendable {

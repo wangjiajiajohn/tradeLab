@@ -119,6 +119,7 @@
 "settings.storage" = "Demo Data Storage";
 "settings.slippage" = "Slippage";
 "settings.theme" = "Theme";
+"settings.language" = "Language";
 
 "status.confirmed" = "Confirmed";
 "status.disabled" = "Disabled";

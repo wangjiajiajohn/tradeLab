@@ -20,6 +20,11 @@ struct SettingsView: View {
                 }
 
                 Section("settings.appearance") {
+                    Picker("settings.language", selection: $model.language) {
+                        ForEach(AppModel.AppLanguage.allCases) { language in
+                            Text(language.displayName).tag(language)
+                        }
+                    }
                     Picker("settings.theme", selection: $model.appearance) {
                         Text("theme.system").tag(AppModel.Appearance.system)
                         Text("theme.light").tag(AppModel.Appearance.light)

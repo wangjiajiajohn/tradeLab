@@ -8,6 +8,7 @@ struct TradeLabV2App: App {
         WindowGroup {
             RootView()
                 .environmentObject(model)
+                .environment(\.locale, model.language.locale)
                 .preferredColorScheme(model.appearance.colorScheme)
         }
     }

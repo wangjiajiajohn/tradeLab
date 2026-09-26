@@ -119,6 +119,7 @@
 "settings.storage" = "示範資料儲存";
 "settings.slippage" = "滑點";
 "settings.theme" = "主題";
+"settings.language" = "語言";
 
 "status.confirmed" = "已確認";
 "status.disabled" = "已關閉";
