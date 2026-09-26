@@ -213,7 +213,6 @@
 "settings.disclosure.assumptions" = "Results depend on historical data, execution assumptions, commissions, and slippage. Data may be delayed, incomplete, or inaccurate.";
 "settings.disclosure.ai" = "AI parsing can be inaccurate. Review generated rules and parameters before use.";
 "settings.research_disclaimer" = "Backtests are research tools, not investment advice or a promise of future performance.";
-"disclosure.pull_down" = "For research and review only. Not investment advice.";
 "settings.reset_onboarding" = "View Getting Started Again";
 "settings.storage" = "Demo Data Storage";
 "settings.slippage" = "Slippage";

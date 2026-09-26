@@ -44,7 +44,6 @@ struct ReviewView: View {
                         .padding(.top, 80)
                     }
                     .scrollBounceBehavior(.always)
-                    .pullDownResearchDisclosure(belowNavigationBar: false)
                 } else {
                     List {
                         ForEach(model.backtestHistory) { record in
@@ -70,7 +69,6 @@ struct ReviewView: View {
                         }
                         .onDelete(perform: model.deleteBacktests)
                     }
-                    .pullDownResearchDisclosure(belowNavigationBar: false)
                 }
             }
             .navigationTitle(model.language.localized("tab.review"))

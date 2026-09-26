@@ -43,7 +43,6 @@ struct BacktestHomeView: View {
                         }
                     }
                 }
-                .pullDownResearchDisclosure()
                 .navigationTitle(navigationTitle)
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
