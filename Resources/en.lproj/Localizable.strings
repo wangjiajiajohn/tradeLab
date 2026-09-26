@@ -32,6 +32,7 @@
 "stock.search.prompt" = "Search name, symbol, or market";
 "stock.search.no_results" = "No Matching Stocks";
 "stock.search.no_results.description" = "No stock in the current data source matches your search.";
+"stock.search.failed" = "Search Failed";
 "stock.search.configure.title" = "Configure Market Data";
 "stock.search.configure.description" = "Only bundled stocks are available. Configure an online data source in Settings to search for more stocks.";
 "stock.search.configure.action" = "Open Settings";

@@ -447,6 +447,9 @@ private struct StockPickerView: View {
     @Environment(\.locale) private var locale
     @State private var searchText = ""
     @State private var showingDataSourceSettings = false
+    @State private var onlineSearchResults: [Security] = []
+    @State private var isSearching = false
+    @State private var searchError: String?
 
     var body: some View {
         NavigationStack {
@@ -465,7 +468,16 @@ private struct StockPickerView: View {
             .navigationTitle("result.change_stock")
             .navigationBarTitleDisplayMode(.inline)
             .overlay {
-                if !needsDataSourceSetup && filteredSecurities.isEmpty {
+                if isSearching {
+                    ProgressView()
+                        .controlSize(.large)
+                } else if let searchError {
+                    ContentUnavailableView {
+                        Label("stock.search.failed", systemImage: "wifi.exclamationmark")
+                    } description: {
+                        Text(searchError)
+                    }
+                } else if !needsDataSourceSetup && filteredSecurities.isEmpty {
                     ContentUnavailableView {
                         Label("stock.search.no_results", systemImage: "magnifyingglass")
                     } description: {
@@ -479,6 +491,26 @@ private struct StockPickerView: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("action.done") { dismiss() }
+                }
+            }
+            .task(id: searchText) {
+                onlineSearchResults = []
+                searchError = nil
+                let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !needsDataSourceSetup, !query.isEmpty else {
+                    isSearching = false
+                    return
+                }
+                do {
+                    try await Task.sleep(for: .milliseconds(350))
+                    isSearching = true
+                    onlineSearchResults = try await model.searchSecurities(matching: query)
+                    isSearching = false
+                } catch is CancellationError {
+                    isSearching = false
+                } catch {
+                    isSearching = false
+                    searchError = error.localizedDescription
                 }
             }
         }
@@ -553,10 +585,14 @@ private struct StockPickerView: View {
     private var filteredSecurities: [Security] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return model.securities }
-        return model.securities.filter { security in
+        let localMatches = (model.securities + model.discoveredSecurities).filter { security in
             security.name.localizedStandardContains(query)
                 || security.symbol.localizedStandardContains(query)
+                || security.id.localizedStandardContains(query)
                 || marketName(security.market).localizedStandardContains(query)
+        }
+        return (localMatches + onlineSearchResults).reduce(into: []) { result, security in
+            if !result.contains(where: { $0.id == security.id }) { result.append(security) }
         }
     }
 

@@ -63,10 +63,12 @@ final class AppModel: ObservableObject {
         static let backtestSettings = "v2.workspace.backtest-settings"
         static let confirmedSettings = "v2.workspace.confirmed-settings"
         static let latestResult = "v2.workspace.latest-result"
+        static let discoveredSecurities = "v2.discovered-securities"
     }
 
     private let defaults: UserDefaults
     @Published private(set) var securities: [Security]
+    @Published private(set) var discoveredSecurities: [Security]
     @Published private(set) var strategies: [TradingStrategy]
     private var marketData: MarketDataLibrary
 
@@ -140,6 +142,7 @@ final class AppModel: ObservableObject {
         let library = BuiltInMarketDataProvider.load(locale: initialLanguage.locale)
         marketData = library
         securities = library.securities
+        discoveredSecurities = Self.loadDiscoveredSecurities(from: defaults)
         strategies = TradingStrategy.builtIn(locale: initialLanguage.locale)
             + Self.loadCustomStrategies(from: defaults)
         selectedSecurityID = nil
@@ -161,7 +164,7 @@ final class AppModel: ObservableObject {
         refreshCredentialStatus()
 
         let storedSecurityID = defaults.string(forKey: Keys.selectedSecurityID)
-        selectedSecurityID = securities.contains { $0.id == storedSecurityID }
+        selectedSecurityID = (securities + discoveredSecurities).contains { $0.id == storedSecurityID }
             ? storedSecurityID
             : nil
         let storedStrategyID = defaults.string(forKey: Keys.selectedStrategyID).flatMap(UUID.init(uuidString:))
@@ -188,7 +191,7 @@ final class AppModel: ObservableObject {
     }
 
     var selectedSecurity: Security? {
-        securities.first { $0.id == selectedSecurityID }
+        (securities + discoveredSecurities).first { $0.id == selectedSecurityID }
     }
 
     var selectedStrategy: TradingStrategy? {
@@ -196,7 +199,7 @@ final class AppModel: ObservableObject {
     }
 
     func localizedSecurityName(id: String, fallback: String) -> String {
-        securities.first { $0.id == id }?.name ?? fallback
+        (securities + discoveredSecurities).first { $0.id == id }?.name ?? fallback
     }
 
     func localizedStrategyName(id: UUID, fallback: String) -> String {
@@ -224,9 +227,31 @@ final class AppModel: ObservableObject {
     }
 
     func selectSecurity(_ security: Security) {
+        if !securities.contains(where: { $0.id == security.id }) {
+            discoveredSecurities.removeAll { $0.id == security.id }
+            discoveredSecurities.append(security)
+            saveDiscoveredSecurities()
+        }
         guard selectedSecurityID != security.id else { return }
         selectedSecurityID = security.id
         result = nil
+    }
+
+    func searchSecurities(matching query: String) async throws -> [Security] {
+        let cached = discoveredSecurities.filter {
+            $0.name.localizedStandardContains(query)
+                || $0.symbol.localizedStandardContains(query)
+                || $0.id.localizedStandardContains(query)
+        }
+        guard marketDataSource == .longbridge else { return cached }
+        guard let credentials = LongbridgeCredentials.saved else {
+            throw OnlineMarketDataError.missingCredentials
+        }
+        let remote = try await LongbridgeMarketDataProvider(credentials: credentials)
+            .searchSecurities(matching: query, locale: language.locale)
+        return (cached + remote).reduce(into: []) { result, security in
+            if !result.contains(where: { $0.id == security.id }) { result.append(security) }
+        }
     }
 
     func selectStrategy(_ strategy: TradingStrategy) {
@@ -342,7 +367,7 @@ final class AppModel: ObservableObject {
     }
 
     func canRestoreConfiguration(from record: BacktestRecord) -> Bool {
-        securities.contains(where: { $0.id == record.securityID })
+        (securities + discoveredSecurities).contains(where: { $0.id == record.securityID })
             && strategies.contains(where: { $0.id == record.strategyID })
     }
 
@@ -477,6 +502,18 @@ final class AppModel: ObservableObject {
     private func saveJournalTrades() {
         guard let data = try? JSONEncoder().encode(journalTrades) else { return }
         defaults.set(data, forKey: Keys.journalTrades)
+    }
+
+    private func saveDiscoveredSecurities() {
+        guard let data = try? JSONEncoder().encode(discoveredSecurities) else { return }
+        defaults.set(data, forKey: Keys.discoveredSecurities)
+    }
+
+    private static func loadDiscoveredSecurities(from defaults: UserDefaults) -> [Security] {
+        guard let data = defaults.data(forKey: Keys.discoveredSecurities),
+              let securities = try? JSONDecoder().decode([Security].self, from: data)
+        else { return [] }
+        return securities
     }
 
     private static func loadJournalTrades(from defaults: UserDefaults) -> [JournalTrade] {

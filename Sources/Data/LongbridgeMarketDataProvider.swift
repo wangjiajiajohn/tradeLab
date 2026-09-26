@@ -143,6 +143,67 @@ struct LongbridgeMarketDataProvider: Sendable {
         throw lastError ?? OnlineMarketDataError.network("Unknown error")
     }
 
+    func searchSecurities(matching query: String, locale: Locale) async throws -> [Security] {
+        let candidates = Self.symbolCandidates(for: query)
+        guard !candidates.isEmpty else { return [] }
+
+        var lastError: Error?
+        for endpoint in endpoints {
+            do {
+                let securities = try await requestStaticInfo(
+                    symbols: candidates,
+                    endpoint: endpoint
+                )
+                return securities.map { info in
+                    let market: Market = info.symbol.hasSuffix(".HK")
+                        ? .hk
+                        : (info.symbol.hasSuffix(".US") ? .us : .cn)
+                    let symbol = info.symbol.split(separator: ".").first.map(String.init) ?? info.symbol
+                    return Security(
+                        id: info.symbol,
+                        symbol: symbol,
+                        name: info.localizedName(locale: locale),
+                        market: market,
+                        currency: info.currency,
+                        isSyntheticDemo: false
+                    )
+                }
+            } catch {
+                lastError = error
+            }
+        }
+        throw lastError ?? OnlineMarketDataError.network("Unknown error")
+    }
+
+    private func requestStaticInfo(
+        symbols: [String],
+        endpoint: LongbridgeEndpoint
+    ) async throws -> [LongbridgeProto.StaticSecurityInfo] {
+        let otp = try await socketToken(endpoint: endpoint)
+        var request = URLRequest(url: endpoint.quote)
+        request.setValue(dataCenter, forHTTPHeaderField: "X-Dc-Region")
+        request.setValue("en-US", forHTTPHeaderField: "Accept-Language")
+        let socket = Self.session.webSocketTask(with: request)
+        socket.resume()
+        defer { socket.cancel(with: .normalClosure, reason: nil) }
+
+        try await socket.send(.data(LongbridgeWire.request(command: 2, id: 1, body: LongbridgeProto.auth(otp))))
+        guard try await receive(socket, id: 1).status == 0 else { throw OnlineMarketDataError.authentication }
+
+        try await socket.send(.data(LongbridgeWire.request(command: 4, id: 2, body: LongbridgeProto.profile())))
+        let profile = try await receive(socket, id: 2)
+        guard profile.status == 0 else { throw OnlineMarketDataError.entitlement(Int(profile.status)) }
+
+        try await socket.send(.data(LongbridgeWire.request(
+            command: 10,
+            id: 3,
+            body: LongbridgeProto.staticInfo(symbols: symbols)
+        )))
+        let response = try await receive(socket, id: 3)
+        guard response.status == 0 else { throw OnlineMarketDataError.entitlement(Int(response.status)) }
+        return try LongbridgeProto.decodeStaticInfo(response.body)
+    }
+
     private func requestDailyCandles(
         for security: Security,
         from: Date,
@@ -272,6 +333,43 @@ struct LongbridgeMarketDataProvider: Sendable {
         }
         return false
     }
+
+    private static func symbolCandidates(for query: String) -> [String] {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
+        let lookupKey = trimmed.folding(
+            options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive],
+            locale: Locale(identifier: "zh-Hans")
+        ).lowercased()
+        if let aliases = securityAliases[lookupKey] { return aliases }
+
+        let compact = trimmed
+            .replacingOccurrences(of: " ", with: "")
+            .uppercased()
+        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: ".-"))
+        guard compact.unicodeScalars.allSatisfy(allowed.contains) else { return [] }
+        if compact.contains(".") { return [compact] }
+        if compact.allSatisfy(\.isNumber) { return ["\(compact).HK"] }
+        return ["\(compact).US"]
+    }
+
+    private static let securityAliases: [String: [String]] = [
+        "蔚来": ["NIO.US"], "蔚來": ["NIO.US"], "nio": ["NIO.US"],
+        "小鹏": ["XPEV.US"], "小鵬": ["XPEV.US"], "xpeng": ["XPEV.US"],
+        "理想": ["LI.US"], "li auto": ["LI.US"],
+        "拼多多": ["PDD.US"], "pdd": ["PDD.US"],
+        "京东": ["JD.US", "9618.HK"], "京東": ["JD.US", "9618.HK"],
+        "百度": ["BIDU.US", "9888.HK"],
+        "哔哩哔哩": ["BILI.US", "9626.HK"], "嗶哩嗶哩": ["BILI.US", "9626.HK"],
+        "阿里巴巴": ["BABA.US", "9988.HK"], "alibaba": ["BABA.US", "9988.HK"],
+        "腾讯": ["700.HK"], "騰訊": ["700.HK"], "tencent": ["700.HK"],
+        "美团": ["3690.HK"], "美團": ["3690.HK"], "meituan": ["3690.HK"],
+        "网易": ["NTES.US", "9999.HK"], "網易": ["NTES.US", "9999.HK"],
+        "快手": ["1024.HK"],
+        "苹果": ["AAPL.US"], "蘋果": ["AAPL.US"], "apple": ["AAPL.US"],
+        "特斯拉": ["TSLA.US"], "tesla": ["TSLA.US"],
+        "英伟达": ["NVDA.US"], "英偉達": ["NVDA.US"], "nvidia": ["NVDA.US"]
+    ]
 }
 
 private struct SocketTokenEnvelope: Decodable {
@@ -335,8 +433,31 @@ private enum LongbridgeWire {
 }
 
 private enum LongbridgeProto {
+    struct StaticSecurityInfo {
+        let symbol: String
+        let nameCN: String
+        let nameEN: String
+        let nameHK: String
+        let currency: String
+
+        func localizedName(locale: Locale) -> String {
+            let identifier = locale.identifier.lowercased()
+            if identifier.contains("hant"), !nameHK.isEmpty { return nameHK }
+            if identifier.hasPrefix("zh"), !nameCN.isEmpty { return nameCN }
+            if !nameEN.isEmpty { return nameEN }
+            if !nameCN.isEmpty { return nameCN }
+            return symbol
+        }
+    }
+
     static func auth(_ token: String) -> Data { fieldString(1, token) }
     static func profile() -> Data { fieldString(1, "en-US") }
+
+    static func staticInfo(symbols: [String]) -> Data {
+        symbols.reduce(into: Data()) { data, symbol in
+            data += fieldString(1, symbol)
+        }
+    }
 
     static func history(symbol: String, start: String, end: String) -> Data {
         var data = fieldString(1, symbol)
@@ -377,6 +498,27 @@ private enum LongbridgeProto {
                 low: low,
                 close: close,
                 volume: Double(integer(5) ?? 0)
+            )
+        }
+    }
+
+    static func decodeStaticInfo(_ data: Data) throws -> [StaticSecurityInfo] {
+        try fields(data).compactMap { field in
+            guard field.number == 1, case let .bytes(bytes) = field.value else { return nil }
+            let parts = try fields(bytes)
+            func text(_ number: Int) -> String {
+                parts.first { $0.number == number }.flatMap {
+                    if case let .bytes(value) = $0.value { String(data: value, encoding: .utf8) } else { nil }
+                } ?? ""
+            }
+            let symbol = text(1)
+            guard !symbol.isEmpty else { return nil }
+            return StaticSecurityInfo(
+                symbol: symbol,
+                nameCN: text(2),
+                nameEN: text(3),
+                nameHK: text(4),
+                currency: text(7)
             )
         }
     }

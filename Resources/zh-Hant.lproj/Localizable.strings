@@ -32,6 +32,7 @@
 "stock.search.prompt" = "搜尋名稱、代碼或市場";
 "stock.search.no_results" = "沒有相符的股票";
 "stock.search.no_results.description" = "目前資料來源中沒有與搜尋條件相符的股票。";
+"stock.search.failed" = "搜尋失敗";
 "stock.search.configure.title" = "設定行情資料來源";
 "stock.search.configure.description" = "目前只能使用內置股票。如需搜尋更多股票，請先在設定中配置線上行情資料來源。";
 "stock.search.configure.action" = "前往設定";
