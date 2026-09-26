@@ -102,9 +102,25 @@ struct MarketDataSettingsView: View {
     var body: some View {
         Form {
             Section {
-                Picker("settings.market_data_provider", selection: $model.marketDataSource) {
-                    Text("provider.offline").tag(MarketDataSource.offline)
-                    Text("provider.longbridge").tag(MarketDataSource.longbridge)
+                HStack {
+                    Text("settings.market_data_provider")
+                    Spacer()
+                    Button {
+                        showingProviderPicker = true
+                    } label: {
+                        HStack(spacing: 6) {
+                            Text(providerName(model.marketDataSource))
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .popover(isPresented: $showingProviderPicker, arrowEdge: .top) {
+                        providerPickerMenu
+                            .presentationCompactAdaptation(.popover)
+                    }
                 }
             } footer: {
                 Text(LocalizedStringKey(
@@ -154,27 +170,52 @@ struct MarketDataSettingsView: View {
             loadCredentials()
             guard presentsProviderPickerOnAppear, !hasPresentedProviderPicker else { return }
             hasPresentedProviderPicker = true
-            DispatchQueue.main.async {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 showingProviderPicker = true
             }
-        }
-        .confirmationDialog(
-            "settings.market_data_provider",
-            isPresented: $showingProviderPicker,
-            titleVisibility: .visible
-        ) {
-            Button("provider.offline") {
-                model.marketDataSource = .offline
-            }
-            Button("provider.longbridge") {
-                model.marketDataSource = .longbridge
-            }
-            Button("action.cancel", role: .cancel) {}
         }
         .alert("error.title", isPresented: errorPresented) {
             Button("action.ok", role: .cancel) { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
+        }
+    }
+
+    private var providerPickerMenu: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            providerButton(.offline)
+            Divider()
+            providerButton(.longbridge)
+        }
+        .padding(.vertical, 6)
+        .frame(minWidth: 220)
+    }
+
+    private func providerButton(_ source: MarketDataSource) -> some View {
+        Button {
+            model.marketDataSource = source
+            showingProviderPicker = false
+        } label: {
+            HStack(spacing: 12) {
+                Text(providerName(source))
+                    .foregroundStyle(.primary)
+                Spacer(minLength: 20)
+                if model.marketDataSource == source {
+                    Image(systemName: "checkmark")
+                        .fontWeight(.semibold)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 11)
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func providerName(_ source: MarketDataSource) -> LocalizedStringKey {
+        switch source {
+        case .offline: "provider.offline"
+        case .longbridge: "provider.longbridge"
         }
     }
 
