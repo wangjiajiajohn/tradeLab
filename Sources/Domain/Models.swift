@@ -124,4 +124,10 @@ struct BacktestResult: Hashable, Sendable {
     let maxDrawdown: Double
 
     var excessReturn: Double { cumulativeReturn - benchmarkReturn }
+    var netProfit: Double { finalValue - settings.initialCapital }
+    var totalBuyCost: Double {
+        trades
+            .filter { $0.side == .buy }
+            .reduce(0) { $0 + $1.price * Double($1.quantity) + $1.fee }
+    }
 }

@@ -64,6 +64,12 @@
 "result.summary" = "结果摘要";
 "result.trade_count" = "订单数";
 "result.trades" = "交易记录";
+"result.final_value" = "回测期末资产";
+"result.total_bought" = "累计买入";
+"result.interpretation" = "如何理解结果";
+"result.benchmark_outperformed_format" = "本次回测跑赢买入并持有 %@。";
+"result.benchmark_underperformed_format" = "本次回测落后买入并持有 %@。";
+"result.reliability_note" = "一次回测只是历史证据，建议更换股票和时间区间再次验证。";
 
 "review.empty.description" = "保存的回测会显示在这里，便于对比复盘。";
 "review.empty.title" = "暂无可复盘内容";

@@ -64,6 +64,12 @@
 "result.summary" = "Summary";
 "result.trade_count" = "Orders";
 "result.trades" = "Trades";
+"result.final_value" = "Ending Value";
+"result.total_bought" = "Total Purchased";
+"result.interpretation" = "How to Read This";
+"result.benchmark_outperformed_format" = "This backtest beat buy and hold by %@.";
+"result.benchmark_underperformed_format" = "This backtest trailed buy and hold by %@.";
+"result.reliability_note" = "One backtest is only historical evidence. Try another stock and period before drawing conclusions.";
 
 "review.empty.description" = "Saved backtests will appear here for side-by-side review.";
 "review.empty.title" = "Nothing to Review Yet";

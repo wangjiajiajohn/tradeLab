@@ -64,6 +64,12 @@
 "result.summary" = "結果摘要";
 "result.trade_count" = "訂單數";
 "result.trades" = "交易記錄";
+"result.final_value" = "回測期末資產";
+"result.total_bought" = "累計買入";
+"result.interpretation" = "如何理解結果";
+"result.benchmark_outperformed_format" = "本次回測跑贏買入並持有 %@。";
+"result.benchmark_underperformed_format" = "本次回測落後買入並持有 %@。";
+"result.reliability_note" = "一次回測只是歷史證據，建議更換股票和時間區間再次驗證。";
 
 "review.empty.description" = "儲存的回測會顯示在這裡，方便比較和複盤。";
 "review.empty.title" = "暫無可複盤內容";

@@ -80,9 +80,20 @@ final class BacktestEngineTests: XCTestCase {
         let buys = result.trades.filter { $0.side == .buy }
         let calendar = Calendar(identifier: .gregorian)
         let investedMonths = Set(buys.map { calendar.dateComponents([.year, .month], from: $0.date) })
+        let candles = provider.candles()
 
         XCTAssertEqual(buys.count, investedMonths.count)
         XCTAssertGreaterThan(buys.count, 1)
         XCTAssertEqual(result.trades.last?.side, .sell)
+        XCTAssertLessThanOrEqual(result.totalBuyCost, BacktestSettings.demo.initialCapital + 0.01)
+
+        for buy in buys {
+            let month = calendar.dateComponents([.year, .month], from: buy.date)
+            let firstTradingDate = candles
+                .filter { calendar.dateComponents([.year, .month], from: $0.date) == month }
+                .map(\.date)
+                .min()
+            XCTAssertEqual(buy.date, firstTradingDate)
+        }
     }
 }
