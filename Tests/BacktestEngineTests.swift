@@ -68,11 +68,15 @@ final class BacktestEngineTests: XCTestCase {
                 strategy: strategy,
                 settings: .demo
             )
-            let diagnostics = BacktestDiagnostics.analyze(result)
+            let report = BacktestDiagnostics.report(result)
+            let diagnostics = report.diagnostics
 
             XCTAssertFalse(diagnostics.isEmpty, strategy.name)
             XCTAssertLessThanOrEqual(diagnostics.count, 4, strategy.name)
             XCTAssertEqual(Set(diagnostics.map(\.id)).count, diagnostics.count, strategy.name)
+            XCTAssertGreaterThanOrEqual(report.curve.annualizedVolatility, 0, strategy.name)
+            XCTAssertGreaterThanOrEqual(report.curve.maximumDrawdown, 0, strategy.name)
+            XCTAssertFalse(report.optimizations.isEmpty, strategy.name)
         }
     }
 

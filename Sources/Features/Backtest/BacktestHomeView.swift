@@ -116,6 +116,8 @@ private struct ResultSections: View {
     @Environment(\.locale) private var locale
 
     var body: some View {
+        let report = BacktestDiagnostics.report(result)
+
         Section {
             ResultOverview(result: result)
                 .listRowInsets(EdgeInsets())
@@ -127,11 +129,37 @@ private struct ResultSections: View {
         }
 
         Section {
-            ForEach(diagnostics) { diagnostic in
+            CurveProfileView(profile: report.curve)
+        } header: {
+            Text("result.curve_profile")
+        }
+
+        Section {
+            ForEach(report.diagnostics) { diagnostic in
                 StrategyDiagnosticRow(diagnostic: diagnostic)
             }
         } header: {
             Text("result.diagnostics")
+        }
+
+        if !report.operationFindings.isEmpty {
+            Section {
+                ForEach(report.operationFindings) { finding in
+                    OperationFindingRow(finding: finding)
+                }
+            } header: {
+                Text("result.operation_review")
+            } footer: {
+                Text("result.operation_hindsight")
+            }
+        }
+
+        Section {
+            ForEach(report.optimizations) { optimization in
+                OptimizationRow(optimization: optimization)
+            }
+        } header: {
+            Text("result.optimizations")
         } footer: {
             Text("result.diagnostics_scope")
         }
@@ -249,8 +277,98 @@ private struct ResultSections: View {
         )
     }
 
-    private var diagnostics: [BacktestDiagnostic] {
-        BacktestDiagnostics.analyze(result)
+}
+
+private struct CurveProfileView: View {
+    let profile: BacktestCurveProfile
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(trendTitle)
+                        .font(.headline)
+                    Text(trendDetail)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            } icon: {
+                Image(systemName: trendIcon)
+                    .foregroundStyle(trendColor)
+            }
+
+            Divider()
+
+            LabeledContent("result.curve.volatility", value: percent(profile.annualizedVolatility))
+
+            if let peak = profile.drawdownPeak, let trough = profile.drawdownTrough {
+                VStack(alignment: .leading, spacing: 3) {
+                    LabeledContent("result.curve.max_drawdown", value: percent(profile.maximumDrawdown))
+                    Text(String(
+                        format: localized("result.curve.drawdown_period_format"),
+                        date(peak),
+                        date(trough)
+                    ))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private var trendTitle: String {
+        localized("result.curve.\(trendKey).title")
+    }
+
+    private var trendDetail: String {
+        String(
+            format: localized("result.curve.\(trendKey).\(pathKey)_format"),
+            percent(abs(profile.returnRate))
+        )
+    }
+
+    private var trendKey: String {
+        switch profile.trend {
+        case .rising: "rising"
+        case .falling: "falling"
+        case .sideways: "sideways"
+        }
+    }
+
+    private var pathKey: String {
+        if profile.efficiency < 0.20 { return "choppy" }
+        if profile.efficiency > 0.45 { return "directional" }
+        return "mixed"
+    }
+
+    private var trendIcon: String {
+        switch profile.trend {
+        case .rising: "chart.line.uptrend.xyaxis"
+        case .falling: "chart.line.downtrend.xyaxis"
+        case .sideways: "arrow.left.and.right"
+        }
+    }
+
+    private var trendColor: Color {
+        switch profile.trend {
+        case .rising: .green
+        case .falling: .red
+        case .sideways: .orange
+        }
+    }
+
+    private func localized(_ key: String) -> String {
+        AppLocalization.string(key, locale: locale)
+    }
+
+    private func percent(_ value: Double) -> String {
+        value.formatted(.percent.precision(.fractionLength(1)).locale(locale))
+    }
+
+    private func date(_ value: Date) -> String {
+        value.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: locale))
     }
 }
 
@@ -348,6 +466,113 @@ private struct StrategyDiagnosticRow: View {
                 .precision(.fractionLength(1))
                 .locale(locale)
         )
+    }
+}
+
+private struct OperationFindingRow: View {
+    let finding: BacktestOperationFinding
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.headline)
+                Text(detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        } icon: {
+            Image(systemName: icon)
+                .foregroundStyle(color)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private var title: String {
+        localized("result.operation.\(key).title")
+    }
+
+    private var detail: String {
+        switch finding.kind {
+        case let .buyBeforeDecline(date, decline, tradingDays):
+            return String(format: localized("result.operation.buy_before_decline.detail"), formattedDate(date), tradingDays, percent(decline))
+        case let .sellBeforeRise(date, rise, tradingDays):
+            return String(format: localized("result.operation.sell_before_rise.detail"), formattedDate(date), tradingDays, percent(rise))
+        case let .losingRoundTrip(entry, exit, loss):
+            return String(format: localized("result.operation.losing_trade.detail"), formattedDate(entry), formattedDate(exit), percent(loss))
+        }
+    }
+
+    private var key: String {
+        switch finding.kind {
+        case .buyBeforeDecline: "buy_before_decline"
+        case .sellBeforeRise: "sell_before_rise"
+        case .losingRoundTrip: "losing_trade"
+        }
+    }
+
+    private var icon: String {
+        switch finding.kind {
+        case .buyBeforeDecline: "arrow.down.forward.circle.fill"
+        case .sellBeforeRise: "arrow.up.forward.circle.fill"
+        case .losingRoundTrip: "xmark.circle.fill"
+        }
+    }
+
+    private var color: Color {
+        finding.severity == .critical ? .red : .orange
+    }
+
+    private func localized(_ key: String) -> String {
+        AppLocalization.string(key, locale: locale)
+    }
+
+    private func percent(_ value: Double) -> String {
+        value.formatted(.percent.precision(.fractionLength(1)).locale(locale))
+    }
+
+    private func formattedDate(_ date: Date) -> String {
+        date.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: locale))
+    }
+}
+
+private struct OptimizationRow: View {
+    let optimization: BacktestOptimization
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        Label {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(localized("result.optimization.\(key).title"))
+                    .font(.headline)
+                Text(localized("result.optimization.\(key).detail"))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        } icon: {
+            Image(systemName: "wrench.and.screwdriver.fill")
+                .foregroundStyle(.blue)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private var key: String {
+        switch optimization.kind {
+        case .compareFrontLoadedEntry: "front_load"
+        case .addTrendConfirmation: "trend_confirmation"
+        case .reduceTrendLag: "reduce_lag"
+        case .confirmBreakout: "breakout_confirmation"
+        case .addRiskExit: "risk_exit"
+        case .extendSample: "extend_sample"
+        case .crossValidate: "cross_validate"
+        }
+    }
+
+    private func localized(_ key: String) -> String {
+        AppLocalization.string(key, locale: locale)
     }
 }
 

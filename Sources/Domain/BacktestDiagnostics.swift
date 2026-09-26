@@ -1,7 +1,7 @@
 import Foundation
 
 struct BacktestDiagnostic: Identifiable, Sendable {
-    enum Severity: Sendable {
+    enum Severity: Sendable, Equatable {
         case critical
         case warning
         case information
@@ -26,7 +26,72 @@ struct BacktestDiagnostic: Identifiable, Sendable {
     let kind: Kind
 }
 
+struct BacktestCurveProfile: Sendable {
+    enum Trend: Sendable {
+        case rising
+        case falling
+        case sideways
+    }
+
+    let trend: Trend
+    let returnRate: Double
+    let annualizedVolatility: Double
+    let efficiency: Double
+    let maximumDrawdown: Double
+    let drawdownPeak: Date?
+    let drawdownTrough: Date?
+}
+
+struct BacktestOperationFinding: Identifiable, Sendable {
+    enum Kind: Sendable {
+        case buyBeforeDecline(date: Date, decline: Double, tradingDays: Int)
+        case sellBeforeRise(date: Date, rise: Double, tradingDays: Int)
+        case losingRoundTrip(entry: Date, exit: Date, loss: Double)
+    }
+
+    let id: String
+    let severity: BacktestDiagnostic.Severity
+    let kind: Kind
+}
+
+struct BacktestOptimization: Identifiable, Sendable {
+    enum Kind: Sendable {
+        case compareFrontLoadedEntry
+        case addTrendConfirmation
+        case reduceTrendLag
+        case confirmBreakout
+        case addRiskExit
+        case extendSample
+        case crossValidate
+    }
+
+    let id: String
+    let kind: Kind
+}
+
+struct BacktestAnalysisReport: Sendable {
+    let curve: BacktestCurveProfile
+    let diagnostics: [BacktestDiagnostic]
+    let operationFindings: [BacktestOperationFinding]
+    let optimizations: [BacktestOptimization]
+}
+
 enum BacktestDiagnostics {
+    static func report(_ result: BacktestResult) -> BacktestAnalysisReport {
+        let diagnostics = analyze(result)
+        let operations = operationFindings(result)
+        return BacktestAnalysisReport(
+            curve: curveProfile(result.candles),
+            diagnostics: diagnostics,
+            operationFindings: operations,
+            optimizations: optimizations(
+                for: result,
+                diagnostics: diagnostics,
+                operations: operations
+            )
+        )
+    }
+
     static func analyze(_ result: BacktestResult) -> [BacktestDiagnostic] {
         var items: [BacktestDiagnostic] = []
         let gap = result.excessReturn
@@ -142,6 +207,201 @@ enum BacktestDiagnostics {
               let last = result.candles.last?.date
         else { return 0 }
         return max(Calendar(identifier: .gregorian).dateComponents([.day], from: first, to: last).day ?? 0, 0)
+    }
+
+    private static func curveProfile(_ candles: [Candle]) -> BacktestCurveProfile {
+        let closes = candles.map(\.close)
+        let first = closes.first ?? 0
+        let last = closes.last ?? first
+        let returnRate = first > 0 ? last / first - 1 : 0
+        let path = zip(closes.dropFirst(), closes).reduce(0) { partial, pair in
+            partial + abs(pair.0 - pair.1)
+        }
+        let efficiency = path > 0 ? abs(last - first) / path : 0
+        let returns = zip(closes.dropFirst(), closes).compactMap { current, previous -> Double? in
+            guard previous > 0 else { return nil }
+            return current / previous - 1
+        }
+        let mean = returns.isEmpty ? 0 : returns.reduce(0, +) / Double(returns.count)
+        let variance = returns.count > 1
+            ? returns.reduce(0) { $0 + pow($1 - mean, 2) } / Double(returns.count - 1)
+            : 0
+        let volatility = sqrt(max(variance, 0)) * sqrt(252)
+        let drawdown = drawdownPeriod(candles)
+
+        let trend: BacktestCurveProfile.Trend
+        if returnRate >= 0.08 { trend = .rising }
+        else if returnRate <= -0.08 { trend = .falling }
+        else { trend = .sideways }
+
+        return BacktestCurveProfile(
+            trend: trend,
+            returnRate: returnRate,
+            annualizedVolatility: volatility,
+            efficiency: efficiency,
+            maximumDrawdown: drawdown.value,
+            drawdownPeak: drawdown.peak,
+            drawdownTrough: drawdown.trough
+        )
+    }
+
+    private static func drawdownPeriod(_ candles: [Candle]) -> (value: Double, peak: Date?, trough: Date?) {
+        guard let first = candles.first else { return (0, nil, nil) }
+        var peakValue = first.close
+        var peakDate = first.date
+        var worst = 0.0
+        var worstPeak: Date?
+        var worstTrough: Date?
+        for candle in candles {
+            if candle.close > peakValue {
+                peakValue = candle.close
+                peakDate = candle.date
+            }
+            guard peakValue > 0 else { continue }
+            let drawdown = (peakValue - candle.close) / peakValue
+            if drawdown > worst {
+                worst = drawdown
+                worstPeak = peakDate
+                worstTrough = candle.date
+            }
+        }
+        return (worst, worstPeak, worstTrough)
+    }
+
+    private static func operationFindings(_ result: BacktestResult) -> [BacktestOperationFinding] {
+        let candles = result.candles
+        let indexByDate = Dictionary(uniqueKeysWithValues: candles.enumerated().map { ($1.date, $0) })
+        let horizon = 20
+        var findings: [BacktestOperationFinding] = []
+
+        let riskyBuys = result.trades.compactMap { trade -> BacktestOperationFinding? in
+            guard trade.side == .buy,
+                  let index = indexByDate[trade.date],
+                  index + 1 < candles.count
+            else { return nil }
+            let end = min(index + horizon, candles.count - 1)
+            let futureLow = candles[(index + 1)...end].map(\.close).min() ?? trade.price
+            let decline = futureLow / trade.price - 1
+            guard decline <= -0.05 else { return nil }
+            return BacktestOperationFinding(
+                id: "buy-\(trade.id.uuidString)",
+                severity: decline <= -0.12 ? .critical : .warning,
+                kind: .buyBeforeDecline(date: trade.date, decline: abs(decline), tradingDays: end - index)
+            )
+        }
+        if let worstBuy = riskyBuys.max(by: { operationImpact($0) < operationImpact($1) }) {
+            findings.append(worstBuy)
+        }
+
+        switch result.strategy.rule {
+        case .dualMovingAverage, .breakout:
+            let prematureSells = result.trades.compactMap { trade -> BacktestOperationFinding? in
+                guard trade.side == .sell,
+                      let index = indexByDate[trade.date],
+                      index + 1 < candles.count
+                else { return nil }
+                let end = min(index + horizon, candles.count - 1)
+                let futureHigh = candles[(index + 1)...end].map(\.close).max() ?? trade.price
+                let rise = futureHigh / trade.price - 1
+                guard rise >= 0.05 else { return nil }
+                return BacktestOperationFinding(
+                    id: "sell-\(trade.id.uuidString)",
+                    severity: rise >= 0.12 ? .critical : .warning,
+                    kind: .sellBeforeRise(date: trade.date, rise: rise, tradingDays: end - index)
+                )
+            }
+            if let worstSell = prematureSells.max(by: { operationImpact($0) < operationImpact($1) }) {
+                findings.append(worstSell)
+            }
+            if let worstLoss = worstRoundTrip(result.trades) {
+                findings.append(worstLoss)
+            }
+        case .buyAndHold, .monthlyDCA:
+            break
+        }
+
+        return Array(findings.sorted { operationImpact($0) > operationImpact($1) }.prefix(3))
+    }
+
+    private static func operationImpact(_ finding: BacktestOperationFinding) -> Double {
+        switch finding.kind {
+        case let .buyBeforeDecline(_, decline, _): decline
+        case let .sellBeforeRise(_, rise, _): rise
+        case let .losingRoundTrip(_, _, loss): loss
+        }
+    }
+
+    private static func worstRoundTrip(_ trades: [SimulatedTrade]) -> BacktestOperationFinding? {
+        var entry: SimulatedTrade?
+        var findings: [BacktestOperationFinding] = []
+        for trade in trades.sorted(by: { $0.date < $1.date }) {
+            if trade.side == .buy {
+                entry = trade
+            } else if let buy = entry {
+                let cost = buy.price * Double(buy.quantity) + buy.fee
+                let proceeds = trade.price * Double(trade.quantity) - trade.fee
+                let tradeReturn = cost > 0 ? proceeds / cost - 1 : 0
+                if tradeReturn <= -0.03 {
+                    findings.append(.init(
+                        id: "round-trip-\(buy.id.uuidString)",
+                        severity: tradeReturn <= -0.10 ? .critical : .warning,
+                        kind: .losingRoundTrip(entry: buy.date, exit: trade.date, loss: abs(tradeReturn))
+                    ))
+                }
+                entry = nil
+            }
+        }
+        return findings.max(by: { operationImpact($0) < operationImpact($1) })
+    }
+
+    private static func optimizations(
+        for result: BacktestResult,
+        diagnostics: [BacktestDiagnostic],
+        operations: [BacktestOperationFinding]
+    ) -> [BacktestOptimization] {
+        let ids = Set(diagnostics.map(\.id))
+        var kinds: [BacktestOptimization.Kind] = []
+
+        switch result.strategy.rule {
+        case .monthlyDCA:
+            if ids.contains("rising-market-dca") { kinds.append(.compareFrontLoadedEntry) }
+        case .dualMovingAverage:
+            if ids.contains("whipsaw") { kinds.append(.addTrendConfirmation) }
+            if ids.contains("missed-trend") { kinds.append(.reduceTrendLag) }
+        case .breakout:
+            if ids.contains("whipsaw") { kinds.append(.confirmBreakout) }
+            if ids.contains("missed-trend") { kinds.append(.reduceTrendLag) }
+        case .buyAndHold:
+            break
+        }
+
+        if ids.contains("deep-drawdown") || ids.contains("limited-protection") || ids.contains("no-downside-protection") || operations.contains(where: {
+            if case .buyBeforeDecline = $0.kind { return true }
+            return false
+        }) {
+            kinds.append(.addRiskExit)
+        }
+        if ids.contains("short-sample") { kinds.append(.extendSample) }
+        if kinds.isEmpty { kinds.append(.crossValidate) }
+
+        var seen = Set<String>()
+        return kinds.compactMap { kind in
+            let id = optimizationID(kind)
+            guard seen.insert(id).inserted else { return nil }
+            return BacktestOptimization(id: id, kind: kind)
+        }.prefix(3).map { $0 }
+    }
+
+    private static func optimizationID(_ kind: BacktestOptimization.Kind) -> String {
+        switch kind {
+        case .compareFrontLoadedEntry: "compare-front-loaded"
+        case .addTrendConfirmation: "add-trend-confirmation"
+        case .reduceTrendLag: "reduce-trend-lag"
+        case .confirmBreakout: "confirm-breakout"
+        case .addRiskExit: "add-risk-exit"
+        case .extendSample: "extend-sample"
+        case .crossValidate: "cross-validate"
+        }
     }
 
     private static func maximumDrawdown(_ values: [Double]) -> Double {
