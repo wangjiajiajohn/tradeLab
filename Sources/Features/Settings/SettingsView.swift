@@ -101,6 +101,7 @@ struct MarketDataSettingsView: View {
     @State private var didSave = false
     @State private var showingProviderPicker = false
     @State private var hasPresentedProviderPicker = false
+    @FocusState private var isCredentialFieldFocused: Bool
 
     init(presentsProviderPickerOnAppear: Bool = false) {
         self.presentsProviderPickerOnAppear = presentsProviderPickerOnAppear
@@ -167,6 +168,11 @@ struct MarketDataSettingsView: View {
             }
 
         }
+        .scrollDismissesKeyboard(.interactively)
+        .gesture(
+            TapGesture().onEnded { isCredentialFieldFocused = false },
+            including: .gesture
+        )
         .navigationTitle("settings.market_data_provider")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -269,15 +275,33 @@ struct MarketDataSettingsView: View {
             TextField("provider.longbridge.app_key", text: $appKey)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-            SecretEntryField(title: "provider.longbridge.app_secret", text: $appSecret)
-            SecretEntryField(title: "provider.longbridge.access_token", text: $accessToken)
+                .focused($isCredentialFieldFocused)
+            SecretEntryField(
+                title: "provider.longbridge.app_secret",
+                text: $appSecret,
+                isFocused: $isCredentialFieldFocused
+            )
+            SecretEntryField(
+                title: "provider.longbridge.access_token",
+                text: $accessToken,
+                isFocused: $isCredentialFieldFocused
+            )
         case .alpaca:
             TextField("provider.alpaca.api_key", text: $appKey)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-            SecretEntryField(title: "provider.alpaca.api_secret", text: $appSecret)
+                .focused($isCredentialFieldFocused)
+            SecretEntryField(
+                title: "provider.alpaca.api_secret",
+                text: $appSecret,
+                isFocused: $isCredentialFieldFocused
+            )
         case .twelveData:
-            SecretEntryField(title: "provider.twelve_data.api_key", text: $appKey)
+            SecretEntryField(
+                title: "provider.twelve_data.api_key",
+                text: $appKey,
+                isFocused: $isCredentialFieldFocused
+            )
         }
     }
 
@@ -368,6 +392,7 @@ private struct AISettingsView: View {
     @State private var showsManualModelEntry = false
     @State private var selectedModelID = ""
     @State private var validatedAPIKey = ""
+    @FocusState private var isCredentialFieldFocused: Bool
 
     private var trimmedAPIKey: String {
         apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -395,7 +420,11 @@ private struct AISettingsView: View {
 
             if model.aiProvider != .disabled {
                 Section("provider.credentials") {
-                    SecretEntryField(title: "provider.ai.api_key", text: $apiKey)
+                    SecretEntryField(
+                        title: "provider.ai.api_key",
+                        text: $apiKey,
+                        isFocused: $isCredentialFieldFocused
+                    )
                 }
                 Section {
                     if isLoadingModels {
@@ -420,6 +449,7 @@ private struct AISettingsView: View {
                         TextField("provider.ai.model_id", text: $selectedModelID)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .focused($isCredentialFieldFocused)
                             .submitLabel(.done)
                             .onSubmit { saveConfiguration() }
                     }
@@ -467,6 +497,11 @@ private struct AISettingsView: View {
             }
 
         }
+        .scrollDismissesKeyboard(.interactively)
+        .gesture(
+            TapGesture().onEnded { isCredentialFieldFocused = false },
+            including: .gesture
+        )
         .navigationTitle("settings.ai_provider")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -584,6 +619,7 @@ private struct AISettingsView: View {
 private struct SecretEntryField: View {
     let title: LocalizedStringKey
     @Binding var text: String
+    let isFocused: FocusState<Bool>.Binding
     @State private var revealsText = false
 
     var body: some View {
@@ -597,6 +633,7 @@ private struct SecretEntryField: View {
             }
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
+            .focused(isFocused)
             Button {
                 revealsText.toggle()
             } label: {
