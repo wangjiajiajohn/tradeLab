@@ -49,6 +49,7 @@ struct BacktestHomeView: View {
                     .accessibilityLabel(model.language.localized(
                         model.isRunningBacktest ? model.backtestRunPhase.localizationKey : "backtest.run"
                     ))
+                    .tabToolbarGlassStyle()
                 }
             }
             .sheet(item: $configurationSheet) { sheet in

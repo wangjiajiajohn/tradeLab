@@ -77,6 +77,7 @@ struct ReviewView: View {
                                     selectedRecordIDs.removeAll()
                                 }
                             }
+                            .tabToolbarGlassStyle(circular: false)
                         } else {
                             Menu {
                                 Button {
@@ -93,8 +94,9 @@ struct ReviewView: View {
                                     }
                                 }
                             } label: {
-                                Image(systemName: "ellipsis.circle")
+                                Image(systemName: "ellipsis")
                             }
+                            .tabToolbarGlassStyle()
                         }
                     }
                 }

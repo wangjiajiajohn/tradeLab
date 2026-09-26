@@ -41,3 +41,16 @@ private struct MainTabView: View {
         }
     }
 }
+
+extension View {
+    @ViewBuilder
+    func tabToolbarGlassStyle(circular: Bool = true) -> some View {
+        if #available(iOS 26.0, *) {
+            self
+                .buttonStyle(.glass)
+                .buttonBorderShape(circular ? .circle : .capsule)
+        } else {
+            self
+        }
+    }
+}
