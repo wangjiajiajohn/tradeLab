@@ -8,6 +8,7 @@
 "backtest.empty.description" = "Select a stock and strategy, then run a historical simulation.";
 "backtest.empty.title" = "No Backtest Yet";
 "backtest.run" = "Run Backtest";
+"backtest.running" = "Running Backtest…";
 "backtest.stock" = "Stock";
 "backtest.strategy" = "Strategy";
 "backtest.workflow" = "Backtest Workflow";

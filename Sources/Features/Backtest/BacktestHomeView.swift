@@ -83,17 +83,26 @@ struct BacktestHomeView: View {
                 )
             }
             Button {
+                guard !model.isRunningBacktest else { return }
                 Task { _ = await model.runBacktest() }
             } label: {
-                HStack {
-                    if model.isRunningBacktest { ProgressView().controlSize(.small) }
-                    Label("backtest.run", systemImage: "play.fill")
+                HStack(spacing: 10) {
+                    if model.isRunningBacktest {
+                        ProgressView()
+                            .controlSize(.small)
+                            .tint(.white)
+                        Text("backtest.running")
+                    } else {
+                        Label("backtest.run", systemImage: "play.fill")
+                    }
                 }
                 .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
-            .disabled(!model.canRunBacktest || model.isRunningBacktest)
+            .disabled(!model.canRunBacktest)
+            .allowsHitTesting(!model.isRunningBacktest)
+            .animation(.easeInOut(duration: 0.2), value: model.isRunningBacktest)
         }
     }
 }

@@ -228,7 +228,8 @@ struct FirstBacktestFlowView: View {
                 title: primaryActionTitle,
                 symbol: stage == .run ? "play.fill" : "arrow.right",
                 tint: stageTint,
-                disabled: !canContinue || model.isRunningBacktest,
+                disabled: !canContinue,
+                loading: stage == .run && model.isRunningBacktest,
                 action: performPrimaryAction
             )
             .frame(maxWidth: 600)
@@ -446,6 +447,7 @@ private struct PrimaryActionButton: View {
     let symbol: String
     let tint: Color
     var disabled = false
+    var loading = false
     let action: () -> Void
 
     var body: some View {
@@ -462,14 +464,28 @@ private struct PrimaryActionButton: View {
         .controlSize(.large)
         .tint(tint)
         .disabled(disabled)
+        .allowsHitTesting(!loading)
         .opacity(disabled ? 0.55 : 1)
+        .animation(.easeInOut(duration: 0.2), value: loading)
     }
 
     private var actionButton: some View {
-        Button(action: action) {
-            Label(title, systemImage: symbol)
-                .font(.headline)
-                .frame(maxWidth: .infinity)
+        Button {
+            guard !loading else { return }
+            action()
+        } label: {
+            HStack(spacing: 10) {
+                if loading {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(.white)
+                    Text("backtest.running")
+                } else {
+                    Label(title, systemImage: symbol)
+                }
+            }
+            .font(.headline)
+            .frame(maxWidth: .infinity)
         }
     }
 }

@@ -8,6 +8,7 @@
 "backtest.empty.description" = "选择股票和策略后，运行一次历史模拟。";
 "backtest.empty.title" = "还没有回测结果";
 "backtest.run" = "运行回测";
+"backtest.running" = "正在回测…";
 "backtest.stock" = "股票";
 "backtest.strategy" = "策略";
 "backtest.workflow" = "回测流程";
