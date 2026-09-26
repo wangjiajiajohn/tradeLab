@@ -280,23 +280,10 @@ final class BacktestEngineTests: XCTestCase {
         XCTAssertEqual(second.rejectedRows, 0)
     }
 
-    func testDualListedChineseNamesSearchBothMarkets() {
-        XCTAssertEqual(
-            LongbridgeMarketDataProvider.searchSymbolCandidates(for: "蔚来"),
-            ["NIO.US", "9866.HK"]
-        )
-        XCTAssertEqual(
-            LongbridgeMarketDataProvider.searchSymbolCandidates(for: "蔚來"),
-            ["NIO.US", "9866.HK"]
-        )
-        XCTAssertEqual(
-            LongbridgeMarketDataProvider.searchSymbolCandidates(for: "蔚来汽车"),
-            ["NIO.US", "9866.HK"]
-        )
-        XCTAssertEqual(
-            LongbridgeMarketDataProvider.searchSymbolCandidates(for: "哔哩哔哩"),
-            ["BILI.US", "9626.HK"]
-        )
+    func testLongbridgeSearchNormalizationIsCompanyAgnostic() {
+        XCTAssertEqual(LongbridgeMarketDataProvider.normalizedSearchText("  NIO  "), "nio")
+        XCTAssertEqual(LongbridgeMarketDataProvider.normalizedSearchText("ＡＡＰＬ"), "aapl")
+        XCTAssertEqual(LongbridgeMarketDataProvider.normalizedSearchText("蔚来汽车"), "蔚来汽车")
     }
 
     @MainActor

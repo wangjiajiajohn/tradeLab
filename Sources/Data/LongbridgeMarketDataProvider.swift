@@ -144,35 +144,144 @@ struct LongbridgeMarketDataProvider: Sendable {
     }
 
     func searchSecurities(matching query: String, locale: Locale) async throws -> [Security] {
-        let candidates = Self.searchSymbolCandidates(for: query)
-        guard !candidates.isEmpty else { return [] }
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
 
         var lastError: Error?
         for endpoint in endpoints {
             do {
-                let securities = try await requestStaticInfo(
-                    symbols: candidates,
-                    endpoint: endpoint
-                )
-                return securities.map { info in
-                    let market: Market = info.symbol.hasSuffix(".HK")
-                        ? .hk
-                        : (info.symbol.hasSuffix(".US") ? .us : .cn)
-                    let symbol = info.symbol.split(separator: ".").first.map(String.init) ?? info.symbol
-                    return Security(
-                        id: info.symbol,
-                        symbol: symbol,
-                        name: info.localizedName(locale: locale),
-                        market: market,
-                        currency: info.currency,
-                        isSyntheticDemo: false
-                    )
-                }
+                let catalog = try await securityCatalog(endpoint: endpoint, locale: locale)
+                return Self.filterCatalog(catalog, matching: trimmed, locale: locale).map(\.security)
             } catch {
                 lastError = error
             }
         }
         throw lastError ?? OnlineMarketDataError.network("Unknown error")
+    }
+
+    private func securityCatalog(
+        endpoint: LongbridgeEndpoint,
+        locale: Locale
+    ) async throws -> [LongbridgeCatalogSecurity] {
+        let language = Self.acceptLanguage(for: locale)
+        let cacheKey = "\(dataCenter)|\(language)"
+        if let cached = await Self.catalogCache.value(for: cacheKey) { return cached }
+
+        let markets = ["US", "HK"]
+        var catalog: [LongbridgeCatalogSecurity] = []
+        var firstError: Error?
+        await withTaskGroup(of: Result<[LongbridgeCatalogSecurity], Error>.self) { group in
+            for market in markets {
+                group.addTask {
+                    do {
+                        return .success(try await requestSecurityCatalog(
+                            market: market,
+                            endpoint: endpoint,
+                            acceptLanguage: language
+                        ))
+                    } catch {
+                        return .failure(error)
+                    }
+                }
+            }
+            for await result in group {
+                switch result {
+                case let .success(values): catalog.append(contentsOf: values)
+                case let .failure(error): firstError = firstError ?? error
+                }
+            }
+        }
+
+        // A partial catalog is misleading for cross-listed companies. If either
+        // market fails, retry through the next Longbridge access point instead
+        // of silently presenting only the surviving market.
+        if let firstError { throw firstError }
+
+        let unique = catalog.reduce(into: [String: LongbridgeCatalogSecurity]()) { result, item in
+            result[item.symbol] = item
+        }.values.sorted { $0.symbol < $1.symbol }
+        guard !unique.isEmpty else { throw firstError ?? OnlineMarketDataError.noData }
+        await Self.catalogCache.store(unique, for: cacheKey)
+        return unique
+    }
+
+    private func requestSecurityCatalog(
+        market: String,
+        endpoint: LongbridgeEndpoint,
+        acceptLanguage: String
+    ) async throws -> [LongbridgeCatalogSecurity] {
+        let pageSize = 1_000
+        var page = 1
+        var values: [LongbridgeCatalogSecurity] = []
+
+        while page <= 20 {
+            let query = [
+                URLQueryItem(name: "count", value: String(pageSize)),
+                URLQueryItem(name: "market", value: market),
+                URLQueryItem(name: "page", value: String(page))
+            ]
+            let request = try signedHTTPRequest(
+                endpoint: endpoint,
+                path: "/v1/quote/get_security_list",
+                queryItems: query,
+                acceptLanguage: acceptLanguage
+            )
+            let data: Data
+            let response: URLResponse
+            do {
+                (data, response) = try await Self.session.data(for: request)
+            } catch {
+                throw OnlineMarketDataError.network(error.localizedDescription)
+            }
+            guard let http = response as? HTTPURLResponse else { throw OnlineMarketDataError.malformed }
+            guard 200..<300 ~= http.statusCode else {
+                if http.statusCode == 401 || http.statusCode == 403 {
+                    throw OnlineMarketDataError.authentication
+                }
+                throw OnlineMarketDataError.network("HTTP \(http.statusCode)")
+            }
+            let envelope = try JSONDecoder().decode(LongbridgeCatalogEnvelope.self, from: data)
+            guard envelope.code == 0 else {
+                throw OnlineMarketDataError.network(envelope.message ?? "Longbridge \(envelope.code)")
+            }
+            let batch = envelope.data?.list ?? []
+            values.append(contentsOf: batch)
+            guard batch.count == pageSize else { break }
+            page += 1
+        }
+        return values
+    }
+
+    private func signedHTTPRequest(
+        endpoint: LongbridgeEndpoint,
+        path: String,
+        queryItems: [URLQueryItem],
+        acceptLanguage: String
+    ) throws -> URLRequest {
+        var components = URLComponents(url: endpoint.http.appending(path: path), resolvingAgainstBaseURL: false)
+        components?.queryItems = queryItems.sorted { $0.name < $1.name }
+        guard let url = components?.url else { throw OnlineMarketDataError.malformed }
+
+        let timestamp = String(Int(Date().timeIntervalSince1970))
+        let signedHeaders = "authorization:\(credentials.accessToken)\nx-api-key:\(credentials.appKey)\nx-timestamp:\(timestamp)\n"
+        let canonical = "GET|\(path)|\(components?.percentEncodedQuery ?? "")|\(signedHeaders)|authorization;x-api-key;x-timestamp|"
+        let stringToSign = "HMAC-SHA256|\(sha1(Data(canonical.utf8)))"
+        let key = SymmetricKey(data: Data(credentials.appSecret.utf8))
+        let signature = HMAC<SHA256>.authenticationCode(for: Data(stringToSign.utf8), using: key)
+            .map { String(format: "%02x", $0) }.joined()
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 45
+        request.setValue(credentials.appKey, forHTTPHeaderField: "X-Api-Key")
+        request.setValue(credentials.accessToken, forHTTPHeaderField: "Authorization")
+        request.setValue(timestamp, forHTTPHeaderField: "X-Timestamp")
+        request.setValue(dataCenter, forHTTPHeaderField: "X-Dc-Region")
+        request.setValue(acceptLanguage, forHTTPHeaderField: "Accept-Language")
+        request.setValue(
+            "HMAC-SHA256 SignedHeaders=authorization;x-api-key;x-timestamp, Signature=\(signature)",
+            forHTTPHeaderField: "X-Api-Signature"
+        )
+        return request
     }
 
     private func requestStaticInfo(
@@ -334,44 +443,100 @@ struct LongbridgeMarketDataProvider: Sendable {
         return false
     }
 
-    static func searchSymbolCandidates(for query: String) -> [String] {
-        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return [] }
-        let lookupKey = trimmed.folding(
+    static func normalizedSearchText(_ value: String) -> String {
+        value.trimmingCharacters(in: .whitespacesAndNewlines).folding(
             options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive],
             locale: Locale(identifier: "zh-Hans")
         ).lowercased()
-        if let aliases = securityAliases[lookupKey] { return aliases }
-
-        let compact = trimmed
-            .replacingOccurrences(of: " ", with: "")
-            .uppercased()
-        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: ".-"))
-        guard compact.unicodeScalars.allSatisfy(allowed.contains) else { return [] }
-        if compact.contains(".") { return [compact] }
-        if compact.allSatisfy(\.isNumber) { return ["\(compact).HK"] }
-        return ["\(compact).US"]
     }
 
-    private static let securityAliases: [String: [String]] = [
-        "蔚来": ["NIO.US", "9866.HK"], "蔚来汽车": ["NIO.US", "9866.HK"],
-        "蔚來": ["NIO.US", "9866.HK"], "蔚來汽車": ["NIO.US", "9866.HK"],
-        "nio": ["NIO.US", "9866.HK"],
-        "小鹏": ["XPEV.US"], "小鵬": ["XPEV.US"], "xpeng": ["XPEV.US"],
-        "理想": ["LI.US"], "li auto": ["LI.US"],
-        "拼多多": ["PDD.US"], "pdd": ["PDD.US"],
-        "京东": ["JD.US", "9618.HK"], "京東": ["JD.US", "9618.HK"],
-        "百度": ["BIDU.US", "9888.HK"],
-        "哔哩哔哩": ["BILI.US", "9626.HK"], "嗶哩嗶哩": ["BILI.US", "9626.HK"],
-        "阿里巴巴": ["BABA.US", "9988.HK"], "alibaba": ["BABA.US", "9988.HK"],
-        "腾讯": ["700.HK"], "騰訊": ["700.HK"], "tencent": ["700.HK"],
-        "美团": ["3690.HK"], "美團": ["3690.HK"], "meituan": ["3690.HK"],
-        "网易": ["NTES.US", "9999.HK"], "網易": ["NTES.US", "9999.HK"],
-        "快手": ["1024.HK"],
-        "苹果": ["AAPL.US"], "蘋果": ["AAPL.US"], "apple": ["AAPL.US"],
-        "特斯拉": ["TSLA.US"], "tesla": ["TSLA.US"],
-        "英伟达": ["NVDA.US"], "英偉達": ["NVDA.US"], "nvidia": ["NVDA.US"]
-    ]
+    private static func filterCatalog(
+        _ catalog: [LongbridgeCatalogSecurity],
+        matching query: String,
+        locale: Locale
+    ) -> [(security: Security, score: Int)] {
+        let needle = normalizedSearchText(query)
+        return catalog.compactMap { item -> (Security, Int)? in
+            let symbol = item.symbol.split(separator: ".").first.map(String.init) ?? item.symbol
+            let searchable = [item.symbol, symbol, item.name, item.nameCN, item.nameHK, item.nameEN]
+                .compactMap { $0 }
+                .map(normalizedSearchText)
+            guard searchable.contains(where: { $0.contains(needle) }) else { return nil }
+            let score: Int
+            if searchable.contains(needle) { score = 0 }
+            else if searchable.contains(where: { $0.hasPrefix(needle) }) { score = 1 }
+            else { score = 2 }
+            let market: Market = item.symbol.hasSuffix(".HK") ? .hk : .us
+            return (
+                Security(
+                    id: item.symbol,
+                    symbol: symbol,
+                    name: item.localizedName(locale: locale),
+                    market: market,
+                    currency: market == .hk ? "HKD" : "USD",
+                    isSyntheticDemo: false
+                ),
+                score
+            )
+        }
+        .sorted {
+            if $0.score != $1.score { return $0.score < $1.score }
+            return $0.security.id < $1.security.id
+        }
+    }
+
+    private static func acceptLanguage(for locale: Locale) -> String {
+        if locale.identifier.lowercased().contains("hant") || locale.identifier.lowercased().contains("hk") {
+            return "zh-HK"
+        }
+        if locale.language.languageCode?.identifier == "zh" { return "zh-CN" }
+        return "en-US"
+    }
+
+    private static let catalogCache = LongbridgeCatalogCache()
+}
+
+private struct LongbridgeCatalogEnvelope: Decodable {
+    let code: Int
+    let message: String?
+    let data: Payload?
+
+    struct Payload: Decodable {
+        let list: [LongbridgeCatalogSecurity]?
+    }
+}
+
+private struct LongbridgeCatalogSecurity: Decodable, Sendable {
+    let symbol: String
+    let name: String?
+    let nameCN: String?
+    let nameHK: String?
+    let nameEN: String?
+
+    enum CodingKeys: String, CodingKey {
+        case symbol, name
+        case nameCN = "name_cn"
+        case nameHK = "name_hk"
+        case nameEN = "name_en"
+    }
+
+    func localizedName(locale: Locale) -> String {
+        let identifier = locale.identifier.lowercased()
+        if identifier.contains("hant") || identifier.contains("hk") {
+            return nameHK ?? name ?? nameCN ?? nameEN ?? symbol
+        }
+        if locale.language.languageCode?.identifier == "zh" {
+            return nameCN ?? name ?? nameHK ?? nameEN ?? symbol
+        }
+        return nameEN ?? name ?? nameCN ?? nameHK ?? symbol
+    }
+}
+
+private actor LongbridgeCatalogCache {
+    private var storage: [String: [LongbridgeCatalogSecurity]] = [:]
+
+    func value(for key: String) -> [LongbridgeCatalogSecurity]? { storage[key] }
+    func store(_ value: [LongbridgeCatalogSecurity], for key: String) { storage[key] = value }
 }
 
 private struct SocketTokenEnvelope: Decodable {
