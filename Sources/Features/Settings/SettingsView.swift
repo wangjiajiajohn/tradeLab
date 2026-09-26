@@ -576,6 +576,7 @@ private struct AISettingsView: View {
     @State private var didSave = false
     @State private var availableModels: [AIModelOption] = []
     @State private var isLoadingModels = false
+    @State private var validationSecondsRemaining = 15
     @State private var modelLoadMessage: String?
     @State private var showsManualModelEntry = false
     @State private var selectedModelID = ""
@@ -596,6 +597,16 @@ private struct AISettingsView: View {
         !trimmedAPIKey.isEmpty
             && !availableModels.isEmpty
             && validatedAPIKey == trimmedAPIKey
+    }
+
+    private var verificationCountdownText: String {
+        String(
+            format: AppLocalization.string(
+                "provider.ai.loading_models_countdown",
+                locale: model.language.locale
+            ),
+            validationSecondsRemaining
+        )
     }
 
     var body: some View {
@@ -705,7 +716,8 @@ private struct AISettingsView: View {
                             HStack(spacing: 8) {
                                 ProgressView()
                                     .tint(.white)
-                                Text("provider.ai.loading_models")
+                                Text(verificationCountdownText)
+                                    .monospacedDigit()
                             }
                         } else {
                             Label(
@@ -803,8 +815,20 @@ private struct AISettingsView: View {
         let trimmedKey = trimmedAPIKey
         guard !trimmedKey.isEmpty, model.aiProvider != .disabled else { return }
         isLoadingModels = true
+        validationSecondsRemaining = 15
         modelLoadMessage = nil
-        defer { isLoadingModels = false }
+        let countdownTask = Task { @MainActor in
+            while !Task.isCancelled, validationSecondsRemaining > 1 {
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                validationSecondsRemaining -= 1
+            }
+        }
+        defer {
+            countdownTask.cancel()
+            validationSecondsRemaining = 15
+            isLoadingModels = false
+        }
         do {
             availableModels = try await AIModelCatalogService.fetchModels(
                 for: model.aiProvider,

@@ -297,7 +297,7 @@ enum AIModelCatalogService {
 
         var request = URLRequest(url: endpoint)
         request.httpMethod = "GET"
-        request.timeoutInterval = 30
+        request.timeoutInterval = 15
         switch provider {
         case .disabled:
             break

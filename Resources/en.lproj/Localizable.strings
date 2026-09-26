@@ -221,6 +221,7 @@
 "provider.ai.model" = "Model";
 "provider.ai.model_section" = "Model";
 "provider.ai.loading_models" = "Loading available models…";
+"provider.ai.loading_models_countdown" = "Verifying… %d sec";
 "provider.ai.choose_model" = "Choose a Model";
 "provider.ai.no_models" = "Save your API key to load the available models.";
 "provider.ai.refresh_models" = "Refresh Model List";

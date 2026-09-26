@@ -221,6 +221,7 @@
 "provider.ai.model" = "模型";
 "provider.ai.model_section" = "模型";
 "provider.ai.loading_models" = "正在获取可用模型…";
+"provider.ai.loading_models_countdown" = "正在验证… %d 秒";
 "provider.ai.choose_model" = "选择模型";
 "provider.ai.no_models" = "保存 API Key 后即可获取可用模型。";
 "provider.ai.refresh_models" = "刷新模型列表";
