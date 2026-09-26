@@ -1,6 +1,14 @@
 import Charts
 import SwiftUI
 
+private struct ResultIdentityMaxYPreferenceKey: PreferenceKey {
+    static let defaultValue = CGFloat.infinity
+
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
 struct BacktestHomeView: View {
     private enum ConfigurationSheet: String, Identifiable {
         case stock
@@ -12,87 +20,111 @@ struct BacktestHomeView: View {
 
     @EnvironmentObject private var model: AppModel
     @Environment(\.locale) private var locale
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var configurationSheet: ConfigurationSheet?
     @State private var showsBacktestCompletion = false
+    @State private var showsSecurityNavigationTitle = false
 
     var body: some View {
-        NavigationStack {
-            List {
-                configurationSection
+        GeometryReader { geometry in
+            NavigationStack {
+                List {
+                    configurationSection
 
-                if let result = model.result {
-                    ResultSections(result: result)
-                } else {
-                    Section {
-                        ContentUnavailableView(
-                            "backtest.empty.title",
-                            systemImage: "chart.xyaxis.line",
-                            description: Text("backtest.empty.description")
+                    if let result = model.result {
+                        ResultSections(result: result)
+                    } else {
+                        Section {
+                            ContentUnavailableView(
+                                "backtest.empty.title",
+                                systemImage: "chart.xyaxis.line",
+                                description: Text("backtest.empty.description")
+                            )
+                        }
+                    }
+                }
+                .navigationTitle(navigationTitle)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            guard !model.isRunningBacktest else { return }
+                            Task {
+                                showsBacktestCompletion = false
+                                guard await model.runBacktest() else { return }
+                                withAnimation(.spring(response: 0.28, dampingFraction: 0.62)) {
+                                    showsBacktestCompletion = true
+                                }
+                                try? await Task.sleep(for: .milliseconds(550))
+                                withAnimation(.easeOut(duration: 0.18)) {
+                                    showsBacktestCompletion = false
+                                }
+                            }
+                        } label: {
+                            if model.isRunningBacktest {
+                                BacktestActivityMark(tint: .accentColor, compact: true)
+                            } else if showsBacktestCompletion {
+                                Image(systemName: "checkmark")
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.green)
+                                    .transition(.scale.combined(with: .opacity))
+                            } else {
+                                Label("backtest.run", systemImage: "play.fill")
+                            }
+                        }
+                        .disabled(!model.canRunBacktest)
+                        .allowsHitTesting(!model.isRunningBacktest && !showsBacktestCompletion)
+                        .accessibilityLabel(model.language.localized(
+                            model.isRunningBacktest ? model.backtestRunPhase.localizationKey : "backtest.run"
+                        ))
+                        .tabToolbarJellyEffect()
+                        .scaleEffect(model.isRunningBacktest ? 1.32 : showsBacktestCompletion ? 1.12 : 1)
+                        .animation(
+                            .spring(response: 0.32, dampingFraction: 0.62),
+                            value: model.isRunningBacktest
+                        )
+                        .animation(
+                            .spring(response: 0.28, dampingFraction: 0.62),
+                            value: showsBacktestCompletion
                         )
                     }
                 }
-            }
-            .navigationTitle(model.language.localized("tab.backtest"))
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        guard !model.isRunningBacktest else { return }
-                        Task {
-                            showsBacktestCompletion = false
-                            guard await model.runBacktest() else { return }
-                            withAnimation(.spring(response: 0.28, dampingFraction: 0.62)) {
-                                showsBacktestCompletion = true
-                            }
-                            try? await Task.sleep(for: .milliseconds(550))
-                            withAnimation(.easeOut(duration: 0.18)) {
-                                showsBacktestCompletion = false
-                            }
-                        }
-                    } label: {
-                        if model.isRunningBacktest {
-                            BacktestActivityMark(tint: .accentColor, compact: true)
-                        } else if showsBacktestCompletion {
-                            Image(systemName: "checkmark")
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.green)
-                                .transition(.scale.combined(with: .opacity))
-                        } else {
-                            Label("backtest.run", systemImage: "play.fill")
+                .sheet(item: $configurationSheet) { sheet in
+                    switch sheet {
+                    case .stock: StockPickerView()
+                    case .strategy: StrategyPickerView()
+                    case .settings: BacktestSettingsSheet()
+                    }
+                }
+                .alert("error.title", isPresented: Binding(
+                    get: { model.errorMessage != nil },
+                    set: { if !$0 { model.errorMessage = nil } }
+                )) {
+                    Button("action.ok", role: .cancel) { model.errorMessage = nil }
+                } message: {
+                    Text(model.errorMessage ?? "")
+                }
+                .onPreferenceChange(ResultIdentityMaxYPreferenceKey.self) { maxY in
+                    let navigationBarBottom = geometry.safeAreaInsets.top + 48
+                    let shouldShow = model.result != nil && maxY <= navigationBarBottom
+                    guard shouldShow != showsSecurityNavigationTitle else { return }
+                    if reduceMotion {
+                        showsSecurityNavigationTitle = shouldShow
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.18)) {
+                            showsSecurityNavigationTitle = shouldShow
                         }
                     }
-                    .disabled(!model.canRunBacktest)
-                    .allowsHitTesting(!model.isRunningBacktest && !showsBacktestCompletion)
-                    .accessibilityLabel(model.language.localized(
-                        model.isRunningBacktest ? model.backtestRunPhase.localizationKey : "backtest.run"
-                    ))
-                    .tabToolbarJellyEffect()
-                    .scaleEffect(model.isRunningBacktest ? 1.32 : showsBacktestCompletion ? 1.12 : 1)
-                    .animation(
-                        .spring(response: 0.32, dampingFraction: 0.62),
-                        value: model.isRunningBacktest
-                    )
-                    .animation(
-                        .spring(response: 0.28, dampingFraction: 0.62),
-                        value: showsBacktestCompletion
-                    )
                 }
-            }
-            .sheet(item: $configurationSheet) { sheet in
-                switch sheet {
-                case .stock: StockPickerView()
-                case .strategy: StrategyPickerView()
-                case .settings: BacktestSettingsSheet()
-                }
-            }
-            .alert("error.title", isPresented: Binding(
-                get: { model.errorMessage != nil },
-                set: { if !$0 { model.errorMessage = nil } }
-            )) {
-                Button("action.ok", role: .cancel) { model.errorMessage = nil }
-            } message: {
-                Text(model.errorMessage ?? "")
             }
         }
+    }
+
+    private var navigationTitle: String {
+        guard showsSecurityNavigationTitle, let result = model.result else {
+            return model.language.localized("tab.backtest")
+        }
+        let name = model.localizedSecurityName(id: result.security.id, fallback: result.security.name)
+        return "\(name) · \(result.security.symbol)"
     }
 
     private var configurationSection: some View {
@@ -655,6 +687,14 @@ private struct ResultOverview: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text("\(securityName) · \(strategyName)")
                     .font(.headline)
+                    .background {
+                        GeometryReader { proxy in
+                            Color.clear.preference(
+                                key: ResultIdentityMaxYPreferenceKey.self,
+                                value: proxy.frame(in: .global).maxY
+                            )
+                        }
+                    }
                 if let first = result.candles.first?.date,
                    let last = result.candles.last?.date {
                     Text("\(formatted(first)) – \(formatted(last))")
