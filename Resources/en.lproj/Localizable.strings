@@ -251,3 +251,11 @@
 "trades.note" = "Trade note";
 "review.export" = "Export Backtests as CSV";
 "trades.export" = "Export Trades as CSV";
+"market_error.missing_credentials" = "Complete your Longbridge credentials in Settings before using online market data.";
+"market_error.network_format" = "Could not connect to Longbridge: %@";
+"market_error.token" = "Longbridge could not issue a socket token. Check the credentials and network.";
+"market_error.authentication" = "Longbridge quote authentication failed. Check whether the access token has expired.";
+"market_error.entitlement_format" = "Longbridge quote access could not be initialized (status %d).";
+"market_error.history_format" = "Longbridge rejected the daily-history request (status %d).";
+"market_error.malformed" = "The market-data response could not be read.";
+"market_error.no_data" = "No daily market data was returned for this stock and period.";

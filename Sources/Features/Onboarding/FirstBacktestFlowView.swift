@@ -226,7 +226,7 @@ struct FirstBacktestFlowView: View {
             title: primaryActionTitle,
             symbol: stage == .run ? "play.fill" : "arrow.right",
             tint: stageTint,
-            disabled: !canContinue,
+            disabled: !canContinue || model.isRunningBacktest,
             action: performPrimaryAction
         )
         .frame(maxWidth: 600)
@@ -272,7 +272,7 @@ struct FirstBacktestFlowView: View {
             model.hasConfirmedSettings = true
             move(to: .run)
         case .run:
-            _ = model.runBacktest(completesOnboarding: true)
+            Task { _ = await model.runBacktest(completesOnboarding: true) }
         }
     }
 

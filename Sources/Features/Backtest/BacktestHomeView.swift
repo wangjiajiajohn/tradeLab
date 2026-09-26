@@ -22,7 +22,7 @@ struct BacktestHomeView: View {
                         changeStock: { configurationSheet = .stock },
                         changeStrategy: { configurationSheet = .strategy },
                         changeSettings: { configurationSheet = .settings },
-                        runAgain: { _ = model.runBacktest() }
+                        runAgain: { Task { _ = await model.runBacktest() } }
                     )
                 } else {
                     workflowSection
@@ -42,6 +42,14 @@ struct BacktestHomeView: View {
                 case .strategy: StrategyPickerView()
                 case .settings: BacktestSettingsSheet()
                 }
+            }
+            .alert("error.title", isPresented: Binding(
+                get: { model.errorMessage != nil },
+                set: { if !$0 { model.errorMessage = nil } }
+            )) {
+                Button("action.ok", role: .cancel) { model.errorMessage = nil }
+            } message: {
+                Text(model.errorMessage ?? "")
             }
         }
     }
@@ -70,14 +78,17 @@ struct BacktestHomeView: View {
                 )
             }
             Button {
-                _ = model.runBacktest()
+                Task { _ = await model.runBacktest() }
             } label: {
-                Label("backtest.run", systemImage: "play.fill")
-                    .frame(maxWidth: .infinity)
+                HStack {
+                    if model.isRunningBacktest { ProgressView().controlSize(.small) }
+                    Label("backtest.run", systemImage: "play.fill")
+                }
+                .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
-            .disabled(!model.canRunBacktest)
+            .disabled(!model.canRunBacktest || model.isRunningBacktest)
         }
     }
 }

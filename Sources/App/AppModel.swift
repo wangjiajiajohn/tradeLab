@@ -49,11 +49,15 @@ final class AppModel: ObservableObject {
     @Published var hasConfirmedSettings = false
     @Published var result: BacktestResult?
     @Published var errorMessage: String?
+    @Published private(set) var isRunningBacktest = false
     @Published var selectedTab: MainTab = .backtest
     @Published var hasCompletedFirstBacktest: Bool
     @Published private(set) var backtestHistory: [BacktestRecord]
     @Published var marketDataSource: MarketDataSource {
-        didSet { defaults.set(marketDataSource.rawValue, forKey: Keys.marketDataSource) }
+        didSet {
+            defaults.set(marketDataSource.rawValue, forKey: Keys.marketDataSource)
+            result = nil
+        }
     }
     @Published var aiProvider: AIProvider {
         didSet { defaults.set(aiProvider.rawValue, forKey: Keys.aiProvider) }
@@ -64,6 +68,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var hasLongbridgeCredentials = false
     @Published private(set) var hasAIAPIKey = false
     @Published private(set) var journalTrades: [JournalTrade]
+    private var onlineCandles: [String: [Candle]] = [:]
     @Published var appearance: Appearance {
         didSet { defaults.set(appearance.rawValue, forKey: Keys.appearance) }
     }
@@ -94,6 +99,8 @@ final class AppModel: ObservableObject {
 
     var selectedCandles: [Candle] {
         guard let selectedSecurity else { return [] }
+        if marketDataSource == .longbridge,
+           let cached = onlineCandles[selectedSecurity.id] { return cached }
         return candles(for: selectedSecurity)
     }
 
@@ -125,16 +132,43 @@ final class AppModel: ObservableObject {
     }
 
     @discardableResult
-    func runBacktest(completesOnboarding: Bool = false) -> Bool {
+    func runBacktest(completesOnboarding: Bool = false) async -> Bool {
         guard let security = selectedSecurity, let strategy = selectedStrategy, canRunBacktest else {
             errorMessage = String(localized: "error.incomplete_setup")
             return false
         }
 
+        isRunningBacktest = true
+        defer { isRunningBacktest = false }
         do {
+            let inputCandles: [Candle]
+            if marketDataSource == .longbridge {
+                guard let credentials = LongbridgeCredentials.saved else {
+                    throw OnlineMarketDataError.missingCredentials
+                }
+                let end = settings.endDate ?? Date()
+                let start = settings.startDate
+                    ?? Calendar(identifier: .gregorian).date(byAdding: .year, value: -2, to: end)
+                    ?? end.addingTimeInterval(-730 * 86_400)
+                inputCandles = try await LongbridgeMarketDataProvider(credentials: credentials)
+                    .dailyCandles(for: security, from: start, to: end)
+                onlineCandles[security.id] = inputCandles
+            } else {
+                inputCandles = candles(for: security)
+            }
+            let resultSecurity = marketDataSource == .longbridge
+                ? Security(
+                    id: security.id,
+                    symbol: security.symbol,
+                    name: security.name,
+                    market: security.market,
+                    currency: security.currency,
+                    isSyntheticDemo: false
+                )
+                : security
             let newResult = try BacktestEngine.run(
-                security: security,
-                candles: candles(for: security),
+                security: resultSecurity,
+                candles: inputCandles,
                 strategy: strategy,
                 settings: settings
             )
@@ -204,6 +238,7 @@ final class AppModel: ObservableObject {
         hasConfirmedSettings = false
         result = nil
         errorMessage = nil
+        onlineCandles.removeAll()
         hasCompletedFirstBacktest = false
         defaults.removeObject(forKey: Keys.completedFirstBacktest)
     }

@@ -251,3 +251,11 @@
 "trades.note" = "交易备注";
 "review.export" = "导出回测 CSV";
 "trades.export" = "导出交易 CSV";
+"market_error.missing_credentials" = "使用在线行情前，请先在设置中完整填写长桥凭证。";
+"market_error.network_format" = "无法连接长桥：%@";
+"market_error.token" = "长桥未能下发 Socket Token，请检查凭证和网络。";
+"market_error.authentication" = "长桥行情鉴权失败，请检查 Access Token 是否过期。";
+"market_error.entitlement_format" = "长桥行情权限初始化失败（状态 %d）。";
+"market_error.history_format" = "长桥拒绝了日线历史请求（状态 %d）。";
+"market_error.malformed" = "无法读取行情服务返回的数据。";
+"market_error.no_data" = "该股票在所选区间没有返回日线数据。";

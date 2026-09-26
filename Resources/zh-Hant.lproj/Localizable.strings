@@ -251,3 +251,11 @@
 "trades.note" = "交易備註";
 "review.export" = "匯出回測 CSV";
 "trades.export" = "匯出交易 CSV";
+"market_error.missing_credentials" = "使用線上行情前，請先在設定中完整填寫長橋憑證。";
+"market_error.network_format" = "無法連接長橋：%@";
+"market_error.token" = "長橋未能發出 Socket Token，請檢查憑證及網絡。";
+"market_error.authentication" = "長橋行情認證失敗，請檢查 Access Token 是否過期。";
+"market_error.entitlement_format" = "長橋行情權限初始化失敗（狀態 %d）。";
+"market_error.history_format" = "長橋拒絕了日線歷史請求（狀態 %d）。";
+"market_error.malformed" = "無法讀取行情服務傳回的資料。";
+"market_error.no_data" = "該股票在所選區間沒有傳回日線資料。";
