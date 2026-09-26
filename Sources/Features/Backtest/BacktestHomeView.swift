@@ -94,10 +94,41 @@ struct BacktestHomeView: View {
                     value: model.hasConfirmedSettings
                         ? AppLocalization.string("status.confirmed", locale: locale)
                         : AppLocalization.string("status.not_confirmed", locale: locale),
-                    symbol: "calendar.badge.clock"
+                    symbol: "calendar.badge.clock",
+                    detail: backtestSettingsSummary
                 )
             }
         }
+    }
+
+    private var backtestSettingsSummary: String {
+        let currency = model.selectedSecurity?.currency ?? "USD"
+        let capital = model.settings.initialCapital.formatted(
+            .currency(code: currency).precision(.fractionLength(0))
+        )
+        let commission = model.settings.commissionRate.formatted(
+            .percent.precision(.fractionLength(2))
+        )
+        let slippage = model.settings.slippageRate.formatted(
+            .percent.precision(.fractionLength(2))
+        )
+        let costs = "\(AppLocalization.string("settings.commission", locale: locale)) \(commission) · "
+            + "\(AppLocalization.string("settings.slippage", locale: locale)) \(slippage)"
+
+        guard let period = backtestPeriodSummary else {
+            return capital + "\n" + costs
+        }
+        return period + " · " + capital + "\n" + costs
+    }
+
+    private var backtestPeriodSummary: String? {
+        let fallbackStart = model.selectedSecurity.flatMap { model.candles(for: $0).first?.date }
+        let fallbackEnd = model.selectedSecurity.flatMap { model.candles(for: $0).last?.date }
+        guard let start = model.settings.startDate ?? fallbackStart,
+              let end = model.settings.endDate ?? fallbackEnd
+        else { return nil }
+        let format = Date.FormatStyle(date: .numeric, time: .omitted, locale: locale)
+        return start.formatted(format) + "–" + end.formatted(format)
     }
 }
 
@@ -733,14 +764,25 @@ private struct ConfigurationRow: View {
     let title: LocalizedStringKey
     let value: String
     let symbol: String
+    var detail: String? = nil
 
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: symbol)
                 .frame(width: 24)
                 .foregroundStyle(.tint)
-            Text(title)
-                .foregroundStyle(.primary)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .foregroundStyle(.primary)
+                if let detail {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .layoutPriority(1)
             Spacer()
             Text(value)
                 .foregroundStyle(.secondary)
