@@ -89,6 +89,44 @@ struct LongbridgeMarketDataProvider: Sendable {
         return URLSession(configuration: configuration)
     }()
 
+    func validateCredentials() async throws {
+        var lastError: Error?
+        for endpoint in endpoints {
+            do {
+                let otp = try await socketToken(endpoint: endpoint)
+                var request = URLRequest(url: endpoint.quote)
+                request.setValue(dataCenter, forHTTPHeaderField: "X-Dc-Region")
+                request.setValue("en-US", forHTTPHeaderField: "Accept-Language")
+                let socket = Self.session.webSocketTask(with: request)
+                socket.resume()
+                defer { socket.cancel(with: .normalClosure, reason: nil) }
+
+                try await socket.send(.data(LongbridgeWire.request(
+                    command: 2,
+                    id: 1,
+                    body: LongbridgeProto.auth(otp)
+                )))
+                guard try await receive(socket, id: 1).status == 0 else {
+                    throw OnlineMarketDataError.authentication
+                }
+
+                try await socket.send(.data(LongbridgeWire.request(
+                    command: 4,
+                    id: 2,
+                    body: LongbridgeProto.profile()
+                )))
+                let profile = try await receive(socket, id: 2)
+                guard profile.status == 0 else {
+                    throw OnlineMarketDataError.entitlement(Int(profile.status))
+                }
+                return
+            } catch {
+                lastError = error
+            }
+        }
+        throw lastError ?? OnlineMarketDataError.network("Unknown error")
+    }
+
     func dailyCandles(for security: Security, from: Date, to: Date) async throws -> [Candle] {
         var lastError: Error?
         for attempt in 1...2 {

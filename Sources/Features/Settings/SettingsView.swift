@@ -157,10 +157,12 @@ struct MarketDataSettingsView: View {
     @State private var appSecret = ""
     @State private var accessToken = ""
     @State private var errorMessage: String?
-    @State private var didSave = false
     @State private var showingProviderPicker = false
     @State private var hasPresentedProviderPicker = false
     @State private var showingRemoveCredentialsConfirmation = false
+    @State private var selectedSource: MarketDataSource = .offline
+    @State private var isValidating = false
+    @State private var verifiedCredentialSignature = ""
     @FocusState private var isCredentialFieldFocused: Bool
 
     init(presentsProviderPickerOnAppear: Bool = false) {
@@ -168,7 +170,7 @@ struct MarketDataSettingsView: View {
     }
 
     private var canSave: Bool {
-        switch model.marketDataSource {
+        switch selectedSource {
         case .offline: false
         case .longbridge:
             !appKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -182,6 +184,19 @@ struct MarketDataSettingsView: View {
         }
     }
 
+    private var credentialSignature: String {
+        [appKey, appSecret, accessToken]
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .joined(separator: "\u{1F}")
+    }
+
+    private var shouldShowVerificationAction: Bool {
+        guard selectedSource != .offline else { return false }
+        return selectedSource != model.marketDataSource
+            || !hasStoredCredentials(for: selectedSource)
+            || verifiedCredentialSignature != credentialSignature
+    }
+
     var body: some View {
         Form {
             Section {
@@ -192,7 +207,7 @@ struct MarketDataSettingsView: View {
                         showingProviderPicker = true
                     } label: {
                         HStack(spacing: 6) {
-                            Text(providerName(model.marketDataSource))
+                            Text(providerName(selectedSource))
                                 .foregroundStyle(.secondary)
                             Image(systemName: "chevron.up.chevron.down")
                                 .font(.caption.weight(.semibold))
@@ -200,18 +215,27 @@ struct MarketDataSettingsView: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    .disabled(isValidating)
                     .popover(isPresented: $showingProviderPicker, arrowEdge: .top) {
                         providerPickerMenu
                             .presentationCompactAdaptation(.popover)
                     }
                 }
+                if selectedSource != .offline,
+                   selectedSource == model.marketDataSource,
+                   hasStoredCredentials(for: selectedSource),
+                   !shouldShowVerificationAction {
+                    Label("provider.market_data.connected", systemImage: "checkmark.circle.fill")
+                        .font(.footnote)
+                        .foregroundStyle(.green)
+                }
             } footer: {
                 Text(LocalizedStringKey(
-                    providerDescription(model.marketDataSource)
+                    providerDescription(selectedSource)
                 ))
             }
 
-            if model.marketDataSource != .offline {
+            if selectedSource != .offline {
                 Section("provider.credentials") {
                     credentialFields
                 }
@@ -228,7 +252,7 @@ struct MarketDataSettingsView: View {
         .navigationTitle("settings.market_data_provider")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if model.hasSelectedMarketDataCredentials {
+            if hasStoredCredentials(for: selectedSource) {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(role: .destructive) {
                         showingRemoveCredentialsConfirmation = true
@@ -240,25 +264,40 @@ struct MarketDataSettingsView: View {
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if model.marketDataSource != .offline {
+            if shouldShowVerificationAction {
                 Button {
-                    save()
+                    Task { await validateAndSave() }
                 } label: {
-                    Label(
-                        LocalizedStringKey(didSave ? "status.saved" : "action.save"),
-                        systemImage: didSave ? "checkmark" : "square.and.arrow.down"
-                    )
+                    Group {
+                        if isValidating {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .tint(.white)
+                                Text("provider.market_data.verifying")
+                            }
+                        } else {
+                            Label(
+                                "provider.market_data.verify_and_save",
+                                systemImage: "checkmark.shield"
+                            )
+                        }
+                    }
                     .font(.headline)
                     .frame(maxWidth: .infinity, minHeight: 50)
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(.blue)
                 .disabled(!canSave)
+                .allowsHitTesting(canSave && !isValidating)
                 .padding(.horizontal)
                 .padding(.vertical, 10)
                 .background(.bar)
+                .transition(.opacity)
             }
         }
+        .animation(.easeOut(duration: 0.2), value: shouldShowVerificationAction)
         .onAppear {
+            selectedSource = model.marketDataSource
             loadCredentials()
             guard presentsProviderPickerOnAppear, !hasPresentedProviderPicker else { return }
             hasPresentedProviderPicker = true
@@ -266,11 +305,8 @@ struct MarketDataSettingsView: View {
                 showingProviderPicker = true
             }
         }
-        .onChange(of: model.marketDataSource) { _, _ in loadCredentials() }
-        .onChange(of: appKey) { _, _ in didSave = false }
-        .onChange(of: appSecret) { _, _ in didSave = false }
-        .onChange(of: accessToken) { _, _ in didSave = false }
-        .alert("error.title", isPresented: errorPresented) {
+        .onChange(of: selectedSource) { _, _ in loadCredentials() }
+        .alert("provider.market_data.configuration_error", isPresented: errorPresented) {
             Button("action.ok", role: .cancel) { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
@@ -303,14 +339,17 @@ struct MarketDataSettingsView: View {
 
     private func providerButton(_ source: MarketDataSource) -> some View {
         Button {
-            model.marketDataSource = source
+            selectedSource = source
+            if source == .offline {
+                model.marketDataSource = .offline
+            }
             showingProviderPicker = false
         } label: {
             HStack(spacing: 12) {
                 Text(providerName(source))
                     .foregroundStyle(.primary)
                 Spacer(minLength: 20)
-                if model.marketDataSource == source {
+                if selectedSource == source {
                     Image(systemName: "checkmark")
                         .fontWeight(.semibold)
                 }
@@ -320,6 +359,7 @@ struct MarketDataSettingsView: View {
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
+        .disabled(isValidating)
     }
 
     private func providerName(_ source: MarketDataSource) -> LocalizedStringKey {
@@ -342,7 +382,7 @@ struct MarketDataSettingsView: View {
 
     @ViewBuilder
     private var credentialFields: some View {
-        switch model.marketDataSource {
+        switch selectedSource {
         case .offline:
             EmptyView()
         case .longbridge:
@@ -380,7 +420,7 @@ struct MarketDataSettingsView: View {
     }
 
     private func loadCredentials() {
-        switch model.marketDataSource {
+        switch selectedSource {
         case .offline:
             appKey = ""
             appSecret = ""
@@ -398,35 +438,68 @@ struct MarketDataSettingsView: View {
             appSecret = ""
             accessToken = ""
         }
-        didSave = false
+        verifiedCredentialSignature = selectedSource == model.marketDataSource
+            && hasStoredCredentials(for: selectedSource)
+            ? credentialSignature
+            : ""
     }
 
-    private func save() {
+    @MainActor
+    private func validateAndSave() async {
+        guard canSave, selectedSource != .offline else { return }
+        isCredentialFieldFocused = false
+        isValidating = true
+        errorMessage = nil
+        defer { isValidating = false }
+
         do {
-            switch model.marketDataSource {
+            let trimmedAppKey = appKey.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedAppSecret = appSecret.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedAccessToken = accessToken.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            switch selectedSource {
             case .offline:
                 return
             case .longbridge:
-                try CredentialStore.set(appKey, for: .longbridgeAppKey)
-                try CredentialStore.set(appSecret, for: .longbridgeAppSecret)
-                try CredentialStore.set(accessToken, for: .longbridgeAccessToken)
+                try await LongbridgeMarketDataProvider(
+                    credentials: LongbridgeCredentials(
+                        appKey: trimmedAppKey,
+                        appSecret: trimmedAppSecret,
+                        accessToken: trimmedAccessToken
+                    )
+                ).validateCredentials()
+                try CredentialStore.set(trimmedAppKey, for: .longbridgeAppKey)
+                try CredentialStore.set(trimmedAppSecret, for: .longbridgeAppSecret)
+                try CredentialStore.set(trimmedAccessToken, for: .longbridgeAccessToken)
             case .alpaca:
-                try CredentialStore.set(appKey, for: .alpacaAPIKey)
-                try CredentialStore.set(appSecret, for: .alpacaAPISecret)
+                try await AlpacaMarketDataProvider(
+                    credentials: AlpacaCredentials(
+                        apiKey: trimmedAppKey,
+                        apiSecret: trimmedAppSecret
+                    )
+                ).validateCredentials()
+                try CredentialStore.set(trimmedAppKey, for: .alpacaAPIKey)
+                try CredentialStore.set(trimmedAppSecret, for: .alpacaAPISecret)
             case .twelveData:
-                try CredentialStore.set(appKey, for: .twelveDataAPIKey)
+                try await TwelveDataMarketDataProvider(apiKey: trimmedAppKey).validateCredentials()
+                try CredentialStore.set(trimmedAppKey, for: .twelveDataAPIKey)
             }
             model.refreshCredentialStatus()
-            didSave = true
+            model.marketDataSource = selectedSource
+            verifiedCredentialSignature = credentialSignature
         } catch {
-            errorMessage = (error as? CredentialStoreError)?.localizedDescription(locale: model.language.locale)
-                ?? error.localizedDescription
+            if let marketError = error as? OnlineMarketDataError {
+                errorMessage = marketError.localizedDescription(locale: model.language.locale)
+            } else {
+                errorMessage = (error as? CredentialStoreError)?.localizedDescription(locale: model.language.locale)
+                    ?? error.localizedDescription
+            }
         }
     }
 
     private func removeCredentials() {
         do {
-            switch model.marketDataSource {
+            switch selectedSource {
             case .offline:
                 return
             case .longbridge:
@@ -443,7 +516,10 @@ struct MarketDataSettingsView: View {
             appSecret = ""
             accessToken = ""
             model.refreshCredentialStatus()
-            didSave = false
+            if model.marketDataSource == selectedSource {
+                model.marketDataSource = .offline
+            }
+            verifiedCredentialSignature = ""
         } catch {
             errorMessage = (error as? CredentialStoreError)?.localizedDescription(locale: model.language.locale)
                 ?? error.localizedDescription
@@ -452,6 +528,15 @@ struct MarketDataSettingsView: View {
 
     private var errorPresented: Binding<Bool> {
         Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })
+    }
+
+    private func hasStoredCredentials(for source: MarketDataSource) -> Bool {
+        switch source {
+        case .offline: false
+        case .longbridge: model.hasLongbridgeCredentials
+        case .alpaca: model.hasAlpacaCredentials
+        case .twelveData: model.hasTwelveDataCredentials
+        }
     }
 }
 

@@ -32,6 +32,21 @@ struct AlpacaMarketDataProvider: Sendable {
         let message: String?
     }
 
+    func validateCredentials() async throws {
+        let end = Date()
+        let start = Calendar(identifier: .gregorian).date(byAdding: .day, value: -30, to: end)
+            ?? end.addingTimeInterval(-30 * 86_400)
+        let security = Security(
+            id: "AAPL.US",
+            symbol: "AAPL",
+            name: "Apple",
+            market: .us,
+            currency: "USD",
+            isSyntheticDemo: false
+        )
+        _ = try await dailyCandles(for: security, from: start, to: end)
+    }
+
     func dailyCandles(for security: Security, from: Date, to: Date) async throws -> [Candle] {
         guard security.market == .us else { throw OnlineMarketDataError.unsupportedMarket }
         var components = URLComponents(
@@ -94,6 +109,21 @@ struct TwelveDataMarketDataProvider: Sendable {
     static var savedAPIKey: String? {
         guard let value = CredentialStore.value(for: .twelveDataAPIKey), !value.isEmpty else { return nil }
         return value
+    }
+
+    func validateCredentials() async throws {
+        let end = Date()
+        let start = Calendar(identifier: .gregorian).date(byAdding: .day, value: -30, to: end)
+            ?? end.addingTimeInterval(-30 * 86_400)
+        let security = Security(
+            id: "AAPL.US",
+            symbol: "AAPL",
+            name: "Apple",
+            market: .us,
+            currency: "USD",
+            isSyntheticDemo: false
+        )
+        _ = try await dailyCandles(for: security, from: start, to: end)
     }
 
     func dailyCandles(for security: Security, from: Date, to: Date) async throws -> [Candle] {

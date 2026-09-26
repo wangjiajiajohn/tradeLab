@@ -210,6 +210,10 @@
 "provider.twelve_data" = "Twelve Data（美股 / 港股）";
 "provider.twelve_data.description" = "使用您自己的 Twelve Data API Key。港股通常需要支持国际交易所的付费套餐。";
 "provider.twelve_data.api_key" = "API Key";
+"provider.market_data.verify_and_save" = "验证并保存";
+"provider.market_data.verifying" = "正在验证行情连接…";
+"provider.market_data.connected" = "已连接并启用";
+"provider.market_data.configuration_error" = "行情数据源配置失败";
 "provider.ai.disabled" = "不使用 AI";
 "provider.ai.description" = "AI 仅用于把自然语言整理成策略草稿；回测仍由本机的确定性引擎执行。";
 "provider.ai.api_key" = "API Key";

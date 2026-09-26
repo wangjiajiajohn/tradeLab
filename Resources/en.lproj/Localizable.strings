@@ -210,6 +210,10 @@
 "provider.twelve_data" = "Twelve Data (U.S. / Hong Kong)";
 "provider.twelve_data.description" = "Uses your own Twelve Data API key. Hong Kong equities usually require a plan with international-exchange access.";
 "provider.twelve_data.api_key" = "API Key";
+"provider.market_data.verify_and_save" = "Verify and Save";
+"provider.market_data.verifying" = "Verifying market data access…";
+"provider.market_data.connected" = "Connected and Active";
+"provider.market_data.configuration_error" = "Market Data Configuration Failed";
 "provider.ai.disabled" = "Do Not Use AI";
 "provider.ai.description" = "AI only turns natural language into a strategy draft. Backtests still run in the deterministic on-device engine.";
 "provider.ai.api_key" = "API Key";
