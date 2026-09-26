@@ -455,7 +455,11 @@ private struct StockPickerView: View {
                     stockList
                 } else {
                     stockList
-                        .searchable(text: $searchText, prompt: "stock.search.prompt")
+                        .searchable(
+                            text: $searchText,
+                            placement: .navigationBarDrawer(displayMode: .always),
+                            prompt: "stock.search.prompt"
+                        )
                 }
             }
             .navigationTitle("result.change_stock")
