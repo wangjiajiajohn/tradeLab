@@ -71,11 +71,18 @@ struct ReviewView: View {
                 if mode == .backtests && !model.backtestHistory.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
                         Menu {
-                            Button(isSelectingForComparison ? "action.cancel" : "review.compare") {
+                            Button {
                                 withAnimation(.easeInOut(duration: 0.2)) {
                                     isSelectingForComparison.toggle()
                                     selectedRecordIDs.removeAll()
                                 }
+                            } label: {
+                                Label(
+                                    isSelectingForComparison ? "action.cancel" : "review.compare",
+                                    systemImage: isSelectingForComparison
+                                        ? "xmark"
+                                        : "arrow.left.arrow.right"
+                                )
                             }
                             if let exportURL = CSVExports.backtests(model.backtestHistory) {
                                 ShareLink(item: exportURL) {
