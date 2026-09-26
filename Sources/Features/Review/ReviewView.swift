@@ -70,27 +70,31 @@ struct ReviewView: View {
             .toolbar {
                 if mode == .backtests && !model.backtestHistory.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Menu {
-                            Button {
+                        if isSelectingForComparison {
+                            Button("action.cancel") {
                                 withAnimation(.easeInOut(duration: 0.2)) {
-                                    isSelectingForComparison.toggle()
+                                    isSelectingForComparison = false
                                     selectedRecordIDs.removeAll()
                                 }
-                            } label: {
-                                Label(
-                                    isSelectingForComparison ? "action.cancel" : "review.compare",
-                                    systemImage: isSelectingForComparison
-                                        ? "xmark"
-                                        : "arrow.left.arrow.right"
-                                )
                             }
-                            if let exportURL = CSVExports.backtests(model.backtestHistory) {
-                                ShareLink(item: exportURL) {
-                                    Label("review.export", systemImage: "square.and.arrow.up")
+                        } else {
+                            Menu {
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        isSelectingForComparison = true
+                                        selectedRecordIDs.removeAll()
+                                    }
+                                } label: {
+                                    Label("review.compare", systemImage: "arrow.left.arrow.right")
                                 }
+                                if let exportURL = CSVExports.backtests(model.backtestHistory) {
+                                    ShareLink(item: exportURL) {
+                                        Label("review.export", systemImage: "square.and.arrow.up")
+                                    }
+                                }
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
                             }
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
                         }
                     }
                 }
