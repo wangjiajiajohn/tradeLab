@@ -1069,12 +1069,27 @@ private struct BacktestSettingsSheet: View {
                             in: availableRange.lowerBound...effectiveEndDate,
                             displayedComponents: .date
                         )
+                        .disabled(!canEditPeriod)
                         DatePicker(
                             "settings.end_date",
                             selection: endDateBinding,
                             in: effectiveStartDate...availableRange.upperBound,
                             displayedComponents: .date
                         )
+                        .disabled(!canEditPeriod)
+
+                        if !canEditPeriod {
+                            NavigationLink {
+                                MarketDataSettingsView(presentsProviderPickerOnAppear: true)
+                            } label: {
+                                Label(
+                                    "settings.period.requires_verified_source",
+                                    systemImage: "lock.fill"
+                                )
+                                .font(.footnote)
+                                .foregroundStyle(.orange)
+                            }
+                        }
                     }
                 }
                 Section("settings.capital") {
@@ -1115,14 +1130,27 @@ private struct BacktestSettingsSheet: View {
     }
 
     private var availableRange: ClosedRange<Date>? {
-        if let first = model.selectedCandles.first?.date,
-           let last = model.selectedCandles.last?.date {
+        if canEditPeriod {
+            let calendar = Calendar.current
+            let onlineLowerBound = calendar.date(from: DateComponents(year: 1990, month: 1, day: 1))
+                ?? BacktestSettings.defaultPeriod().lowerBound
+            let lowerBound = min(draft.startDate ?? onlineLowerBound, onlineLowerBound)
+            let upperBound = max(draft.endDate ?? .now, .now)
+            return lowerBound...upperBound
+        }
+        if let security = model.selectedSecurity,
+           let first = model.candles(for: security).first?.date,
+           let last = model.candles(for: security).last?.date {
             return first...last
         }
-        guard model.selectedSecurity != nil,
-              model.marketDataSource != .offline
-        else { return nil }
+        if let start = draft.startDate, let end = draft.endDate {
+            return min(start, end)...max(start, end)
+        }
         return BacktestSettings.defaultPeriod()
+    }
+
+    private var canEditPeriod: Bool {
+        model.marketDataSource != .offline && model.hasSelectedMarketDataCredentials
     }
 
     private var startDateBinding: Binding<Date> {

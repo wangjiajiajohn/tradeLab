@@ -190,6 +190,7 @@
 "settings.period" = "Period";
 "settings.start_date" = "Start Date";
 "settings.end_date" = "End Date";
+"settings.period.requires_verified_source" = "Verify a market data source to change dates";
 "settings.full_period" = "All Available Data";
 "settings.privacy" = "Privacy";
 "settings.data_privacy" = "Data & Privacy";

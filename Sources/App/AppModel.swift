@@ -208,8 +208,9 @@ final class AppModel: ObservableObject {
 
     var selectedCandles: [Candle] {
         guard let selectedSecurity else { return [] }
-        if marketDataSource != .offline,
-           let cached = onlineCandles[selectedSecurity.id] { return cached }
+        if marketDataSource != .offline {
+            return onlineCandles[selectedSecurity.id] ?? []
+        }
         return candles(for: selectedSecurity)
     }
 
@@ -234,15 +235,7 @@ final class AppModel: ObservableObject {
         }
         guard selectedSecurityID != security.id else { return }
         selectedSecurityID = security.id
-        if marketDataSource != .offline, hasSelectedMarketDataCredentials {
-            if settings.startDate != nil || settings.endDate != nil {
-                var resetSettings = settings
-                resetSettings.startDate = nil
-                resetSettings.endDate = nil
-                settings = resetSettings
-            }
-            hasConfirmedSettings = false
-        }
+        hasConfirmedSettings = false
         result = nil
     }
 

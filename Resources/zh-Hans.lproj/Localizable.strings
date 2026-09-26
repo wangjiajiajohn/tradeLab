@@ -190,6 +190,7 @@
 "settings.period" = "时间区间";
 "settings.start_date" = "开始日期";
 "settings.end_date" = "结束日期";
+"settings.period.requires_verified_source" = "认证行情数据源后可修改时间";
 "settings.full_period" = "全部可用数据";
 "settings.privacy" = "隐私";
 "settings.data_privacy" = "数据与隐私";
