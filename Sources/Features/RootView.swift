@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct RootView: View {
     @EnvironmentObject private var model: AppModel
@@ -51,6 +52,7 @@ extension View {
 
 private struct TabToolbarJellyModifier: ViewModifier {
     @GestureState private var isPressed = false
+    @State private var hasTriggeredHaptic = false
 
     func body(content: Content) -> some View {
         content
@@ -62,9 +64,16 @@ private struct TabToolbarJellyModifier: ViewModifier {
             .simultaneousGesture(
                 DragGesture(minimumDistance: 0)
                     .updating($isPressed) { _, state, _ in state = true }
+                    .onChanged { _ in
+                        guard !hasTriggeredHaptic else { return }
+                        hasTriggeredHaptic = true
+                        let generator = UIImpactFeedbackGenerator(style: .medium)
+                        generator.prepare()
+                        generator.impactOccurred(intensity: 0.9)
+                    }
+                    .onEnded { _ in
+                        hasTriggeredHaptic = false
+                    }
             )
-            .sensoryFeedback(.impact(weight: .light), trigger: isPressed) { oldValue, newValue in
-                !oldValue && newValue
-            }
     }
 }
