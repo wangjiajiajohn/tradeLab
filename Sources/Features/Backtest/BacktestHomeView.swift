@@ -420,7 +420,7 @@ private struct StockPickerView: View {
                 }
             }
             .navigationDestination(isPresented: $showingDataSourceSettings) {
-                MarketDataSettingsView()
+                MarketDataSettingsView(presentsProviderPickerOnAppear: true)
             }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

@@ -78,12 +78,19 @@ struct SettingsView: View {
 }
 
 struct MarketDataSettingsView: View {
+    let presentsProviderPickerOnAppear: Bool
     @EnvironmentObject private var model: AppModel
     @State private var appKey = ""
     @State private var appSecret = ""
     @State private var accessToken = ""
     @State private var errorMessage: String?
     @State private var didSave = false
+    @State private var showingProviderPicker = false
+    @State private var hasPresentedProviderPicker = false
+
+    init(presentsProviderPickerOnAppear: Bool = false) {
+        self.presentsProviderPickerOnAppear = presentsProviderPickerOnAppear
+    }
 
     private var canSave: Bool {
         model.marketDataSource == .offline
@@ -143,7 +150,27 @@ struct MarketDataSettingsView: View {
         }
         .navigationTitle("settings.market_data_provider")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear(perform: loadCredentials)
+        .onAppear {
+            loadCredentials()
+            guard presentsProviderPickerOnAppear, !hasPresentedProviderPicker else { return }
+            hasPresentedProviderPicker = true
+            DispatchQueue.main.async {
+                showingProviderPicker = true
+            }
+        }
+        .confirmationDialog(
+            "settings.market_data_provider",
+            isPresented: $showingProviderPicker,
+            titleVisibility: .visible
+        ) {
+            Button("provider.offline") {
+                model.marketDataSource = .offline
+            }
+            Button("provider.longbridge") {
+                model.marketDataSource = .longbridge
+            }
+            Button("action.cancel", role: .cancel) {}
+        }
         .alert("error.title", isPresented: errorPresented) {
             Button("action.ok", role: .cancel) { errorMessage = nil }
         } message: {
