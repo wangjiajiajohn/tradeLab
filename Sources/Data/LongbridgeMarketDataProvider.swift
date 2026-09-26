@@ -833,9 +833,23 @@ private enum LongbridgeProto {
 }
 
 private extension Data {
-    mutating func appendUInt16BE(_ value: UInt16) { append(UInt8(value >> 8)); append(UInt8(value & 0xFF)) }
-    mutating func appendUInt24BE(_ value: UInt32) { append(UInt8(value >> 16)); append(UInt8(value >> 8)); append(UInt8(value)) }
-    mutating func appendUInt32BE(_ value: UInt32) { append(UInt8(value >> 24)); append(UInt8(value >> 16)); append(UInt8(value >> 8)); append(UInt8(value)) }
+    mutating func appendUInt16BE(_ value: UInt16) {
+        append(UInt8(truncatingIfNeeded: value >> 8))
+        append(UInt8(truncatingIfNeeded: value))
+    }
+
+    mutating func appendUInt24BE(_ value: UInt32) {
+        append(UInt8(truncatingIfNeeded: value >> 16))
+        append(UInt8(truncatingIfNeeded: value >> 8))
+        append(UInt8(truncatingIfNeeded: value))
+    }
+
+    mutating func appendUInt32BE(_ value: UInt32) {
+        append(UInt8(truncatingIfNeeded: value >> 24))
+        append(UInt8(truncatingIfNeeded: value >> 16))
+        append(UInt8(truncatingIfNeeded: value >> 8))
+        append(UInt8(truncatingIfNeeded: value))
+    }
     func uint24BE(at index: Int) -> UInt32 { UInt32(self[index]) << 16 | UInt32(self[index + 1]) << 8 | UInt32(self[index + 2]) }
     func uint32BE(at index: Int) -> UInt32 { UInt32(self[index]) << 24 | UInt32(self[index + 1]) << 16 | UInt32(self[index + 2]) << 8 | UInt32(self[index + 3]) }
 }
