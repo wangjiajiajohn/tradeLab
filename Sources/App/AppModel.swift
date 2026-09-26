@@ -32,6 +32,9 @@ final class AppModel: ObservableObject {
         static let appearance = "v2.appearance"
         static let backtestHistory = "v2.backtest-history"
         static let customStrategies = "v2.custom-strategies"
+        static let marketDataSource = "v2.market-data-source"
+        static let aiProvider = "v2.ai-provider"
+        static let aiModel = "v2.ai-model"
     }
 
     private let defaults: UserDefaults
@@ -48,6 +51,17 @@ final class AppModel: ObservableObject {
     @Published var selectedTab: MainTab = .backtest
     @Published var hasCompletedFirstBacktest: Bool
     @Published private(set) var backtestHistory: [BacktestRecord]
+    @Published var marketDataSource: MarketDataSource {
+        didSet { defaults.set(marketDataSource.rawValue, forKey: Keys.marketDataSource) }
+    }
+    @Published var aiProvider: AIProvider {
+        didSet { defaults.set(aiProvider.rawValue, forKey: Keys.aiProvider) }
+    }
+    @Published var aiModel: String {
+        didSet { defaults.set(aiModel, forKey: Keys.aiModel) }
+    }
+    @Published private(set) var hasLongbridgeCredentials = false
+    @Published private(set) var hasAIAPIKey = false
     @Published var appearance: Appearance {
         didSet { defaults.set(appearance.rawValue, forKey: Keys.appearance) }
     }
@@ -61,6 +75,10 @@ final class AppModel: ObservableObject {
         hasCompletedFirstBacktest = defaults.bool(forKey: Keys.completedFirstBacktest)
         appearance = Appearance(rawValue: defaults.string(forKey: Keys.appearance) ?? "") ?? .system
         backtestHistory = Self.loadHistory(from: defaults)
+        marketDataSource = MarketDataSource(rawValue: defaults.string(forKey: Keys.marketDataSource) ?? "") ?? .offline
+        aiProvider = AIProvider(rawValue: defaults.string(forKey: Keys.aiProvider) ?? "") ?? .disabled
+        aiModel = defaults.string(forKey: Keys.aiModel) ?? "deepseek-chat"
+        refreshCredentialStatus()
     }
 
     var selectedSecurity: Security? {
@@ -180,6 +198,13 @@ final class AppModel: ObservableObject {
         errorMessage = nil
         hasCompletedFirstBacktest = false
         defaults.removeObject(forKey: Keys.completedFirstBacktest)
+    }
+
+    func refreshCredentialStatus() {
+        hasLongbridgeCredentials = CredentialStore.hasValue(for: .longbridgeAppKey)
+            && CredentialStore.hasValue(for: .longbridgeAppSecret)
+            && CredentialStore.hasValue(for: .longbridgeAccessToken)
+        hasAIAPIKey = CredentialStore.hasValue(for: .aiAPIKey)
     }
 
     private func saveToHistory(_ result: BacktestResult) {

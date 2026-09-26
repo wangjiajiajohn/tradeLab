@@ -7,6 +7,21 @@ enum Market: String, Codable, Sendable {
     case cn
 }
 
+enum MarketDataSource: String, CaseIterable, Identifiable, Codable, Sendable {
+    case offline
+    case longbridge
+
+    var id: String { rawValue }
+}
+
+enum AIProvider: String, CaseIterable, Identifiable, Codable, Sendable {
+    case disabled
+    case openAI
+    case deepSeek
+
+    var id: String { rawValue }
+}
+
 struct Security: Identifiable, Hashable, Codable, Sendable {
     let id: String
     let symbol: String

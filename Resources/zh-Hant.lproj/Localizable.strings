@@ -182,3 +182,26 @@
 "trade.reason.breakout" = "收市價突破前 20 日高位";
 "trade.reason.breakdown" = "收市價跌破前 10 日低位";
 "trade.reason.monthly_dca" = "每月首個交易日定投";
+
+"action.save" = "儲存";
+"status.saved" = "已儲存";
+"status.needs_configuration" = "需要設定";
+"settings.market_data_provider" = "行情資料來源";
+"settings.ai_provider" = "AI 服務";
+"provider.offline" = "離線示範資料";
+"provider.offline.description" = "使用 App 內置資料，不連線，也不需要帳戶或密鑰。";
+"provider.longbridge" = "長橋 OpenAPI";
+"provider.longbridge.description" = "使用您自己的長橋 OpenAPI 憑證。只有主動請求線上行情時才會連線。";
+"provider.credentials" = "憑證";
+"provider.longbridge.app_key" = "App Key";
+"provider.longbridge.app_secret" = "App Secret";
+"provider.longbridge.access_token" = "Access Token";
+"provider.ai.disabled" = "不使用 AI";
+"provider.ai.description" = "AI 僅用於把自然語言整理成策略草稿；回測仍由本機的確定性引擎執行。";
+"provider.ai.api_key" = "API Key";
+"provider.ai.model" = "模型名稱";
+"provider.keychain_note" = "憑證儲存在本機系統鑰匙圈中，不會寫入記錄或回測紀錄。";
+"provider.remove_credentials" = "刪除已儲存的憑證";
+"provider.show_secret" = "顯示憑證";
+"provider.hide_secret" = "隱藏憑證";
+"error.keychain_format" = "無法存取系統鑰匙圈（錯誤 %d）。";

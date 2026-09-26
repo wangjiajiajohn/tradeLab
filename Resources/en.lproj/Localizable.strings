@@ -182,3 +182,26 @@
 "trade.reason.breakout" = "Closed above the prior 20-day high";
 "trade.reason.breakdown" = "Closed below the prior 10-day low";
 "trade.reason.monthly_dca" = "Monthly investment on the first trading day";
+
+"action.save" = "Save";
+"status.saved" = "Saved";
+"status.needs_configuration" = "Setup Required";
+"settings.market_data_provider" = "Market Data Source";
+"settings.ai_provider" = "AI Service";
+"provider.offline" = "Offline Demo Data";
+"provider.offline.description" = "Uses data bundled with the app. No network, account, or credential is required.";
+"provider.longbridge" = "Longbridge OpenAPI";
+"provider.longbridge.description" = "Uses your own Longbridge OpenAPI credentials. The app connects only when you request online market data.";
+"provider.credentials" = "Credentials";
+"provider.longbridge.app_key" = "App Key";
+"provider.longbridge.app_secret" = "App Secret";
+"provider.longbridge.access_token" = "Access Token";
+"provider.ai.disabled" = "Do Not Use AI";
+"provider.ai.description" = "AI only turns natural language into a strategy draft. Backtests still run in the deterministic on-device engine.";
+"provider.ai.api_key" = "API Key";
+"provider.ai.model" = "Model Name";
+"provider.keychain_note" = "Credentials are stored in the system Keychain on this device and never written to logs or backtest records.";
+"provider.remove_credentials" = "Remove Saved Credentials";
+"provider.show_secret" = "Show credential";
+"provider.hide_secret" = "Hide credential";
+"error.keychain_format" = "The system Keychain could not be accessed (error %d).";

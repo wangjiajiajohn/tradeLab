@@ -182,3 +182,26 @@
 "trade.reason.breakout" = "收盘价突破前 20 日高点";
 "trade.reason.breakdown" = "收盘价跌破前 10 日低点";
 "trade.reason.monthly_dca" = "每月首个交易日定投";
+
+"action.save" = "保存";
+"status.saved" = "已保存";
+"status.needs_configuration" = "需要配置";
+"settings.market_data_provider" = "行情数据来源";
+"settings.ai_provider" = "AI 服务";
+"provider.offline" = "离线演示数据";
+"provider.offline.description" = "使用应用内置数据，不联网，也不需要账户或密钥。";
+"provider.longbridge" = "长桥 OpenAPI";
+"provider.longbridge.description" = "使用您自己的长桥 OpenAPI 凭证。只有主动请求在线行情时才会联网。";
+"provider.credentials" = "凭证";
+"provider.longbridge.app_key" = "App Key";
+"provider.longbridge.app_secret" = "App Secret";
+"provider.longbridge.access_token" = "Access Token";
+"provider.ai.disabled" = "不使用 AI";
+"provider.ai.description" = "AI 仅用于把自然语言整理成策略草稿；回测仍由本机的确定性引擎执行。";
+"provider.ai.api_key" = "API Key";
+"provider.ai.model" = "模型名称";
+"provider.keychain_note" = "凭证保存在本机系统钥匙串中，不会写入日志或回测记录。";
+"provider.remove_credentials" = "删除已保存的凭证";
+"provider.show_secret" = "显示凭证";
+"provider.hide_secret" = "隐藏凭证";
+"error.keychain_format" = "无法访问系统钥匙串（错误 %d）。";

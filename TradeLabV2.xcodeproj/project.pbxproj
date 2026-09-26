@@ -23,6 +23,7 @@
 		E0CF6703C94593CCCBDB6DC7 /* ReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36E3B096E09A56BAF0E35C5E /* ReviewView.swift */; };
 		F18BA57F4C33D1D6BE0A196D /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81FAF6E854ACC4BF99C426A /* AppModel.swift */; };
 		F2886537BC67D28616DFA430 /* BuiltInMarketDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9539789CDD56B4D6581D73D /* BuiltInMarketDataProvider.swift */; };
+		F3065D9DFC399012F41BDC41 /* CredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEE53C26A4C35763B87641F6 /* CredentialStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		A8733EF46FEAD463CC2910BD /* BacktestHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BacktestHomeView.swift; sourceTree = "<group>"; };
 		A9539789CDD56B4D6581D73D /* BuiltInMarketDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltInMarketDataProvider.swift; sourceTree = "<group>"; };
 		AFD03B2B8639C2319C5E95B0 /* TradeLabV2App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeLabV2App.swift; sourceTree = "<group>"; };
+		CEE53C26A4C35763B87641F6 /* CredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialStore.swift; sourceTree = "<group>"; };
 		D3F051947413FF9FC4E7C0E4 /* BacktestEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BacktestEngineTests.swift; sourceTree = "<group>"; };
 		E81FAF6E854ACC4BF99C426A /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		FE8EBBAE35E401D782390F53 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 			isa = PBXGroup;
 			children = (
 				A9539789CDD56B4D6581D73D /* BuiltInMarketDataProvider.swift */,
+				CEE53C26A4C35763B87641F6 /* CredentialStore.swift */,
 				7E0B43C4D9A12A7671FE746D /* DemoMarketDataProvider.swift */,
 			);
 			path = Data;
@@ -312,6 +315,7 @@
 				12C70EDFF773B9CA2A3BDCA2 /* BacktestEngine.swift in Sources */,
 				238FDEE7837C46D483204C2D /* BacktestHomeView.swift in Sources */,
 				F2886537BC67D28616DFA430 /* BuiltInMarketDataProvider.swift in Sources */,
+				F3065D9DFC399012F41BDC41 /* CredentialStore.swift in Sources */,
 				8406FBF52AEB8BA2384D59E8 /* DemoMarketDataProvider.swift in Sources */,
 				915A6E71F719F44873BD114D /* FirstBacktestFlowView.swift in Sources */,
 				3B0D9021AC7A8657FA57AFCD /* Models.swift in Sources */,
