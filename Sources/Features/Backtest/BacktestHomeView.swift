@@ -17,16 +17,11 @@ struct BacktestHomeView: View {
     var body: some View {
         NavigationStack {
             List {
+                configurationSection
+
                 if let result = model.result {
-                    ResultSections(
-                        result: result,
-                        changeStock: { configurationSheet = .stock },
-                        changeStrategy: { configurationSheet = .strategy },
-                        changeSettings: { configurationSheet = .settings },
-                        runAgain: { Task { _ = await model.runBacktest() } }
-                    )
+                    ResultSections(result: result)
                 } else {
-                    workflowSection
                     Section {
                         ContentUnavailableView(
                             "backtest.empty.title",
@@ -37,6 +32,26 @@ struct BacktestHomeView: View {
                 }
             }
             .navigationTitle(model.language.localized("tab.backtest"))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        guard !model.isRunningBacktest else { return }
+                        Task { _ = await model.runBacktest() }
+                    } label: {
+                        if model.isRunningBacktest {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Label("backtest.run", systemImage: "play.fill")
+                        }
+                    }
+                    .disabled(!model.canRunBacktest)
+                    .allowsHitTesting(!model.isRunningBacktest)
+                    .accessibilityLabel(model.language.localized(
+                        model.isRunningBacktest ? "backtest.running" : "backtest.run"
+                    ))
+                }
+            }
             .sheet(item: $configurationSheet) { sheet in
                 switch sheet {
                 case .stock: StockPickerView()
@@ -55,7 +70,7 @@ struct BacktestHomeView: View {
         }
     }
 
-    private var workflowSection: some View {
+    private var configurationSection: some View {
         Section("backtest.workflow") {
             Button { configurationSheet = .stock } label: {
                 ConfigurationRow(
@@ -82,37 +97,12 @@ struct BacktestHomeView: View {
                     symbol: "calendar.badge.clock"
                 )
             }
-            Button {
-                guard !model.isRunningBacktest else { return }
-                Task { _ = await model.runBacktest() }
-            } label: {
-                HStack(spacing: 10) {
-                    if model.isRunningBacktest {
-                        ProgressView()
-                            .controlSize(.small)
-                            .tint(.white)
-                        Text("backtest.running")
-                    } else {
-                        Label("backtest.run", systemImage: "play.fill")
-                    }
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .disabled(!model.canRunBacktest)
-            .allowsHitTesting(!model.isRunningBacktest)
-            .animation(.easeInOut(duration: 0.2), value: model.isRunningBacktest)
         }
     }
 }
 
 private struct ResultSections: View {
     let result: BacktestResult
-    let changeStock: () -> Void
-    let changeStrategy: () -> Void
-    let changeSettings: () -> Void
-    let runAgain: () -> Void
     @Environment(\.locale) private var locale
 
     var body: some View {
@@ -162,24 +152,6 @@ private struct ResultSections: View {
             Text("result.optimizations")
         } footer: {
             Text("result.diagnostics_scope")
-        }
-
-        Section("result.next_test") {
-            Button(action: changeStock) {
-                Label("result.change_stock", systemImage: "chart.line.uptrend.xyaxis")
-            }
-            Button(action: changeStrategy) {
-                Label("result.change_strategy", systemImage: "slider.horizontal.3")
-            }
-            Button(action: changeSettings) {
-                Label("result.change_settings", systemImage: "calendar.badge.clock")
-            }
-            Button(action: runAgain) {
-                Label("result.run_again", systemImage: "arrow.clockwise")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
         }
 
         Section("result.price_signals") {
