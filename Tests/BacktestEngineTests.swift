@@ -284,6 +284,15 @@ final class BacktestEngineTests: XCTestCase {
         XCTAssertEqual(LongbridgeMarketDataProvider.normalizedSearchText("  NIO  "), "nio")
         XCTAssertEqual(LongbridgeMarketDataProvider.normalizedSearchText("ＡＡＰＬ"), "aapl")
         XCTAssertEqual(LongbridgeMarketDataProvider.normalizedSearchText("蔚来汽车"), "蔚来汽车")
+        XCTAssertTrue(
+            LongbridgeMarketDataProvider.containsSecuritySymbolToken(
+                "GraniteShares 2x Long NIO Daily ETF",
+                symbol: "NIO"
+            )
+        )
+        XCTAssertFalse(
+            LongbridgeMarketDataProvider.containsSecuritySymbolToken("NIOG", symbol: "NIO")
+        )
     }
 
     func testLongbridgeSearchSortsSharesBeforeETFsAndWarrants() {
@@ -307,6 +316,13 @@ final class BacktestEngineTests: XCTestCase {
                 names: ["腾讯瑞银牛证"]
             ),
             2
+        )
+        XCTAssertEqual(
+            LongbridgeMarketDataProvider.searchSortPriority(
+                board: "USMain",
+                names: ["GraniteShares 2x Long NIO Daily ETF"]
+            ),
+            1
         )
     }
 

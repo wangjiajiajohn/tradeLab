@@ -485,15 +485,36 @@ struct LongbridgeMarketDataProvider: Sendable {
         locale: Locale
     ) -> [(security: Security, score: Int, names: [String])] {
         let needle = normalizedSearchText(query)
+        let directlyMatchedItems = catalog.filter { item in
+            let symbol = item.symbol.split(separator: ".").first.map(String.init) ?? item.symbol
+            return ([item.symbol, symbol, item.name, item.nameCN, item.nameHK, item.nameEN]
+                .compactMap { $0 }
+                .map(normalizedSearchText))
+                .contains(where: { $0.contains(needle) })
+        }
+        let referencedUSSymbols = Set(directlyMatchedItems.compactMap { item -> String? in
+            guard item.symbol.hasSuffix(".US") else { return nil }
+            let symbol = item.symbol.split(separator: ".").first.map(String.init) ?? item.symbol
+            guard (2...6).contains(symbol.count),
+                  symbol.allSatisfy({ $0.isLetter || $0.isNumber })
+            else { return nil }
+            return symbol
+        })
+
         return catalog.compactMap { item -> (Security, Int, [String])? in
             let symbol = item.symbol.split(separator: ".").first.map(String.init) ?? item.symbol
             let names = [item.name, item.nameCN, item.nameHK, item.nameEN].compactMap { $0 }
             let searchable = [item.symbol, symbol] + names
             let normalized = searchable
                 .map(normalizedSearchText)
-            guard normalized.contains(where: { $0.contains(needle) }) else { return nil }
+            let isDirectMatch = normalized.contains(where: { $0.contains(needle) })
+            let isRelatedProduct = !isDirectMatch && referencedUSSymbols.contains { underlyingSymbol in
+                names.contains { containsSecuritySymbolToken($0, symbol: underlyingSymbol) }
+            }
+            guard isDirectMatch || isRelatedProduct else { return nil }
             let score: Int
-            if normalized.contains(needle) { score = 0 }
+            if isRelatedProduct { score = 3 }
+            else if normalized.contains(needle) { score = 0 }
             else if normalized.contains(where: { $0.hasPrefix(needle) }) { score = 1 }
             else { score = 2 }
             let market: Market = item.symbol.hasSuffix(".HK") ? .hk : .us
@@ -516,6 +537,16 @@ struct LongbridgeMarketDataProvider: Sendable {
         }
     }
 
+    /// Matches a ticker as a complete name token so `NIO` finds products whose
+    /// name references NIO, without treating symbols such as `NIOG` as an
+    /// implicit relationship on their own.
+    static func containsSecuritySymbolToken(_ text: String, symbol: String) -> Bool {
+        let expected = symbol.uppercased()
+        return text.uppercased()
+            .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+            .contains { String($0) == expected }
+    }
+
     /// Search display order: ordinary shares, ETFs/ETNs, then warrants and
     /// other derivatives. Longbridge identifies HK warrants through `board`,
     /// while its static-info response does not provide a dedicated ETF type.
@@ -530,7 +561,12 @@ struct LongbridgeMarketDataProvider: Sendable {
         let isETF = normalizedNames.contains { name in
             name.contains("ETF") ||
                 name.contains("ETN") ||
+                name.contains("ETP") ||
                 name.contains("EXCHANGE TRADED") ||
+                name.contains("2X LONG") ||
+                name.contains("3X LONG") ||
+                name.contains("2X SHORT") ||
+                name.contains("3X SHORT") ||
                 name.contains("交易所买卖基金") ||
                 name.contains("交易所買賣基金")
         }
