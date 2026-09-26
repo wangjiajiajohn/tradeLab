@@ -2,10 +2,10 @@ import Charts
 import SwiftUI
 
 private struct ResultIdentityMaxYPreferenceKey: PreferenceKey {
-    static let defaultValue = CGFloat.infinity
+    static let defaultValue: CGFloat? = nil
 
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
+    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) {
+        value = nextValue() ?? value
     }
 }
 
@@ -104,6 +104,10 @@ struct BacktestHomeView: View {
                     Text(model.errorMessage ?? "")
                 }
                 .onPreferenceChange(ResultIdentityMaxYPreferenceKey.self) { maxY in
+                    // List lazily removes rows after they leave the viewport. In that
+                    // state the preference is nil; keep the last visibility state until
+                    // the identity row is rendered again while scrolling back.
+                    guard let maxY else { return }
                     let navigationBarBottom = geometry.safeAreaInsets.top + 48
                     let shouldShow = model.result != nil && maxY <= navigationBarBottom
                     guard shouldShow != showsSecurityNavigationTitle else { return }
