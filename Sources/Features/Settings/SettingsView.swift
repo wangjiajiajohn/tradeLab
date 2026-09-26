@@ -478,6 +478,12 @@ private struct AISettingsView: View {
             && (validatedAPIKey != trimmedAPIKey || availableModels.isEmpty)
     }
 
+    private var canChooseModel: Bool {
+        !isLoadingModels
+            && !availableModels.isEmpty
+            && validatedAPIKey == trimmedAPIKey
+    }
+
     var body: some View {
         Form {
             Section {
@@ -501,63 +507,50 @@ private struct AISettingsView: View {
                         isFocused: $isCredentialFieldFocused
                     )
                 }
-                Section {
-                    if isLoadingModels {
-                        HStack {
-                            ProgressView()
-                            Text("provider.ai.loading_models")
-                                .foregroundStyle(.secondary)
-                        }
-                    } else if !availableModels.isEmpty {
+                if canChooseModel {
+                    Section {
                         Picker("provider.ai.model", selection: $selectedModelID) {
                             Text("provider.ai.choose_model").tag("")
                             ForEach(availableModels) { option in
                                 Text(option.displayName).tag(option.id)
                             }
                         }
-                    } else {
-                        Text("provider.ai.no_models")
-                            .foregroundStyle(.secondary)
-                    }
 
-                    DisclosureGroup("provider.ai.manual_model", isExpanded: $showsManualModelEntry) {
-                        TextField("provider.ai.model_id", text: $selectedModelID)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .focused($isCredentialFieldFocused)
-                            .submitLabel(.done)
-                            .onSubmit { saveConfiguration() }
-                    }
-
-                    if didSave {
-                        Label("status.saved", systemImage: "checkmark.circle.fill")
-                            .font(.footnote)
-                            .foregroundStyle(.green)
-                    }
-
-                    if let modelLoadMessage {
-                        Text(modelLoadMessage)
-                            .font(.footnote)
-                            .foregroundStyle(.orange)
-                    }
-                } header: {
-                    HStack {
-                        Text("provider.ai.model_section")
-                        Spacer()
-                        Button {
-                            Task { await refreshModels() }
-                        } label: {
-                            Image(systemName: "arrow.clockwise")
+                        DisclosureGroup("provider.ai.manual_model", isExpanded: $showsManualModelEntry) {
+                            TextField("provider.ai.model_id", text: $selectedModelID)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .focused($isCredentialFieldFocused)
+                                .submitLabel(.done)
+                                .onSubmit { saveConfiguration() }
                         }
-                        .buttonStyle(.plain)
-                        .disabled(
-                            apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                                || isLoadingModels
-                        )
-                        .accessibilityLabel(Text("provider.ai.refresh_models"))
+
+                        if didSave {
+                            Label("status.saved", systemImage: "checkmark.circle.fill")
+                                .font(.footnote)
+                                .foregroundStyle(.green)
+                        }
+
+                        if let modelLoadMessage {
+                            Text(modelLoadMessage)
+                                .font(.footnote)
+                                .foregroundStyle(.orange)
+                        }
+                    } header: {
+                        HStack {
+                            Text("provider.ai.model_section")
+                            Spacer()
+                            Button {
+                                Task { await refreshModels() }
+                            } label: {
+                                Image(systemName: "arrow.clockwise")
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(Text("provider.ai.refresh_models"))
+                        }
+                    } footer: {
+                        Text("provider.ai.model_auto_save")
                     }
-                } footer: {
-                    Text("provider.ai.model_auto_save")
                 }
                 Section {
                     Label("provider.keychain_note", systemImage: "lock.shield")
@@ -588,10 +581,19 @@ private struct AISettingsView: View {
                 Button {
                     Task { await refreshModels() }
                 } label: {
-                    Label(
-                        "provider.ai.verify_and_load",
-                        systemImage: "checkmark.shield"
-                    )
+                    Group {
+                        if isLoadingModels {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                Text("provider.ai.loading_models")
+                            }
+                        } else {
+                            Label(
+                                "provider.ai.verify_and_load",
+                                systemImage: "checkmark.shield"
+                            )
+                        }
+                    }
                     .font(.headline)
                     .frame(maxWidth: .infinity, minHeight: 50)
                 }
