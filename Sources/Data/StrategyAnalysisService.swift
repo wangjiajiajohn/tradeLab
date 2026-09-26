@@ -44,7 +44,7 @@ enum StrategyAnalysisError: LocalizedError {
 }
 
 enum StrategyAnalysisService {
-    private struct Request: Encodable {
+    private struct OpenAICompatibleRequest: Encodable {
         struct Message: Encodable {
             let role: String
             let content: String
@@ -54,8 +54,8 @@ enum StrategyAnalysisService {
 
         let model: String
         let messages: [Message]
-        let responseFormat: ResponseFormat
-        let temperature: Double
+        let responseFormat: ResponseFormat?
+        let temperature: Double?
 
         enum CodingKeys: String, CodingKey {
             case model, messages, temperature
@@ -63,12 +63,37 @@ enum StrategyAnalysisService {
         }
     }
 
-    private struct Response: Decodable {
+    private struct OpenAICompatibleResponse: Decodable {
         struct Choice: Decodable {
             struct Message: Decodable { let content: String? }
             let message: Message
         }
         let choices: [Choice]
+    }
+
+    private struct AnthropicRequest: Encodable {
+        struct Message: Encodable {
+            let role: String
+            let content: String
+        }
+
+        let model: String
+        let maxTokens: Int
+        let system: String
+        let messages: [Message]
+
+        enum CodingKeys: String, CodingKey {
+            case model, system, messages
+            case maxTokens = "max_tokens"
+        }
+    }
+
+    private struct AnthropicResponse: Decodable {
+        struct Content: Decodable {
+            let type: String
+            let text: String?
+        }
+        let content: [Content]
     }
 
     private struct ErrorEnvelope: Decodable {
@@ -93,18 +118,31 @@ enum StrategyAnalysisService {
         request.httpMethod = "POST"
         request.timeoutInterval = 45
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.httpBody = try JSONEncoder().encode(
-            Request(
-                model: model,
-                messages: [
-                    .init(role: "system", content: systemPrompt),
-                    .init(role: "user", content: description)
-                ],
-                responseFormat: .init(type: "json_object"),
-                temperature: 0
+        if provider == .claude {
+            request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
+            request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+            request.httpBody = try JSONEncoder().encode(
+                AnthropicRequest(
+                    model: model,
+                    maxTokens: 1_500,
+                    system: systemPrompt,
+                    messages: [.init(role: "user", content: description)]
+                )
             )
-        )
+        } else {
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            request.httpBody = try JSONEncoder().encode(
+                OpenAICompatibleRequest(
+                    model: model,
+                    messages: [
+                        .init(role: "system", content: systemPrompt),
+                        .init(role: "user", content: description)
+                    ],
+                    responseFormat: provider == .kimi ? nil : .init(type: "json_object"),
+                    temperature: provider == .kimi ? nil : 0
+                )
+            )
+        }
 
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else {
@@ -118,7 +156,15 @@ enum StrategyAnalysisService {
                 )
             throw StrategyAnalysisError.provider(message)
         }
-        guard let content = try JSONDecoder().decode(Response.self, from: data).choices.first?.message.content,
+        let content: String?
+        if provider == .claude {
+            content = try JSONDecoder().decode(AnthropicResponse.self, from: data).content
+                .first(where: { $0.type == "text" })?.text
+        } else {
+            content = try JSONDecoder().decode(OpenAICompatibleResponse.self, from: data)
+                .choices.first?.message.content
+        }
+        guard let content,
               let contentData = cleanedJSON(content).data(using: .utf8),
               let draft = try? JSONDecoder().decode(StrategyDraft.self, from: contentData),
               ["buy_and_hold", "monthly_dca", "moving_average", "breakout", "unsupported"].contains(draft.kind)
@@ -131,6 +177,9 @@ enum StrategyAnalysisService {
         case .disabled: nil
         case .openAI: URL(string: "https://api.openai.com/v1/chat/completions")
         case .deepSeek: URL(string: "https://api.deepseek.com/chat/completions")
+        case .claude: URL(string: "https://api.anthropic.com/v1/messages")
+        case .gemini: URL(string: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions")
+        case .kimi: URL(string: "https://api.moonshot.cn/v1/chat/completions")
         }
     }
 

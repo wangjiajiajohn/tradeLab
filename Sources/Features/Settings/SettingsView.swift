@@ -73,6 +73,12 @@ struct SettingsView: View {
             model.hasAIAPIKey ? "OpenAI" : AppLocalization.string("status.needs_configuration", locale: locale)
         case .deepSeek:
             model.hasAIAPIKey ? "DeepSeek" : AppLocalization.string("status.needs_configuration", locale: locale)
+        case .claude:
+            model.hasAIAPIKey ? "Claude" : AppLocalization.string("status.needs_configuration", locale: locale)
+        case .gemini:
+            model.hasAIAPIKey ? "Gemini" : AppLocalization.string("status.needs_configuration", locale: locale)
+        case .kimi:
+            model.hasAIAPIKey ? "Kimi" : AppLocalization.string("status.needs_configuration", locale: locale)
         }
     }
 }
@@ -288,6 +294,9 @@ private struct AISettingsView: View {
                     Text("provider.ai.disabled").tag(AIProvider.disabled)
                     Text("OpenAI").tag(AIProvider.openAI)
                     Text("DeepSeek").tag(AIProvider.deepSeek)
+                    Text("Claude").tag(AIProvider.claude)
+                    Text("Gemini").tag(AIProvider.gemini)
+                    Text("Kimi").tag(AIProvider.kimi)
                 }
             } footer: {
                 Text("provider.ai.description")
@@ -336,8 +345,9 @@ private struct AISettingsView: View {
         }
         .onAppear { apiKey = CredentialStore.value(for: .aiAPIKey) ?? "" }
         .onChange(of: model.aiProvider) { _, provider in
-            if provider == .deepSeek, model.aiModel == "gpt-4.1-mini" { model.aiModel = "deepseek-chat" }
-            if provider == .openAI, model.aiModel == "deepseek-chat" { model.aiModel = "gpt-4.1-mini" }
+            if provider != .disabled {
+                model.aiModel = provider.defaultModel
+            }
             didSave = false
         }
         .onChange(of: apiKey) { _, _ in didSave = false }

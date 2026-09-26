@@ -18,8 +18,33 @@ enum AIProvider: String, CaseIterable, Identifiable, Codable, Sendable {
     case disabled
     case openAI
     case deepSeek
+    case claude
+    case gemini
+    case kimi
 
     var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .disabled: ""
+        case .openAI: "OpenAI"
+        case .deepSeek: "DeepSeek"
+        case .claude: "Claude"
+        case .gemini: "Gemini"
+        case .kimi: "Kimi"
+        }
+    }
+
+    var defaultModel: String {
+        switch self {
+        case .disabled: ""
+        case .openAI: "gpt-4.1-mini"
+        case .deepSeek: "deepseek-chat"
+        case .claude: "claude-sonnet-4-6"
+        case .gemini: "gemini-3.8-flash"
+        case .kimi: "kimi-k2.5"
+        }
+    }
 }
 
 struct Security: Identifiable, Hashable, Codable, Sendable {
