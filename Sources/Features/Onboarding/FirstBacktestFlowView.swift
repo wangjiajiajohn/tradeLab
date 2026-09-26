@@ -95,7 +95,10 @@ struct FirstBacktestFlowView: View {
                 title: "onboarding.start",
                 symbol: "arrow.right",
                 tint: .blue,
-                action: { move(to: .stock) }
+                action: {
+                    AppHaptics.toolbarTap()
+                    move(to: .stock)
+                }
             )
             Label("onboarding.offline", systemImage: "wifi.slash")
                 .font(.footnote)
@@ -277,6 +280,8 @@ struct FirstBacktestFlowView: View {
     }
 
     private func performPrimaryAction() {
+        AppHaptics.toolbarTap()
+
         switch stage {
         case .intro: move(to: .stock)
         case .stock: move(to: .strategy)
