@@ -767,29 +767,35 @@ private struct ConfigurationRow: View {
     var detail: String? = nil
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(alignment: detail == nil ? .center : .top, spacing: 12) {
             Image(systemName: symbol)
                 .frame(width: 24)
                 .foregroundStyle(.tint)
+                .padding(.top, detail == nil ? 0 : 2)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .foregroundStyle(.primary)
+                HStack(spacing: 12) {
+                    Text(title)
+                        .foregroundStyle(.primary)
+                    Spacer(minLength: 8)
+                    Text(value)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: detail != nil, vertical: false)
+                }
                 if let detail {
                     Text(detail)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
+                        .minimumScaleFactor(0.82)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .layoutPriority(1)
-            Spacer()
-            Text(value)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
             Image(systemName: "chevron.right")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.tertiary)
+                .padding(.top, detail == nil ? 0 : 4)
         }
         .contentShape(.rect)
     }
