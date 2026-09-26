@@ -1,0 +1,82 @@
+{
+  "schema": "tradelab-minute-dataset",
+  "version": 1,
+  "generatedAt": "2026-09-26T06:14:01.934743Z",
+  "source": "public",
+  "period": "1m",
+  "tradeSessions": "intraday",
+  "requestedStart": "2025-09-26",
+  "requestedEnd": "2026-09-26",
+  "symbols": [
+    {
+      "symbol": "AAPL.US",
+      "file": "AAPL.US-1m.csv.gz",
+      "rows": 97529,
+      "firstTimestamp": "2025-09-26T13:30:00Z",
+      "lastTimestamp": "2026-09-25T19:59:00Z",
+      "compressedBytes": 2188880,
+      "sha256": "09787393afa2d71cd5715e47dc59a0995898936e2aece4b2438456cfe0475471",
+      "timezone": "America/New_York"
+    },
+    {
+      "symbol": "NVDA.US",
+      "file": "NVDA.US-1m.csv.gz",
+      "rows": 97530,
+      "firstTimestamp": "2025-09-26T13:30:00Z",
+      "lastTimestamp": "2026-09-25T19:59:00Z",
+      "compressedBytes": 2278316,
+      "sha256": "bd132d6376205244b8553a00e8e8938f38ff4f777612c943effe2816f0876338",
+      "timezone": "America/New_York"
+    },
+    {
+      "symbol": "TSLA.US",
+      "file": "TSLA.US-1m.csv.gz",
+      "rows": 97529,
+      "firstTimestamp": "2025-09-26T13:30:00Z",
+      "lastTimestamp": "2026-09-25T19:59:00Z",
+      "compressedBytes": 2341295,
+      "sha256": "30a30709581e72e32ee4bf3d97742df9b73eb5d8b7a8d9cdf17dac4cb25492d4",
+      "timezone": "America/New_York"
+    },
+    {
+      "symbol": "MU.US",
+      "file": "MU.US-1m.csv.gz",
+      "rows": 97530,
+      "firstTimestamp": "2025-09-26T13:30:00Z",
+      "lastTimestamp": "2026-09-25T19:59:00Z",
+      "compressedBytes": 2368123,
+      "sha256": "4bcd4d800165f1f7b62b46c4720d060b373974cc737afeb6355209e18e09041b",
+      "timezone": "America/New_York"
+    },
+    {
+      "symbol": "SNDK.US",
+      "file": "SNDK.US-1m.csv.gz",
+      "rows": 97530,
+      "firstTimestamp": "2025-09-26T13:30:00Z",
+      "lastTimestamp": "2026-09-25T19:59:00Z",
+      "compressedBytes": 2340128,
+      "sha256": "f438af55fba9166f49947378586031cc84900eefb5b57a0c0258afdf4d7341e8",
+      "timezone": "America/New_York"
+    },
+    {
+      "symbol": "700.HK",
+      "file": "700.HK-1m.csv.gz",
+      "rows": 80552,
+      "firstTimestamp": "2025-09-26T01:30:00Z",
+      "lastTimestamp": "2026-09-25T08:00:00Z",
+      "compressedBytes": 1236290,
+      "sha256": "93dc8454d0331225c94b980cfac2eff42400b5d7828b863e752975cff5da6f2b",
+      "timezone": "Asia/Hong_Kong"
+    },
+    {
+      "symbol": "9988.HK",
+      "file": "9988.HK-1m.csv.gz",
+      "rows": 80551,
+      "firstTimestamp": "2025-09-26T01:30:00Z",
+      "lastTimestamp": "2026-09-25T08:00:00Z",
+      "compressedBytes": 1293625,
+      "sha256": "bb1c22b93cad6dd074cb58e8f4028d7705c6ae78715a5a166098c194a3dc2bee",
+      "timezone": "Asia/Hong_Kong"
+    }
+  ]
+}

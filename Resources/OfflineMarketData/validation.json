@@ -1,0 +1,87 @@
+{
+  "schema": "tradelab-minute-data-validation",
+  "version": 1,
+  "generatedAt": "2026-09-26T06:15:11.598515Z",
+  "summaries": [
+    {
+      "symbol": "AAPL.US",
+      "rows": 97529,
+      "metadataRows": 97529,
+      "timestampsOrderedAndUnique": true,
+      "outsideRecognizedRegularOrClosingSession": 0
+    },
+    {
+      "symbol": "NVDA.US",
+      "rows": 97530,
+      "metadataRows": 97530,
+      "timestampsOrderedAndUnique": true,
+      "outsideRecognizedRegularOrClosingSession": 0
+    },
+    {
+      "symbol": "TSLA.US",
+      "rows": 97529,
+      "metadataRows": 97529,
+      "timestampsOrderedAndUnique": true,
+      "outsideRecognizedRegularOrClosingSession": 0
+    },
+    {
+      "symbol": "MU.US",
+      "rows": 97530,
+      "metadataRows": 97530,
+      "timestampsOrderedAndUnique": true,
+      "outsideRecognizedRegularOrClosingSession": 0
+    },
+    {
+      "symbol": "SNDK.US",
+      "rows": 97530,
+      "metadataRows": 97530,
+      "timestampsOrderedAndUnique": true,
+      "outsideRecognizedRegularOrClosingSession": 0
+    },
+    {
+      "symbol": "700.HK",
+      "rows": 80552,
+      "metadataRows": 80552,
+      "timestampsOrderedAndUnique": true,
+      "outsideRecognizedRegularOrClosingSession": 0
+    },
+    {
+      "symbol": "9988.HK",
+      "rows": 80551,
+      "metadataRows": 80551,
+      "timestampsOrderedAndUnique": true,
+      "outsideRecognizedRegularOrClosingSession": 0
+    }
+  ],
+  "sourceAnomaliesPreserved": [
+    {
+      "symbol": "700.HK",
+      "timestamp": "2026-03-10T02:19:00Z",
+      "localTimestamp": "2026-03-10T10:19:00+08:00",
+      "type": "source-ohlc-invariant",
+      "values": {
+        "o": "532.000",
+        "h": "532.000",
+        "l": "531.000",
+        "c": "532.500"
+      }
+    },
+    {
+      "symbol": "9988.HK",
+      "timestamp": "2026-03-10T02:19:00Z",
+      "localTimestamp": "2026-03-10T10:19:00+08:00",
+      "type": "source-ohlc-invariant",
+      "values": {
+        "o": "131.500",
+        "h": "131.500",
+        "l": "131.400",
+        "c": "131.600"
+      }
+    }
+  ],
+  "notes": [
+    "12:00 Asia/Hong_Kong occurs only on half-day sessions in this range.",
+    "16:00 Asia/Hong_Kong is the closing-auction candle.",
+    "No source candle was synthesized, corrected, or forward-filled."
+  ]
+}

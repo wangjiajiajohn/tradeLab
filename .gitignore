@@ -4,7 +4,7 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 
-# Real market data is development-only. Never commit or bundle it.
+# Legacy provider download workspace; the app uses Resources/OfflineMarketData.
 DevelopmentData/
 *.partial
 .venv-longbridge/

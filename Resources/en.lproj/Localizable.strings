@@ -14,8 +14,8 @@
 
 "demo.security.subtitle" = "AAPL · Synthetic daily demo data";
 "demo.synthetic_disclosure" = "Built-in synthetic data for product demonstration only. It is not actual market data.";
-"demo.development_disclosure" = "Development-only offline market data. It will not be included in the release build.";
-"data.development_offline" = "Offline development data";
+"demo.development_disclosure" = "This backtest uses the offline market dataset bundled with the app.";
+"data.development_offline" = "Bundled Offline Data";
 "data.synthetic" = "Synthetic sample";
 
 "market.hk" = "Hong Kong";

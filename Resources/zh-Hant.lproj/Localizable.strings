@@ -14,8 +14,8 @@
 
 "demo.security.subtitle" = "AAPL · 內置合成日線資料";
 "demo.synthetic_disclosure" = "內置合成資料僅供產品示範，並非真實市場行情。";
-"demo.development_disclosure" = "僅供開發使用的離線行情，正式發佈版本不會包含這些資料。";
-"data.development_offline" = "開發版離線行情";
+"demo.development_disclosure" = "本次回測使用隨 App 提供的離線行情資料。";
+"data.development_offline" = "內置離線行情";
 "data.synthetic" = "合成樣本";
 
 "market.hk" = "港股";

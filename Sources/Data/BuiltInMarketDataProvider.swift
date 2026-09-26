@@ -49,22 +49,23 @@ enum BuiltInMarketDataProvider {
     ]
 
     static func load(bundle: Bundle = .main, locale: Locale = .current) -> MarketDataLibrary {
-        if let payload = loadDevelopmentPayload(bundle: bundle) {
+        if let payload = loadBundledPayload(bundle: bundle) {
             return makeLibrary(payload: payload, locale: locale)
         }
         return makeSyntheticLibrary(locale: locale)
     }
 
-    private static func loadDevelopmentPayload(bundle: Bundle) -> BundlePayload? {
-        #if DEBUG
-        guard let url = bundle.url(forResource: "DevelopmentMarketData", withExtension: "json"),
+    private static func loadBundledPayload(bundle: Bundle) -> BundlePayload? {
+        let url = bundle.url(
+            forResource: "MarketData",
+            withExtension: "json",
+            subdirectory: "OfflineMarketData"
+        ) ?? bundle.url(forResource: "MarketData", withExtension: "json")
+        guard let url,
               let data = try? Data(contentsOf: url),
               let payload = try? JSONDecoder().decode(BundlePayload.self, from: data)
         else { return nil }
         return payload
-        #else
-        return nil
-        #endif
     }
 
     private static func makeLibrary(payload: BundlePayload, locale: Locale) -> MarketDataLibrary {

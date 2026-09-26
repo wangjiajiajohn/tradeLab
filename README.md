@@ -16,10 +16,10 @@ TradeLab V2 is a clean iOS implementation of an offline-first strategy backtesti
 - System appearance support and privacy manifest
 - Unit tests plus a host-side engine smoke check
 
-Release builds use deterministic synthetic series that are clearly disclosed in
-the UI. A local Debug build can use development-only market data generated with
-the scripts in `Tools/`; that data is ignored by Git and never copied by the
-Release build.
+Debug and Release builds use the same versioned dataset in
+`Resources/OfflineMarketData`. It contains one year of daily and one-minute data
+for the seven built-in securities. Backtests currently read `MarketData.json`;
+the compressed minute files are bundled for chart integration.
 
 ## Generate and build
 
