@@ -92,23 +92,25 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("settings.privacy") {
-                    LabeledContent(
-                        "settings.network_first_run",
-                        value: AppLocalization.string("status.disabled", locale: locale)
-                    )
-                    LabeledContent(
-                        "settings.storage",
-                        value: AppLocalization.string("settings.on_device", locale: locale)
-                    )
+                Section("settings.data_privacy") {
+                    NavigationLink {
+                        DataPrivacyView()
+                    } label: {
+                        Label("settings.data_privacy", systemImage: "hand.raised")
+                    }
                 }
 
-                Section {
-                    Button("settings.reset_onboarding", role: .destructive) {
+                Section("settings.help_about") {
+                    Button {
                         model.resetFirstRunExperience()
+                    } label: {
+                        Label("settings.reset_onboarding", systemImage: "sparkles")
                     }
-                } footer: {
-                    Text("settings.research_disclaimer")
+                    NavigationLink {
+                        BacktestDisclosureView()
+                    } label: {
+                        Label("settings.backtest_disclosure", systemImage: "doc.text.magnifyingglass")
+                    }
                 }
             }
             .navigationTitle(model.language.localized("tab.settings"))
@@ -147,6 +149,60 @@ struct SettingsView: View {
         case .kimi:
             model.hasAIAPIKey ? "Kimi" : AppLocalization.string("status.needs_configuration", locale: locale)
         }
+    }
+}
+
+private struct DataPrivacyView: View {
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.locale) private var locale
+
+    var body: some View {
+        Form {
+            Section("settings.privacy.local_data.title") {
+                Label("settings.privacy.local_data.body", systemImage: "iphone")
+                LabeledContent(
+                    "settings.storage",
+                    value: AppLocalization.string("settings.on_device", locale: locale)
+                )
+            }
+
+            Section("settings.privacy.credentials.title") {
+                Label("settings.privacy.credentials.body", systemImage: "key.fill")
+                NavigationLink("settings.privacy.manage_market_data") {
+                    MarketDataSettingsView()
+                }
+                NavigationLink("settings.privacy.manage_ai") {
+                    AISettingsView()
+                }
+            }
+
+            Section("settings.privacy.third_party.title") {
+                Label("settings.privacy.third_party.body", systemImage: "arrow.up.right.square")
+            }
+        }
+        .navigationTitle(model.language.localized("settings.data_privacy"))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct BacktestDisclosureView: View {
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        List {
+            disclosureRow("settings.disclosure.research", symbol: "magnifyingglass")
+            disclosureRow("settings.disclosure.hypothetical", symbol: "chart.line.uptrend.xyaxis")
+            disclosureRow("settings.disclosure.assumptions", symbol: "slider.horizontal.3")
+            disclosureRow("settings.disclosure.ai", symbol: "sparkles")
+        }
+        .navigationTitle(model.language.localized("settings.backtest_disclosure"))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func disclosureRow(_ key: LocalizedStringKey, symbol: String) -> some View {
+        Label(key, systemImage: symbol)
+            .font(.body)
+            .padding(.vertical, 6)
     }
 }
 

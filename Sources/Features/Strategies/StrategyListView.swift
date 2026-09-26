@@ -110,6 +110,8 @@ private struct StrategyCreatorView: View {
     @State private var longWindow = 30
     @State private var entryWindow = 20
     @State private var exitWindow = 10
+    @State private var showingAIConsent = false
+    @AppStorage("v2.ai-consented-providers") private var consentedAIProviders = ""
 
     private var rule: TradingStrategy.Rule {
         switch kind {
@@ -168,6 +170,15 @@ private struct StrategyCreatorView: View {
                 analysisWarnings = []
                 missingFields = []
             }
+            .alert("strategy_analysis.privacy_title", isPresented: $showingAIConsent) {
+                Button("strategy_analysis.privacy_continue") {
+                    recordAIConsent()
+                    analyzeDescription()
+                }
+                Button("action.cancel", role: .cancel) {}
+            } message: {
+                Text(aiConsentMessage)
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("action.cancel") { dismiss() }
@@ -198,7 +209,7 @@ private struct StrategyCreatorView: View {
                 }
 
             Button {
-                analyzeDescription()
+                requestAnalysis()
             } label: {
                 HStack {
                     if isAnalyzing { ProgressView().controlSize(.small) }
@@ -273,6 +284,32 @@ private struct StrategyCreatorView: View {
                     .foregroundStyle(.secondary)
             }
         }
+    }
+
+    private var aiConsentMessage: String {
+        String(
+            format: AppLocalization.string("strategy_analysis.privacy_message_format", locale: locale),
+            model.aiProvider.displayName
+        )
+    }
+
+    private var hasConsentedToCurrentAIProvider: Bool {
+        Set(consentedAIProviders.split(separator: "|").map(String.init))
+            .contains(model.aiProvider.rawValue)
+    }
+
+    private func requestAnalysis() {
+        if hasConsentedToCurrentAIProvider {
+            analyzeDescription()
+        } else {
+            showingAIConsent = true
+        }
+    }
+
+    private func recordAIConsent() {
+        var providers = Set(consentedAIProviders.split(separator: "|").map(String.init))
+        providers.insert(model.aiProvider.rawValue)
+        consentedAIProviders = providers.sorted().joined(separator: "|")
     }
 
     private func analyzeDescription() {

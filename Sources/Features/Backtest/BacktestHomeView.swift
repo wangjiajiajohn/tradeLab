@@ -111,6 +111,10 @@ private struct ResultSections: View {
             ResultOverview(result: result)
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
+
+            Label("result.hypothetical_disclosure", systemImage: "info.circle")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
 
         Section("result.next_test") {

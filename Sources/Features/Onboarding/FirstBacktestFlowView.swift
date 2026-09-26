@@ -223,14 +223,24 @@ struct FirstBacktestFlowView: View {
 
     @ViewBuilder
     private var primaryAction: some View {
-        PrimaryActionButton(
-            title: primaryActionTitle,
-            symbol: stage == .run ? "play.fill" : "arrow.right",
-            tint: stageTint,
-            disabled: !canContinue || model.isRunningBacktest,
-            action: performPrimaryAction
-        )
-        .frame(maxWidth: 600)
+        VStack(spacing: 6) {
+            PrimaryActionButton(
+                title: primaryActionTitle,
+                symbol: stage == .run ? "play.fill" : "arrow.right",
+                tint: stageTint,
+                disabled: !canContinue || model.isRunningBacktest,
+                action: performPrimaryAction
+            )
+            .frame(maxWidth: 600)
+
+            if stage == .run {
+                Text("onboarding.research_disclaimer")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 600)
+            }
+        }
         .padding(.horizontal, 20)
         .padding(.top, 12)
         .padding(.bottom, 8)
