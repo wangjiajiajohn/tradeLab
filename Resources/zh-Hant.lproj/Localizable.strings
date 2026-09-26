@@ -184,6 +184,7 @@
 "settings.appearance" = "外觀";
 "settings.capital" = "初始資金";
 "settings.commission" = "佣金";
+"settings.commission.short" = "佣金";
 "settings.costs" = "佣金 / 滑點";
 "settings.data" = "行情資料";
 "settings.demo_data" = "離線示範資料";
@@ -216,6 +217,7 @@
 "settings.reset_onboarding" = "重新查看新手引導";
 "settings.storage" = "示範資料儲存";
 "settings.slippage" = "滑點";
+"settings.slippage.short" = "滑點";
 "settings.theme" = "主題";
 "settings.language" = "語言";
 

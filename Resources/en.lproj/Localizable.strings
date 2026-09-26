@@ -184,6 +184,7 @@
 "settings.appearance" = "Appearance";
 "settings.capital" = "Initial Capital";
 "settings.commission" = "Commission";
+"settings.commission.short" = "Comm.";
 "settings.costs" = "Commission / Slippage";
 "settings.data" = "Market Data";
 "settings.demo_data" = "Offline Demo Data";
@@ -216,6 +217,7 @@
 "settings.reset_onboarding" = "View Getting Started Again";
 "settings.storage" = "Demo Data Storage";
 "settings.slippage" = "Slippage";
+"settings.slippage.short" = "Slip.";
 "settings.theme" = "Theme";
 "settings.language" = "Language";
 

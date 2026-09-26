@@ -67,7 +67,7 @@ struct TradeJournalView: View {
                 }
             }
         }
-        .pullDownResearchDisclosure()
+        .pullDownResearchDisclosure(belowNavigationBar: false)
         .sheet(isPresented: $showingEntry) {
             TradeEntryView()
         }

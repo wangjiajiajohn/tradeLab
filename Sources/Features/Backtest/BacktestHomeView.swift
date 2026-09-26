@@ -174,8 +174,8 @@ struct BacktestHomeView: View {
         let slippage = model.settings.slippageRate.formatted(
             .percent.precision(.fractionLength(2))
         )
-        let costs = "\(AppLocalization.string("settings.commission", locale: locale)) \(commission) · "
-            + "\(AppLocalization.string("settings.slippage", locale: locale)) \(slippage)"
+        let costs = "\(AppLocalization.string("settings.commission.short", locale: locale)) \(commission) · "
+            + "\(AppLocalization.string("settings.slippage.short", locale: locale)) \(slippage)"
 
         guard let period = backtestPeriodSummary else {
             return capital + "\n" + costs

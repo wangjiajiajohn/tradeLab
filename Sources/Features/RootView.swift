@@ -48,19 +48,21 @@ extension View {
         modifier(TabToolbarJellyModifier())
     }
 
-    func pullDownResearchDisclosure() -> some View {
-        modifier(PullDownResearchDisclosureModifier())
+    func pullDownResearchDisclosure(belowNavigationBar: Bool = true) -> some View {
+        modifier(PullDownResearchDisclosureModifier(belowNavigationBar: belowNavigationBar))
     }
 }
 
 private struct PullDownResearchDisclosureModifier: ViewModifier {
     @Environment(\.locale) private var locale
+    let belowNavigationBar: Bool
 
     func body(content: Content) -> some View {
         content
             .background {
                 ScrollDisclosureInstaller(
-                    text: AppLocalization.string("disclosure.pull_down", locale: locale)
+                    text: AppLocalization.string("disclosure.pull_down", locale: locale),
+                    belowNavigationBar: belowNavigationBar
                 )
                     .frame(width: 0, height: 0)
             }
@@ -69,15 +71,18 @@ private struct PullDownResearchDisclosureModifier: ViewModifier {
 
 private struct ScrollDisclosureInstaller: UIViewRepresentable {
     let text: String
+    let belowNavigationBar: Bool
 
     func makeUIView(context: Context) -> ScrollDisclosureInstallerView {
         let view = ScrollDisclosureInstallerView()
         view.text = text
+        view.belowNavigationBar = belowNavigationBar
         return view
     }
 
     func updateUIView(_ uiView: ScrollDisclosureInstallerView, context: Context) {
         uiView.text = text
+        uiView.belowNavigationBar = belowNavigationBar
         uiView.attachIfNeeded()
     }
 
@@ -92,6 +97,7 @@ private final class ScrollDisclosureInstallerView: UIView {
     }
 
     private weak var observedScrollView: UIScrollView?
+    var belowNavigationBar = true
     private let disclosureHeight: CGFloat = 36
     private lazy var disclosureLabel: UILabel = {
         let label = UILabel()
@@ -120,7 +126,9 @@ private final class ScrollDisclosureInstallerView: UIView {
         disclosureLabel.text = text
         disclosureLabel.frame = CGRect(
             x: 16,
-            y: -scrollView.adjustedContentInset.top - disclosureHeight,
+            y: belowNavigationBar
+                ? -disclosureHeight
+                : -scrollView.adjustedContentInset.top - disclosureHeight,
             width: max(0, scrollView.bounds.width - 32),
             height: disclosureHeight
         )

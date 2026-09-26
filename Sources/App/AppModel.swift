@@ -62,6 +62,19 @@ final class AppModel: ObservableObject {
         func localized(_ key: String) -> String {
             AppLocalization.string(key, locale: locale)
         }
+
+        static var preferredSystemLanguage: AppLanguage {
+            guard let identifier = Locale.preferredLanguages.first else { return .english }
+            let normalized = identifier.replacingOccurrences(of: "_", with: "-").lowercased()
+            guard normalized.hasPrefix("zh") else { return .english }
+            if normalized.contains("hant")
+                || normalized.contains("-tw")
+                || normalized.contains("-hk")
+                || normalized.contains("-mo") {
+                return .traditionalChinese
+            }
+            return .simplifiedChinese
+        }
     }
 
     private enum Keys {
@@ -152,9 +165,9 @@ final class AppModel: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        let initialLanguage = AppLanguage(
-            rawValue: defaults.string(forKey: Keys.language) ?? ""
-        ) ?? .english
+        let initialLanguage = defaults.string(forKey: Keys.language)
+            .flatMap(AppLanguage.init(rawValue:))
+            ?? AppLanguage.preferredSystemLanguage
         language = initialLanguage
         let library = BuiltInMarketDataProvider.load(locale: initialLanguage.locale)
         marketData = library
