@@ -36,7 +36,7 @@ struct StrategyListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("strategies.add", systemImage: "plus") { showingCreator = true }
-                        .tabToolbarGlassStyle()
+                        .tabToolbarJellyEffect()
                 }
             }
             .sheet(isPresented: $showingCreator) {
