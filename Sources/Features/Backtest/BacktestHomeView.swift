@@ -396,77 +396,31 @@ private struct StockPickerView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
     @State private var searchText = ""
+    @State private var showingDataSourceSettings = false
 
     var body: some View {
         NavigationStack {
-            List {
+            Group {
                 if needsDataSourceSetup {
-                    Section {
-                        Button(action: openDataSourceSettings) {
-                            HStack(spacing: 12) {
-                                Image(systemName: "externaldrive.badge.wifi")
-                                    .foregroundStyle(.orange)
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text("stock.search.configure.title")
-                                        .foregroundStyle(.primary)
-                                    Text("stock.search.configure.description")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(.tertiary)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-
-                ForEach(filteredSecurities) { security in
-                    Button {
-                        model.selectSecurity(security)
-                        dismiss()
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(security.name).font(.headline)
-                                Text("\(security.symbol) · \(marketName(security.market))")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            if model.selectedSecurityID == security.id {
-                                Image(systemName: "checkmark")
-                                    .foregroundStyle(.tint)
-                            }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
+                    stockList
+                } else {
+                    stockList
+                        .searchable(text: $searchText, prompt: "stock.search.prompt")
                 }
             }
             .navigationTitle("result.change_stock")
             .navigationBarTitleDisplayMode(.inline)
-            .searchable(text: $searchText, prompt: "stock.search.prompt")
             .overlay {
-                if filteredSecurities.isEmpty {
+                if !needsDataSourceSetup && filteredSecurities.isEmpty {
                     ContentUnavailableView {
                         Label("stock.search.no_results", systemImage: "magnifyingglass")
                     } description: {
-                        Text(LocalizedStringKey(
-                            needsDataSourceSetup
-                                ? "stock.search.configure.description"
-                                : "stock.search.no_results.description"
-                        ))
-                    } actions: {
-                        if needsDataSourceSetup {
-                            Button("stock.search.configure.action", action: openDataSourceSettings)
-                                .buttonStyle(.borderedProminent)
-                        }
+                        Text("stock.search.no_results.description")
                     }
                 }
+            }
+            .navigationDestination(isPresented: $showingDataSourceSettings) {
+                MarketDataSettingsView()
             }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -476,13 +430,70 @@ private struct StockPickerView: View {
         }
     }
 
-    private var needsDataSourceSetup: Bool {
-        model.marketDataSource == .offline || !model.hasLongbridgeCredentials
+    private var stockList: some View {
+        List {
+            if needsDataSourceSetup {
+                Section {
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "externaldrive.badge.wifi")
+                                .font(.title2.weight(.semibold))
+                                .foregroundStyle(.orange)
+                                .frame(width: 44, height: 44)
+                                .background(.orange.opacity(0.14), in: .rect(cornerRadius: 13))
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("stock.search.configure.title")
+                                    .font(.headline)
+                                Text("stock.search.configure.description")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+
+                        Button {
+                            showingDataSourceSettings = true
+                        } label: {
+                            Label("stock.search.configure.action", systemImage: "gearshape.fill")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.orange)
+                        .controlSize(.large)
+                    }
+                    .padding(.vertical, 8)
+                }
+                .listRowBackground(Color.orange.opacity(0.08))
+            }
+
+            ForEach(filteredSecurities) { security in
+                Button {
+                    model.selectSecurity(security)
+                    dismiss()
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(security.name).font(.headline)
+                            Text("\(security.symbol) · \(marketName(security.market))")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if model.selectedSecurityID == security.id {
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(.tint)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
 
-    private func openDataSourceSettings() {
-        dismiss()
-        model.selectedTab = .settings
+    private var needsDataSourceSetup: Bool {
+        model.marketDataSource == .offline || !model.hasLongbridgeCredentials
     }
 
     private var filteredSecurities: [Security] {

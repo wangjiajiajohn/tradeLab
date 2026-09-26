@@ -77,7 +77,7 @@ struct SettingsView: View {
     }
 }
 
-private struct MarketDataSettingsView: View {
+struct MarketDataSettingsView: View {
     @EnvironmentObject private var model: AppModel
     @State private var appKey = ""
     @State private var appSecret = ""
