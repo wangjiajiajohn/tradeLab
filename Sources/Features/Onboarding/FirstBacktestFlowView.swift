@@ -17,6 +17,7 @@ struct FirstBacktestFlowView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.locale) private var locale
     @State private var stage: Stage = .intro
+    @State private var stockSearchText = ""
 
     var body: some View {
         NavigationStack {
@@ -129,19 +130,55 @@ struct FirstBacktestFlowView: View {
             subtitle: "onboarding.stock.subtitle",
             accent: .blue
         ) {
-            LazyVStack(spacing: 10) {
-                ForEach(model.securities) { security in
-                    Button {
-                        model.selectSecurity(security)
-                    } label: {
-                        SelectionRow(
-                            title: security.name,
-                            subtitle: securitySubtitle(security),
-                            selected: model.selectedSecurityID == security.id,
-                            accent: .blue
-                        )
+            VStack(spacing: 12) {
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    TextField("stock.search.prompt", text: $stockSearchText)
+                        .textInputAutocapitalization(.characters)
+                        .autocorrectionDisabled()
+                    if !stockSearchText.isEmpty {
+                        Button {
+                            stockSearchText = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.tertiary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text("action.clear"))
                     }
-                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 14)
+                .frame(minHeight: 50)
+                .background(.background, in: .rect(cornerRadius: 16))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(.separator.opacity(0.35), lineWidth: 0.5)
+                }
+
+                if filteredSecurities.isEmpty {
+                    ContentUnavailableView(
+                        "stock.search.no_results",
+                        systemImage: "magnifyingglass",
+                        description: Text("stock.search.no_results.description")
+                    )
+                    .padding(.top, 24)
+                } else {
+                    LazyVStack(spacing: 10) {
+                        ForEach(filteredSecurities) { security in
+                            Button {
+                                model.selectSecurity(security)
+                            } label: {
+                                SelectionRow(
+                                    title: security.name,
+                                    subtitle: securitySubtitle(security),
+                                    selected: model.selectedSecurityID == security.id,
+                                    accent: .blue
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 }
             }
         }
@@ -303,6 +340,16 @@ struct FirstBacktestFlowView: View {
             ? AppLocalization.string("data.synthetic", locale: locale)
             : AppLocalization.string("data.development_offline", locale: locale)
         return "\(security.symbol) · \(market) · \(source)"
+    }
+
+    private var filteredSecurities: [Security] {
+        let query = stockSearchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return model.securities }
+        return model.securities.filter { security in
+            security.name.localizedStandardContains(query)
+                || security.symbol.localizedStandardContains(query)
+                || securitySubtitle(security).localizedStandardContains(query)
+        }
     }
 
     private func move(to next: Stage) {

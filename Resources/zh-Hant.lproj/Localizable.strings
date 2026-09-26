@@ -28,6 +28,10 @@
 "security.sandisk" = "閃迪";
 "security.tencent" = "騰訊控股";
 "security.tesla" = "特斯拉";
+"stock.search.prompt" = "搜尋名稱、代碼或市場";
+"stock.search.no_results" = "沒有相符的股票";
+"stock.search.no_results.description" = "目前資料來源中沒有與搜尋條件相符的股票。";
+"action.clear" = "清除";
 
 "error.incomplete_setup" = "請先選擇股票和策略，並確認回測設定。";
 "error.insufficient_data" = "價格資料不足，無法執行此策略。";

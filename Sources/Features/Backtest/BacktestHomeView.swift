@@ -395,10 +395,11 @@ private struct StockPickerView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
+    @State private var searchText = ""
 
     var body: some View {
         NavigationStack {
-            List(model.securities) { security in
+            List(filteredSecurities) { security in
                 Button {
                     model.selectSecurity(security)
                     dismiss()
@@ -423,11 +424,31 @@ private struct StockPickerView: View {
             }
             .navigationTitle("result.change_stock")
             .navigationBarTitleDisplayMode(.inline)
+            .searchable(text: $searchText, prompt: "stock.search.prompt")
+            .overlay {
+                if filteredSecurities.isEmpty {
+                    ContentUnavailableView(
+                        "stock.search.no_results",
+                        systemImage: "magnifyingglass",
+                        description: Text("stock.search.no_results.description")
+                    )
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("action.done") { dismiss() }
                 }
             }
+        }
+    }
+
+    private var filteredSecurities: [Security] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return model.securities }
+        return model.securities.filter { security in
+            security.name.localizedStandardContains(query)
+                || security.symbol.localizedStandardContains(query)
+                || marketName(security.market).localizedStandardContains(query)
         }
     }
 
