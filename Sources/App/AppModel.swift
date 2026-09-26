@@ -249,7 +249,9 @@ final class AppModel: ObservableObject {
         }
         let remote = try await LongbridgeMarketDataProvider(credentials: credentials)
             .searchSecurities(matching: query, locale: language.locale)
-        return (cached + remote).reduce(into: []) { result, security in
+        // Keep the provider's instrument-type ranking. Locally saved matches
+        // are only appended when the provider did not return that security.
+        return (remote + cached).reduce(into: []) { result, security in
             if !result.contains(where: { $0.id == security.id }) { result.append(security) }
         }
     }

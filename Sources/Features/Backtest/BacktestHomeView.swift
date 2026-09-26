@@ -767,6 +767,7 @@ private struct StockPickerView: View {
     @State private var onlineSearchResults: [Security] = []
     @State private var isSearching = false
     @State private var searchError: String?
+    @State private var completedSearchQuery = ""
     @State private var marketFilter: MarketFilter = .all
 
     var body: some View {
@@ -786,7 +787,7 @@ private struct StockPickerView: View {
             .navigationTitle("result.change_stock")
             .navigationBarTitleDisplayMode(.inline)
             .overlay {
-                if isSearching && filteredSecurities.isEmpty {
+                if (isSearching || isWaitingForSearchResponse) && filteredSecurities.isEmpty {
                     ProgressView()
                         .controlSize(.large)
                 } else if let searchError, filteredSecurities.isEmpty {
@@ -825,6 +826,7 @@ private struct StockPickerView: View {
 
         guard !needsDataSourceSetup, !query.isEmpty else {
             isSearching = false
+            completedSearchQuery = query
             return
         }
 
@@ -836,10 +838,12 @@ private struct StockPickerView: View {
             try Task.checkCancellation()
             guard normalizedQuery(searchText) == query else { return }
             onlineSearchResults = results
+            completedSearchQuery = query
             searchError = nil
             isSearching = false
         } catch {
             guard !Task.isCancelled, normalizedQuery(searchText) == query else { return }
+            completedSearchQuery = query
             isSearching = false
             if let marketError = error as? OnlineMarketDataError {
                 searchError = marketError.localizedDescription(locale: locale)
@@ -937,14 +941,17 @@ private struct StockPickerView: View {
         let matches: [Security]
         if query.isEmpty {
             matches = available
-        } else {
-            let localMatches = available.filter { security in
+        } else if needsDataSourceSetup {
+            matches = available.filter { security in
                 security.name.localizedStandardContains(query)
                     || security.symbol.localizedStandardContains(query)
                     || security.id.localizedStandardContains(query)
                     || marketName(security.market).localizedStandardContains(query)
             }
-            matches = localMatches + onlineSearchResults
+        } else if completedSearchQuery == query {
+            matches = onlineSearchResults
+        } else {
+            matches = []
         }
 
         let unique = matches.reduce(into: [Security]()) { result, security in
@@ -957,6 +964,11 @@ private struct StockPickerView: View {
             case .hk: security.market == .hk
             }
         }
+    }
+
+    private var isWaitingForSearchResponse: Bool {
+        let query = normalizedQuery(searchText)
+        return !needsDataSourceSetup && !query.isEmpty && completedSearchQuery != query
     }
 
     private func marketName(_ market: Market) -> String {
