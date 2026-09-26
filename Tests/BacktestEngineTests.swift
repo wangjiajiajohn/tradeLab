@@ -286,6 +286,30 @@ final class BacktestEngineTests: XCTestCase {
         XCTAssertEqual(LongbridgeMarketDataProvider.normalizedSearchText("蔚来汽车"), "蔚来汽车")
     }
 
+    func testLongbridgeSearchSortsSharesBeforeETFsAndWarrants() {
+        XCTAssertEqual(
+            LongbridgeMarketDataProvider.searchSortPriority(
+                board: "HKEquity",
+                names: ["腾讯控股", "Tencent Holdings"]
+            ),
+            0
+        )
+        XCTAssertEqual(
+            LongbridgeMarketDataProvider.searchSortPriority(
+                board: "HKEquity",
+                names: ["恒生科技指数 ETF"]
+            ),
+            1
+        )
+        XCTAssertEqual(
+            LongbridgeMarketDataProvider.searchSortPriority(
+                board: "HKWarrant",
+                names: ["腾讯瑞银牛证"]
+            ),
+            2
+        )
+    }
+
     @MainActor
     func testWorkspaceRestoresAfterRelaunch() throws {
         let suiteName = "TradeLabV2Tests.workspace.\(UUID().uuidString)"

@@ -151,7 +151,36 @@ struct LongbridgeMarketDataProvider: Sendable {
         for endpoint in endpoints {
             do {
                 let catalog = try await securityCatalog(endpoint: endpoint, locale: locale)
-                return Self.filterCatalog(catalog, matching: trimmed, locale: locale).map(\.security)
+                let matches = Array(Self.filterCatalog(catalog, matching: trimmed, locale: locale).prefix(500))
+                guard !matches.isEmpty else { return [] }
+
+                // The security catalog does not expose a security type. Enrich the
+                // matched rows with static information so HK warrants do not get
+                // mixed in with ordinary shares. Search must still work if this
+                // optional enrichment request is unavailable.
+                let staticInfo = (try? await requestStaticInfo(
+                    symbols: matches.map(\.security.id),
+                    endpoint: endpoint
+                )) ?? []
+                let boardBySymbol = Dictionary(
+                    staticInfo.map { ($0.symbol, $0.board) },
+                    uniquingKeysWith: { first, _ in first }
+                )
+
+                return matches.sorted {
+                    let lhsPriority = Self.searchSortPriority(
+                        board: boardBySymbol[$0.security.id],
+                        names: $0.names
+                    )
+                    let rhsPriority = Self.searchSortPriority(
+                        board: boardBySymbol[$1.security.id],
+                        names: $1.names
+                    )
+                    if lhsPriority != rhsPriority { return lhsPriority < rhsPriority }
+                    if $0.score != $1.score { return $0.score < $1.score }
+                    return $0.security.id < $1.security.id
+                }
+                .map(\.security)
             } catch {
                 lastError = error
             }
@@ -454,17 +483,18 @@ struct LongbridgeMarketDataProvider: Sendable {
         _ catalog: [LongbridgeCatalogSecurity],
         matching query: String,
         locale: Locale
-    ) -> [(security: Security, score: Int)] {
+    ) -> [(security: Security, score: Int, names: [String])] {
         let needle = normalizedSearchText(query)
-        return catalog.compactMap { item -> (Security, Int)? in
+        return catalog.compactMap { item -> (Security, Int, [String])? in
             let symbol = item.symbol.split(separator: ".").first.map(String.init) ?? item.symbol
-            let searchable = [item.symbol, symbol, item.name, item.nameCN, item.nameHK, item.nameEN]
-                .compactMap { $0 }
+            let names = [item.name, item.nameCN, item.nameHK, item.nameEN].compactMap { $0 }
+            let searchable = [item.symbol, symbol] + names
+            let normalized = searchable
                 .map(normalizedSearchText)
-            guard searchable.contains(where: { $0.contains(needle) }) else { return nil }
+            guard normalized.contains(where: { $0.contains(needle) }) else { return nil }
             let score: Int
-            if searchable.contains(needle) { score = 0 }
-            else if searchable.contains(where: { $0.hasPrefix(needle) }) { score = 1 }
+            if normalized.contains(needle) { score = 0 }
+            else if normalized.contains(where: { $0.hasPrefix(needle) }) { score = 1 }
             else { score = 2 }
             let market: Market = item.symbol.hasSuffix(".HK") ? .hk : .us
             return (
@@ -476,13 +506,35 @@ struct LongbridgeMarketDataProvider: Sendable {
                     currency: market == .hk ? "HKD" : "USD",
                     isSyntheticDemo: false
                 ),
-                score
+                score,
+                names
             )
         }
         .sorted {
             if $0.score != $1.score { return $0.score < $1.score }
             return $0.security.id < $1.security.id
         }
+    }
+
+    /// Search display order: ordinary shares, ETFs/ETNs, then warrants and
+    /// other derivatives. Longbridge identifies HK warrants through `board`,
+    /// while its static-info response does not provide a dedicated ETF type.
+    /// ETF detection therefore uses all localized catalog names.
+    static func searchSortPriority(board: String?, names: [String]) -> Int {
+        let normalizedBoard = board?.uppercased() ?? ""
+        if normalizedBoard.contains("WARRANT") || normalizedBoard.contains("OPTION") {
+            return 2
+        }
+
+        let normalizedNames = names.map { $0.uppercased() }
+        let isETF = normalizedNames.contains { name in
+            name.contains("ETF") ||
+                name.contains("ETN") ||
+                name.contains("EXCHANGE TRADED") ||
+                name.contains("交易所买卖基金") ||
+                name.contains("交易所買賣基金")
+        }
+        return isETF ? 1 : 0
     }
 
     private static func acceptLanguage(for locale: Locale) -> String {
@@ -606,6 +658,7 @@ private enum LongbridgeProto {
         let nameEN: String
         let nameHK: String
         let currency: String
+        let board: String
 
         func localizedName(locale: Locale) -> String {
             let identifier = locale.identifier.lowercased()
@@ -685,7 +738,8 @@ private enum LongbridgeProto {
                 nameCN: text(2),
                 nameEN: text(3),
                 nameHK: text(4),
-                currency: text(7)
+                currency: text(7),
+                board: text(17)
             )
         }
     }
