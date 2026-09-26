@@ -767,21 +767,13 @@ private struct ConfigurationRow: View {
     var detail: String? = nil
 
     var body: some View {
-        HStack(alignment: detail == nil ? .center : .top, spacing: 12) {
+        HStack(spacing: 12) {
             Image(systemName: symbol)
                 .frame(width: 24)
                 .foregroundStyle(.tint)
-                .padding(.top, detail == nil ? 0 : 2)
             VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 12) {
-                    Text(title)
-                        .foregroundStyle(.primary)
-                    Spacer(minLength: 8)
-                    Text(value)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .fixedSize(horizontal: detail != nil, vertical: false)
-                }
+                Text(title)
+                    .foregroundStyle(.primary)
                 if let detail {
                     Text(detail)
                         .font(.caption)
@@ -792,10 +784,15 @@ private struct ConfigurationRow: View {
                 }
             }
             .layoutPriority(1)
+            Spacer(minLength: 8)
+            Text(value)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .fixedSize(horizontal: detail != nil, vertical: false)
+                .layoutPriority(detail == nil ? 0 : 2)
             Image(systemName: "chevron.right")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.tertiary)
-                .padding(.top, detail == nil ? 0 : 4)
         }
         .contentShape(.rect)
     }
