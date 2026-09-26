@@ -163,6 +163,11 @@ final class AppModel: ObservableObject {
         selectedTab = .backtest
     }
 
+    func deleteBacktests(at offsets: IndexSet) {
+        backtestHistory.remove(atOffsets: offsets)
+        saveHistory()
+    }
+
     func canRestoreConfiguration(from record: BacktestRecord) -> Bool {
         securities.contains(where: { $0.id == record.securityID })
             && strategies.contains(where: { $0.id == record.strategyID })
@@ -234,6 +239,10 @@ final class AppModel: ObservableObject {
     private func saveToHistory(_ result: BacktestResult) {
         backtestHistory.insert(BacktestRecord(result: result), at: 0)
         backtestHistory = Array(backtestHistory.prefix(50))
+        saveHistory()
+    }
+
+    private func saveHistory() {
         guard let data = try? JSONEncoder().encode(backtestHistory) else { return }
         defaults.set(data, forKey: Keys.backtestHistory)
     }

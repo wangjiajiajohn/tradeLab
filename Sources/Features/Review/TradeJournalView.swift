@@ -30,6 +30,13 @@ struct TradeJournalView: View {
                 }
                 .controlSize(.large)
 
+                if !model.journalTrades.isEmpty,
+                   let exportURL = CSVExports.trades(model.journalTrades) {
+                    ShareLink(item: exportURL) {
+                        Label("trades.export", systemImage: "square.and.arrow.up")
+                    }
+                }
+
                 Text("trades.import.help")
                     .font(.footnote)
                     .foregroundStyle(.secondary)

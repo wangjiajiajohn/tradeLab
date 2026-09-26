@@ -39,26 +39,29 @@ struct ReviewView: View {
                         description: Text("review.empty.description")
                     )
                 } else {
-                    List(model.backtestHistory) { record in
-                        if isSelectingForComparison {
-                            Button {
-                                toggleSelection(record)
-                            } label: {
-                                HStack(spacing: 12) {
-                                    comparisonIndicator(for: record)
+                    List {
+                        ForEach(model.backtestHistory) { record in
+                            if isSelectingForComparison {
+                                Button {
+                                    toggleSelection(record)
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        comparisonIndicator(for: record)
+                                        BacktestRecordRow(record: record)
+                                    }
+                                    .contentShape(.rect)
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(selectedRecordIDs.count == 2 && !selectedRecordIDs.contains(record.id))
+                            } else {
+                                NavigationLink {
+                                    BacktestRecordDetail(record: record)
+                                } label: {
                                     BacktestRecordRow(record: record)
                                 }
-                                .contentShape(.rect)
-                            }
-                            .buttonStyle(.plain)
-                            .disabled(selectedRecordIDs.count == 2 && !selectedRecordIDs.contains(record.id))
-                        } else {
-                            NavigationLink {
-                                BacktestRecordDetail(record: record)
-                            } label: {
-                                BacktestRecordRow(record: record)
                             }
                         }
+                        .onDelete(perform: model.deleteBacktests)
                     }
                 }
             }
@@ -66,11 +69,20 @@ struct ReviewView: View {
             .toolbar {
                 if mode == .backtests && !model.backtestHistory.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button(isSelectingForComparison ? "action.cancel" : "review.compare") {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                isSelectingForComparison.toggle()
-                                selectedRecordIDs.removeAll()
+                        Menu {
+                            Button(isSelectingForComparison ? "action.cancel" : "review.compare") {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isSelectingForComparison.toggle()
+                                    selectedRecordIDs.removeAll()
+                                }
                             }
+                            if let exportURL = CSVExports.backtests(model.backtestHistory) {
+                                ShareLink(item: exportURL) {
+                                    Label("review.export", systemImage: "square.and.arrow.up")
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
                         }
                     }
                 }

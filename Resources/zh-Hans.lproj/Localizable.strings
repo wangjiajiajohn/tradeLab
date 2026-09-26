@@ -249,3 +249,5 @@
 "trades.currency" = "币种（如 USD 或 HKD）";
 "trades.note_optional" = "备注（可选）";
 "trades.note" = "交易备注";
+"review.export" = "导出回测 CSV";
+"trades.export" = "导出交易 CSV";

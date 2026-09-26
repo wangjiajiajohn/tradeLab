@@ -249,3 +249,5 @@
 "trades.currency" = "Currency (for example, USD or HKD)";
 "trades.note_optional" = "Note (Optional)";
 "trades.note" = "Trade note";
+"review.export" = "Export Backtests as CSV";
+"trades.export" = "Export Trades as CSV";
