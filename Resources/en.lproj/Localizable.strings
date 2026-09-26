@@ -11,7 +11,21 @@
 "backtest.workflow" = "Backtest Workflow";
 
 "demo.security.subtitle" = "AAPL · Synthetic daily demo data";
-"demo.synthetic_disclosure" = "Built-in synthetic data for product demonstration only. It is not actual AAPL market data.";
+"demo.synthetic_disclosure" = "Built-in synthetic data for product demonstration only. It is not actual market data.";
+"demo.development_disclosure" = "Development-only offline market data. It will not be included in the release build.";
+"data.development_offline" = "Offline development data";
+"data.synthetic" = "Synthetic sample";
+
+"market.hk" = "Hong Kong";
+"market.us" = "U.S.";
+
+"security.aapl" = "Apple";
+"security.alibaba" = "Alibaba-W";
+"security.micron" = "Micron Technology";
+"security.nvidia" = "NVIDIA";
+"security.sandisk" = "Sandisk";
+"security.tencent" = "Tencent";
+"security.tesla" = "Tesla";
 
 "error.incomplete_setup" = "Choose a stock and strategy, then confirm the backtest settings.";
 "error.insufficient_data" = "There is not enough price data for this strategy.";
@@ -83,6 +97,10 @@
 "strategies.demo_badge" = "Demo";
 "strategy.demo.name" = "10/30 Trend Following";
 "strategy.demo.summary" = "Buy when the 10-day average crosses above the 30-day average; exit on the reverse cross.";
+"strategy.buy_hold.name" = "Buy and Hold";
+"strategy.buy_hold.summary" = "Buy at the start of the period and hold until the final trading day.";
+"strategy.breakout.name" = "20-Day Breakout";
+"strategy.breakout.summary" = "Buy above the prior 20-day high; exit below the prior 10-day low.";
 
 "tab.backtest" = "Backtest";
 "tab.review" = "Review";
@@ -98,3 +116,6 @@
 "trade.reason.cross_down" = "Fast average crossed below slow average";
 "trade.reason.cross_up" = "Fast average crossed above slow average";
 "trade.reason.period_end" = "Backtest period ended";
+"trade.reason.period_start" = "Backtest period started";
+"trade.reason.breakout" = "Closed above the prior 20-day high";
+"trade.reason.breakdown" = "Closed below the prior 10-day low";

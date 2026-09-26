@@ -104,16 +104,20 @@ struct FirstBacktestFlowView: View {
             title: String(localized: "onboarding.stock.title"),
             subtitle: String(localized: "onboarding.stock.subtitle")
         ) {
-            Button {
-                model.selectDemoSecurity()
-            } label: {
-                SelectionRow(
-                    title: "Apple",
-                    subtitle: String(localized: "demo.security.subtitle"),
-                    selected: model.selectedSecurity != nil
-                )
+            LazyVStack(spacing: 10) {
+                ForEach(model.securities) { security in
+                    Button {
+                        model.selectSecurity(security)
+                    } label: {
+                        SelectionRow(
+                            title: security.name,
+                            subtitle: securitySubtitle(security),
+                            selected: model.selectedSecurityID == security.id
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
             }
-            .buttonStyle(.plain)
 
             Button("action.continue") { move(to: .strategy) }
                 .buttonStyle(.borderedProminent)
@@ -128,17 +132,19 @@ struct FirstBacktestFlowView: View {
             title: String(localized: "onboarding.strategy.title"),
             subtitle: String(localized: "onboarding.strategy.subtitle")
         ) {
-            if let strategy = model.strategies.first {
-                Button {
-                    model.selectDemoStrategy()
-                } label: {
-                    SelectionRow(
-                        title: strategy.name,
-                        subtitle: strategy.summary,
-                        selected: model.selectedStrategy != nil
-                    )
+            LazyVStack(spacing: 10) {
+                ForEach(model.strategies) { strategy in
+                    Button {
+                        model.selectStrategy(strategy)
+                    } label: {
+                        SelectionRow(
+                            title: strategy.name,
+                            subtitle: strategy.summary,
+                            selected: model.selectedStrategyID == strategy.id
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
 
             Button("action.continue") { move(to: .settings) }
@@ -155,9 +161,13 @@ struct FirstBacktestFlowView: View {
             subtitle: String(localized: "onboarding.settings.subtitle")
         ) {
             VStack(spacing: 0) {
-                LabeledContent("settings.period", value: "2024–2025")
+                LabeledContent("settings.period", value: selectedPeriod)
                 Divider()
-                LabeledContent("settings.capital", value: model.settings.initialCapital, format: .currency(code: "USD"))
+                LabeledContent(
+                    "settings.capital",
+                    value: model.settings.initialCapital,
+                    format: .currency(code: model.selectedSecurity?.currency ?? "USD")
+                )
                 Divider()
                 LabeledContent("settings.costs", value: "0.10% / 0.05%")
             }
@@ -205,6 +215,25 @@ struct FirstBacktestFlowView: View {
             get: { model.errorMessage != nil },
             set: { if !$0 { model.errorMessage = nil } }
         )
+    }
+
+    private var selectedPeriod: String {
+        guard let first = model.selectedCandles.first?.date,
+              let last = model.selectedCandles.last?.date
+        else { return "—" }
+        return first.formatted(.dateTime.year().month(.abbreviated))
+            + " – "
+            + last.formatted(.dateTime.year().month(.abbreviated))
+    }
+
+    private func securitySubtitle(_ security: Security) -> String {
+        let market = security.market == .hk
+            ? String(localized: "market.hk")
+            : String(localized: "market.us")
+        let source = security.isSyntheticDemo
+            ? String(localized: "data.synthetic")
+            : String(localized: "data.development_offline")
+        return "\(security.symbol) · \(market) · \(source)"
     }
 
     private func move(to next: Stage) {

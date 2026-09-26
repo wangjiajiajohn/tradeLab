@@ -8,18 +8,24 @@ struct StrategyListView: View {
             List {
                 Section("strategies.built_in") {
                     ForEach(model.strategies) { strategy in
-                        VStack(alignment: .leading, spacing: 5) {
+                        Button {
+                            model.selectStrategy(strategy)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 5) {
                             HStack {
                                 Text(strategy.name).font(.headline)
                                 Spacer()
-                                Text("strategies.demo_badge")
-                                    .font(.caption)
-                                    .foregroundStyle(.tint)
+                                if model.selectedStrategyID == strategy.id {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(.tint)
+                                }
                             }
                             Text(strategy.summary)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
+                            }
                         }
+                        .buttonStyle(.plain)
                         .padding(.vertical, 4)
                     }
                 }

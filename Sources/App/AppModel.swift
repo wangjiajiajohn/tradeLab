@@ -34,7 +34,7 @@ final class AppModel: ObservableObject {
 
     let securities: [Security]
     let strategies: [TradingStrategy]
-    let demoCandles: [Candle]
+    private let marketData: MarketDataLibrary
 
     @Published var selectedSecurityID: String?
     @Published var selectedStrategyID: UUID?
@@ -49,10 +49,10 @@ final class AppModel: ObservableObject {
     }
 
     init(defaults: UserDefaults = .standard) {
-        let provider = DemoMarketDataProvider()
-        securities = [provider.security]
-        demoCandles = provider.candles()
-        strategies = [.dualMovingAverageDemo]
+        let library = BuiltInMarketDataProvider.load()
+        marketData = library
+        securities = library.securities
+        strategies = TradingStrategy.builtIn
         hasCompletedFirstBacktest = defaults.bool(forKey: Keys.completedFirstBacktest)
         appearance = Appearance(rawValue: defaults.string(forKey: Keys.appearance) ?? "") ?? .system
     }
@@ -65,16 +65,25 @@ final class AppModel: ObservableObject {
         strategies.first { $0.id == selectedStrategyID }
     }
 
+    var selectedCandles: [Candle] {
+        guard let selectedSecurity else { return [] }
+        return candles(for: selectedSecurity)
+    }
+
     var canRunBacktest: Bool {
         selectedSecurity != nil && selectedStrategy != nil && hasConfirmedSettings
     }
 
-    func selectDemoSecurity() {
-        selectedSecurityID = securities.first?.id
+    func selectSecurity(_ security: Security) {
+        selectedSecurityID = security.id
     }
 
-    func selectDemoStrategy() {
-        selectedStrategyID = strategies.first?.id
+    func selectStrategy(_ strategy: TradingStrategy) {
+        selectedStrategyID = strategy.id
+    }
+
+    func candles(for security: Security) -> [Candle] {
+        marketData.candles(for: security.id)
     }
 
     @discardableResult
@@ -87,7 +96,7 @@ final class AppModel: ObservableObject {
         do {
             result = try BacktestEngine.run(
                 security: security,
-                candles: demoCandles,
+                candles: candles(for: security),
                 strategy: strategy,
                 settings: settings
             )

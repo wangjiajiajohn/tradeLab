@@ -39,6 +39,23 @@ final class BacktestEngineTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(result.maxDrawdown, 0)
     }
 
+    func testEveryBuiltInStrategyRunsAndClosesItsPosition() throws {
+        let provider = DemoMarketDataProvider()
+        for strategy in TradingStrategy.builtIn {
+            let result = try BacktestEngine.run(
+                security: provider.security,
+                candles: provider.candles(),
+                strategy: strategy,
+                settings: .demo
+            )
+            if !result.trades.isEmpty {
+                XCTAssertEqual(result.trades.first?.side, .buy, strategy.name)
+                XCTAssertEqual(result.trades.last?.side, .sell, strategy.name)
+            }
+            XCTAssertGreaterThan(result.finalValue, 0, strategy.name)
+        }
+    }
+
     func testRejectsInsufficientData() {
         let provider = DemoMarketDataProvider()
         XCTAssertThrowsError(
@@ -51,4 +68,3 @@ final class BacktestEngineTests: XCTestCase {
         )
     }
 }
-

@@ -27,6 +27,20 @@ enum EngineSmokeCheck {
         precondition(abs(first.finalValue - second.finalValue) < 0.0001)
         precondition(abs(first.cumulativeReturn - second.cumulativeReturn) < 0.000_001)
 
+        for strategy in TradingStrategy.builtIn {
+            let result = try BacktestEngine.run(
+                security: provider.security,
+                candles: candles,
+                strategy: strategy,
+                settings: .demo
+            )
+            if !result.trades.isEmpty {
+                precondition(result.trades.first?.side == .buy)
+                precondition(result.trades.last?.side == .sell)
+            }
+            precondition(result.finalValue > 0)
+        }
+
         do {
             _ = try BacktestEngine.run(
                 security: provider.security,

@@ -84,7 +84,13 @@ private struct ResultSections: View {
                 }
             }
             .frame(height: 240)
-            Text("demo.synthetic_disclosure")
+            Text(
+                LocalizedStringKey(
+                    result.security.isSyntheticDemo
+                        ? "demo.synthetic_disclosure"
+                        : "demo.development_disclosure"
+                )
+            )
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

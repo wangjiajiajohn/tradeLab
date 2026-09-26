@@ -11,7 +11,21 @@
 "backtest.workflow" = "回測流程";
 
 "demo.security.subtitle" = "AAPL · 內置合成日線資料";
-"demo.synthetic_disclosure" = "內置資料僅供產品示範，並非 Apple 的真實市場資料。";
+"demo.synthetic_disclosure" = "內置合成資料僅供產品示範，並非真實市場行情。";
+"demo.development_disclosure" = "僅供開發使用的離線行情，正式發佈版本不會包含這些資料。";
+"data.development_offline" = "開發版離線行情";
+"data.synthetic" = "合成樣本";
+
+"market.hk" = "港股";
+"market.us" = "美股";
+
+"security.aapl" = "蘋果";
+"security.alibaba" = "阿里巴巴-W";
+"security.micron" = "美光科技";
+"security.nvidia" = "英偉達";
+"security.sandisk" = "閃迪";
+"security.tencent" = "騰訊控股";
+"security.tesla" = "特斯拉";
 
 "error.incomplete_setup" = "請先選擇股票和策略，並確認回測設定。";
 "error.insufficient_data" = "價格資料不足，無法執行此策略。";
@@ -83,6 +97,10 @@
 "strategies.demo_badge" = "示範";
 "strategy.demo.name" = "10/30 趨勢跟隨";
 "strategy.demo.summary" = "10 日均線上穿 30 日均線時買入，反向下穿時賣出。";
+"strategy.buy_hold.name" = "買入並持有";
+"strategy.buy_hold.summary" = "回測首個交易日買入，並持有到最後一個交易日。";
+"strategy.breakout.name" = "20 日突破";
+"strategy.breakout.summary" = "收市價突破前 20 日高位時買入，跌破前 10 日低位時賣出。";
 
 "tab.backtest" = "回測";
 "tab.review" = "複盤";
@@ -98,3 +116,6 @@
 "trade.reason.cross_down" = "短期均線下穿長期均線";
 "trade.reason.cross_up" = "短期均線上穿長期均線";
 "trade.reason.period_end" = "回測週期結束";
+"trade.reason.period_start" = "回測週期開始";
+"trade.reason.breakout" = "收市價突破前 20 日高位";
+"trade.reason.breakdown" = "收市價跌破前 10 日低位";

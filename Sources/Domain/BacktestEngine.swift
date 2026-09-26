@@ -24,16 +24,21 @@ enum BacktestEngine {
         guard settings.initialCapital > 0 else { throw BacktestError.invalidCapital }
         let candles = candles.sorted { $0.date < $1.date }
 
-        let shortWindow: Int
-        let longWindow: Int
+        let minimumCount: Int
         switch strategy.rule {
+        case .buyAndHold:
+            minimumCount = 2
         case let .dualMovingAverage(short, long):
             guard short > 0, long > short else { throw BacktestError.invalidStrategy }
-            shortWindow = short
-            longWindow = long
+            minimumCount = long + 2
+        case let .breakout(entryWindow, exitWindow):
+            guard entryWindow > 1, exitWindow > 0, entryWindow > exitWindow else {
+                throw BacktestError.invalidStrategy
+            }
+            minimumCount = entryWindow + 2
         }
 
-        guard candles.count > longWindow + 2 else { throw BacktestError.insufficientData }
+        guard candles.count >= minimumCount else { throw BacktestError.insufficientData }
 
         var cash = settings.initialCapital
         var quantity = 0
@@ -46,49 +51,80 @@ enum BacktestEngine {
         for index in candles.indices {
             let candle = candles[index]
 
-            if index >= longWindow - 1 {
-                let shortAverage = meanClose(in: candles, endingAt: index, window: shortWindow)
-                let longAverage = meanClose(in: candles, endingAt: index, window: longWindow)
+            switch strategy.rule {
+            case .buyAndHold:
+                if index == candles.startIndex {
+                    buyAll(
+                        candle: candle,
+                        settings: settings,
+                        reason: String(localized: "trade.reason.period_start"),
+                        cash: &cash,
+                        quantity: &quantity,
+                        trades: &trades
+                    )
+                }
 
-                if let previousShort, let previousLong {
-                    let crossesUp = previousShort <= previousLong && shortAverage > longAverage
-                    let crossesDown = previousShort >= previousLong && shortAverage < longAverage
+            case let .dualMovingAverage(shortWindow, longWindow):
+                if index >= longWindow - 1 {
+                    let shortAverage = meanClose(in: candles, endingAt: index, window: shortWindow)
+                    let longAverage = meanClose(in: candles, endingAt: index, window: longWindow)
 
-                    if crossesUp, quantity == 0 {
-                        let executionPrice = candle.close * (1 + settings.slippageRate)
-                        let unitCost = executionPrice * (1 + settings.commissionRate)
-                        let purchasable = Int(floor(cash / unitCost))
-                        if purchasable > 0 {
-                            let gross = executionPrice * Double(purchasable)
-                            let fee = gross * settings.commissionRate
-                            cash -= gross + fee
-                            quantity = purchasable
-                            trades.append(
-                                SimulatedTrade(
-                                    id: UUID(),
-                                    date: candle.date,
-                                    side: .buy,
-                                    price: executionPrice,
-                                    quantity: purchasable,
-                                    fee: fee,
-                                    reason: String(localized: "trade.reason.cross_up")
-                                )
+                    if let previousShort, let previousLong {
+                        let crossesUp = previousShort <= previousLong && shortAverage > longAverage
+                        let crossesDown = previousShort >= previousLong && shortAverage < longAverage
+
+                        if crossesUp, quantity == 0 {
+                            buyAll(
+                                candle: candle,
+                                settings: settings,
+                                reason: String(localized: "trade.reason.cross_up"),
+                                cash: &cash,
+                                quantity: &quantity,
+                                trades: &trades
+                            )
+                        } else if crossesDown, quantity > 0 {
+                            sellAll(
+                                candle: candle,
+                                settings: settings,
+                                reason: String(localized: "trade.reason.cross_down"),
+                                cash: &cash,
+                                quantity: &quantity,
+                                trades: &trades
                             )
                         }
-                    } else if crossesDown, quantity > 0 {
+                    }
+
+                    previousShort = shortAverage
+                    previousLong = longAverage
+                }
+
+            case let .breakout(entryWindow, exitWindow):
+                if index >= entryWindow {
+                    let entryStart = index - entryWindow
+                    let previousHigh = candles[entryStart..<index].map(\.high).max() ?? candle.high
+                    let exitStart = max(0, index - exitWindow)
+                    let previousLow = candles[exitStart..<index].map(\.low).min() ?? candle.low
+
+                    if quantity == 0, candle.close > previousHigh {
+                        buyAll(
+                            candle: candle,
+                            settings: settings,
+                            reason: String(localized: "trade.reason.breakout"),
+                            cash: &cash,
+                            quantity: &quantity,
+                            trades: &trades
+                        )
+                    } else if quantity > 0, candle.close < previousLow {
                         sellAll(
                             candle: candle,
                             settings: settings,
-                            reason: String(localized: "trade.reason.cross_down"),
+                            reason: String(localized: "trade.reason.breakdown"),
                             cash: &cash,
                             quantity: &quantity,
                             trades: &trades
                         )
                     }
                 }
-
-                previousShort = shortAverage
-                previousLong = longAverage
             }
 
             equityCurve.append(
@@ -141,6 +177,35 @@ enum BacktestEngine {
         return candles[start...index].reduce(0) { $0 + $1.close } / Double(window)
     }
 
+    private static func buyAll(
+        candle: Candle,
+        settings: BacktestSettings,
+        reason: String,
+        cash: inout Double,
+        quantity: inout Int,
+        trades: inout [SimulatedTrade]
+    ) {
+        let executionPrice = candle.close * (1 + settings.slippageRate)
+        let unitCost = executionPrice * (1 + settings.commissionRate)
+        let purchasable = Int(floor(cash / unitCost))
+        guard purchasable > 0 else { return }
+        let gross = executionPrice * Double(purchasable)
+        let fee = gross * settings.commissionRate
+        cash -= gross + fee
+        quantity += purchasable
+        trades.append(
+            SimulatedTrade(
+                id: UUID(),
+                date: candle.date,
+                side: .buy,
+                price: executionPrice,
+                quantity: purchasable,
+                fee: fee,
+                reason: reason
+            )
+        )
+    }
+
     private static func sellAll(
         candle: Candle,
         settings: BacktestSettings,
@@ -178,4 +243,3 @@ enum BacktestEngine {
         return maximum
     }
 }
-

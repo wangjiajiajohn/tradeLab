@@ -28,7 +28,9 @@ struct Candle: Identifiable, Hashable, Codable, Sendable {
 
 struct TradingStrategy: Identifiable, Hashable, Codable, Sendable {
     enum Rule: Hashable, Codable, Sendable {
+        case buyAndHold
         case dualMovingAverage(short: Int, long: Int)
+        case breakout(entryWindow: Int, exitWindow: Int)
     }
 
     let id: UUID
@@ -44,6 +46,26 @@ struct TradingStrategy: Identifiable, Hashable, Codable, Sendable {
         rule: .dualMovingAverage(short: 10, long: 30),
         isBuiltIn: true
     )
+
+    static let buyAndHoldDemo = TradingStrategy(
+        id: UUID(uuidString: "6B5518CF-3034-4E42-9C48-105D32105E90")!,
+        name: String(localized: "strategy.buy_hold.name"),
+        summary: String(localized: "strategy.buy_hold.summary"),
+        rule: .buyAndHold,
+        isBuiltIn: true
+    )
+
+    static let breakoutDemo = TradingStrategy(
+        id: UUID(uuidString: "C0FC3762-D419-4976-9ED4-74ED70AC60D6")!,
+        name: String(localized: "strategy.breakout.name"),
+        summary: String(localized: "strategy.breakout.summary"),
+        rule: .breakout(entryWindow: 20, exitWindow: 10),
+        isBuiltIn: true
+    )
+
+    static var builtIn: [TradingStrategy] {
+        [.buyAndHoldDemo, .dualMovingAverageDemo, .breakoutDemo]
+    }
 }
 
 struct BacktestSettings: Hashable, Codable, Sendable {
@@ -94,4 +116,3 @@ struct BacktestResult: Hashable, Sendable {
 
     var excessReturn: Double { cumulativeReturn - benchmarkReturn }
 }
-

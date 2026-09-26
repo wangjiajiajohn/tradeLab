@@ -16,6 +16,10 @@ struct DemoMarketDataProvider: MarketDataProviding {
     )
 
     func candles() -> [Candle] {
+        Self.candles(seed: 1)
+    }
+
+    static func candles(seed: Int) -> [Candle] {
         let calendar = Calendar(identifier: .gregorian)
         let start = calendar.date(from: DateComponents(year: 2024, month: 1, day: 2))!
         var output: [Candle] = []
@@ -26,9 +30,10 @@ struct DemoMarketDataProvider: MarketDataProviding {
             let weekday = calendar.component(.weekday, from: date)
             if weekday != 1 && weekday != 7 {
                 let index = Double(tradingDay)
-                let trend = 128 + index * 0.105
-                let mediumCycle = sin(index / 18) * 8.5
-                let longCycle = sin(index / 58) * 13
+                let seedValue = Double(seed)
+                let trend = 68 + seedValue * 22 + index * (0.06 + seedValue * 0.008)
+                let mediumCycle = sin(index / (15 + seedValue) + seedValue) * (5 + seedValue)
+                let longCycle = sin(index / (48 + seedValue * 3)) * (9 + seedValue)
                 let shock = index > 260 && index < 330 ? -12 * sin((index - 260) / 70 * .pi) : 0
                 let close = max(30, trend + mediumCycle + longCycle + shock)
                 let open = close * (1 + sin(index * 1.7) * 0.004)
@@ -44,4 +49,3 @@ struct DemoMarketDataProvider: MarketDataProviding {
         return output
     }
 }
-

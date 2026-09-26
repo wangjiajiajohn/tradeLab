@@ -5,15 +5,18 @@ TradeLab V2 is a clean iOS implementation of an offline-first strategy backtesti
 ## Current vertical slice
 
 - Four-step first-backtest flow: stock, strategy, settings, run
-- Deterministic synthetic demo data with no first-run network request
-- Reproducible 10/30 moving-average strategy
+- Seven selectable offline stocks with no first-run network request
+- Three reproducible strategies: buy-and-hold, 10/30 moving average, and 20-day breakout
 - Commission and slippage-aware execution
 - Price/signals, equity comparison, summary metrics, and trade history
 - English, Simplified Chinese, and Traditional Chinese resources
 - System appearance support and privacy manifest
 - Unit tests plus a host-side engine smoke check
 
-The built-in AAPL series is synthetic and clearly disclosed in the UI. It must not be presented as actual market data.
+Release builds use deterministic synthetic series that are clearly disclosed in
+the UI. A local Debug build can use development-only market data generated with
+the scripts in `Tools/`; that data is ignored by Git and never copied by the
+Release build.
 
 ## Generate and build
 
@@ -49,4 +52,3 @@ xcrun swiftc -disable-sandbox \
 2. CSV import with broker-format mapping and data-quality reporting
 3. Saved backtests and side-by-side review
 4. Optional user-configured market-data and AI providers
-
