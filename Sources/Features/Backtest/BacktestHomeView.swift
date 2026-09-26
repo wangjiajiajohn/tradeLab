@@ -2,29 +2,30 @@ import Charts
 import SwiftUI
 
 struct BacktestHomeView: View {
+    private enum ConfigurationSheet: String, Identifiable {
+        case stock
+        case strategy
+        case settings
+
+        var id: String { rawValue }
+    }
+
     @EnvironmentObject private var model: AppModel
+    @State private var configurationSheet: ConfigurationSheet?
 
     var body: some View {
         NavigationStack {
             List {
-                Section("backtest.workflow") {
-                    LabeledContent("backtest.stock", value: model.selectedSecurity?.name ?? String(localized: "status.not_selected"))
-                    LabeledContent("backtest.strategy", value: model.selectedStrategy?.name ?? String(localized: "status.not_selected"))
-                    LabeledContent("backtest.conditions", value: model.hasConfirmedSettings ? String(localized: "status.confirmed") : String(localized: "status.not_confirmed"))
-                    Button {
-                        _ = model.runBacktest()
-                    } label: {
-                        Label("backtest.run", systemImage: "play.fill")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .disabled(!model.canRunBacktest)
-                }
-
                 if let result = model.result {
-                    ResultSections(result: result)
+                    ResultSections(
+                        result: result,
+                        changeStock: { configurationSheet = .stock },
+                        changeStrategy: { configurationSheet = .strategy },
+                        changeSettings: { configurationSheet = .settings },
+                        runAgain: { _ = model.runBacktest() }
+                    )
                 } else {
+                    workflowSection
                     Section {
                         ContentUnavailableView(
                             "backtest.empty.title",
@@ -35,18 +36,81 @@ struct BacktestHomeView: View {
                 }
             }
             .navigationTitle("tab.backtest")
+            .sheet(item: $configurationSheet) { sheet in
+                switch sheet {
+                case .stock: StockPickerView()
+                case .strategy: StrategyPickerView()
+                case .settings: BacktestSettingsSheet()
+                }
+            }
+        }
+    }
+
+    private var workflowSection: some View {
+        Section("backtest.workflow") {
+            Button { configurationSheet = .stock } label: {
+                ConfigurationRow(
+                    title: "backtest.stock",
+                    value: model.selectedSecurity?.name ?? String(localized: "status.not_selected"),
+                    symbol: "chart.line.uptrend.xyaxis"
+                )
+            }
+            Button { configurationSheet = .strategy } label: {
+                ConfigurationRow(
+                    title: "backtest.strategy",
+                    value: model.selectedStrategy?.name ?? String(localized: "status.not_selected"),
+                    symbol: "slider.horizontal.3"
+                )
+            }
+            Button { configurationSheet = .settings } label: {
+                ConfigurationRow(
+                    title: "backtest.conditions",
+                    value: model.hasConfirmedSettings ? String(localized: "status.confirmed") : String(localized: "status.not_confirmed"),
+                    symbol: "calendar.badge.clock"
+                )
+            }
+            Button {
+                _ = model.runBacktest()
+            } label: {
+                Label("backtest.run", systemImage: "play.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .disabled(!model.canRunBacktest)
         }
     }
 }
 
 private struct ResultSections: View {
     let result: BacktestResult
+    let changeStock: () -> Void
+    let changeStrategy: () -> Void
+    let changeSettings: () -> Void
+    let runAgain: () -> Void
 
     var body: some View {
         Section {
             ResultOverview(result: result)
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
+        }
+
+        Section("result.next_test") {
+            Button(action: changeStock) {
+                Label("result.change_stock", systemImage: "chart.line.uptrend.xyaxis")
+            }
+            Button(action: changeStrategy) {
+                Label("result.change_strategy", systemImage: "slider.horizontal.3")
+            }
+            Button(action: changeSettings) {
+                Label("result.change_settings", systemImage: "calendar.badge.clock")
+            }
+            Button(action: runAgain) {
+                Label("result.run_again", systemImage: "arrow.clockwise")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
         }
 
         Section("result.price_signals") {
@@ -150,6 +214,8 @@ private struct ResultOverview: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 5) {
+                Text("\(result.security.name) · \(result.strategy.name)")
+                    .font(.headline)
                 Text("result.final_value")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -226,5 +292,157 @@ private struct ResultMetric: View {
         .frame(maxWidth: .infinity, minHeight: 86, alignment: .leading)
         .padding(14)
         .background(Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 16))
+    }
+}
+
+private struct ConfigurationRow: View {
+    let title: LocalizedStringKey
+    let value: String
+    let symbol: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .frame(width: 24)
+                .foregroundStyle(.tint)
+            Text(title)
+                .foregroundStyle(.primary)
+            Spacer()
+            Text(value)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.tertiary)
+        }
+        .contentShape(.rect)
+    }
+}
+
+private struct StockPickerView: View {
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List(model.securities) { security in
+                Button {
+                    model.selectSecurity(security)
+                    dismiss()
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(security.name).font(.headline)
+                            Text("\(security.symbol) · \(marketName(security.market))")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if model.selectedSecurityID == security.id {
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(.tint)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+            .navigationTitle("result.change_stock")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("action.done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func marketName(_ market: Market) -> String {
+        switch market {
+        case .hk: String(localized: "market.hk")
+        case .us: String(localized: "market.us")
+        default: market.rawValue.uppercased()
+        }
+    }
+}
+
+private struct StrategyPickerView: View {
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List(model.strategies) { strategy in
+                Button {
+                    model.selectStrategy(strategy)
+                    dismiss()
+                } label: {
+                    HStack(alignment: .top, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(strategy.name).font(.headline)
+                            Text(strategy.summary)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if model.selectedStrategyID == strategy.id {
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(.tint)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+                .padding(.vertical, 4)
+            }
+            .navigationTitle("result.change_strategy")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("action.done") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+private struct BacktestSettingsSheet: View {
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var draft = BacktestSettings.demo
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("settings.capital") {
+                    TextField("settings.capital", value: $draft.initialCapital, format: .number)
+                        .keyboardType(.decimalPad)
+                }
+                Section("settings.costs") {
+                    LabeledContent("settings.commission") {
+                        Text(draft.commissionRate, format: .percent.precision(.fractionLength(2)))
+                    }
+                    Slider(value: $draft.commissionRate, in: 0...0.01, step: 0.0005)
+                    LabeledContent("settings.slippage") {
+                        Text(draft.slippageRate, format: .percent.precision(.fractionLength(2)))
+                    }
+                    Slider(value: $draft.slippageRate, in: 0...0.01, step: 0.0005)
+                }
+            }
+            .navigationTitle("backtest.conditions")
+            .navigationBarTitleDisplayMode(.inline)
+            .onAppear { draft = model.settings }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("action.cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("action.done") {
+                        model.updateSettings(draft)
+                        model.hasConfirmedSettings = true
+                        dismiss()
+                    }
+                    .disabled(draft.initialCapital <= 0)
+                }
+            }
+        }
     }
 }

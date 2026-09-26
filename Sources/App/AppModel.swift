@@ -75,11 +75,22 @@ final class AppModel: ObservableObject {
     }
 
     func selectSecurity(_ security: Security) {
+        guard selectedSecurityID != security.id else { return }
         selectedSecurityID = security.id
+        result = nil
     }
 
     func selectStrategy(_ strategy: TradingStrategy) {
+        guard selectedStrategyID != strategy.id else { return }
         selectedStrategyID = strategy.id
+        result = nil
+    }
+
+    func updateSettings(_ newSettings: BacktestSettings) {
+        guard settings != newSettings else { return }
+        settings = newSettings
+        hasConfirmedSettings = false
+        result = nil
     }
 
     func candles(for security: Security) -> [Candle] {

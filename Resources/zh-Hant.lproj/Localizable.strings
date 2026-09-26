@@ -1,6 +1,8 @@
 "action.back" = "返回";
 "action.continue" = "繼續";
 "action.ok" = "好";
+"action.cancel" = "取消";
+"action.done" = "完成";
 
 "backtest.conditions" = "回測設定";
 "backtest.empty.description" = "選擇股票和策略後，執行一次歷史模擬。";
@@ -70,12 +72,18 @@
 "result.benchmark_outperformed_format" = "本次回測跑贏買入並持有 %@。";
 "result.benchmark_underperformed_format" = "本次回測落後買入並持有 %@。";
 "result.reliability_note" = "一次回測只是歷史證據，建議更換股票和時間區間再次驗證。";
+"result.next_test" = "繼續驗證";
+"result.change_stock" = "更換股票";
+"result.change_strategy" = "更換策略";
+"result.change_settings" = "調整回測設定";
+"result.run_again" = "使用目前條件再次回測";
 
 "review.empty.description" = "儲存的回測會顯示在這裡，方便比較和複盤。";
 "review.empty.title" = "暫無可複盤內容";
 
 "settings.appearance" = "外觀";
 "settings.capital" = "初始資金";
+"settings.commission" = "佣金";
 "settings.costs" = "佣金 / 滑點";
 "settings.data" = "行情資料";
 "settings.demo_data" = "離線示範資料";
@@ -87,6 +95,7 @@
 "settings.research_disclaimer" = "回測僅供研究，不構成投資建議，也不代表未來表現。";
 "settings.reset_onboarding" = "重新體驗第一次回測";
 "settings.storage" = "示範資料儲存";
+"settings.slippage" = "滑點";
 "settings.theme" = "主題";
 
 "status.confirmed" = "已確認";

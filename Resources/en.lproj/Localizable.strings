@@ -1,6 +1,8 @@
 "action.back" = "Back";
 "action.continue" = "Continue";
 "action.ok" = "OK";
+"action.cancel" = "Cancel";
+"action.done" = "Done";
 
 "backtest.conditions" = "Backtest Settings";
 "backtest.empty.description" = "Select a stock and strategy, then run a historical simulation.";
@@ -70,12 +72,18 @@
 "result.benchmark_outperformed_format" = "This backtest beat buy and hold by %@.";
 "result.benchmark_underperformed_format" = "This backtest trailed buy and hold by %@.";
 "result.reliability_note" = "One backtest is only historical evidence. Try another stock and period before drawing conclusions.";
+"result.next_test" = "Test Another Variation";
+"result.change_stock" = "Change Stock";
+"result.change_strategy" = "Change Strategy";
+"result.change_settings" = "Adjust Backtest Settings";
+"result.run_again" = "Run Again with Current Setup";
 
 "review.empty.description" = "Saved backtests will appear here for side-by-side review.";
 "review.empty.title" = "Nothing to Review Yet";
 
 "settings.appearance" = "Appearance";
 "settings.capital" = "Initial Capital";
+"settings.commission" = "Commission";
 "settings.costs" = "Commission / Slippage";
 "settings.data" = "Market Data";
 "settings.demo_data" = "Offline Demo Data";
@@ -87,6 +95,7 @@
 "settings.research_disclaimer" = "Backtests are research tools, not investment advice or a promise of future performance.";
 "settings.reset_onboarding" = "Show First Backtest Again";
 "settings.storage" = "Demo Data Storage";
+"settings.slippage" = "Slippage";
 "settings.theme" = "Theme";
 
 "status.confirmed" = "Confirmed";

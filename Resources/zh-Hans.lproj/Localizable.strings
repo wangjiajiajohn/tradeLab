@@ -1,6 +1,8 @@
 "action.back" = "返回";
 "action.continue" = "继续";
 "action.ok" = "好";
+"action.cancel" = "取消";
+"action.done" = "完成";
 
 "backtest.conditions" = "回测设置";
 "backtest.empty.description" = "选择股票和策略后，运行一次历史模拟。";
@@ -70,12 +72,18 @@
 "result.benchmark_outperformed_format" = "本次回测跑赢买入并持有 %@。";
 "result.benchmark_underperformed_format" = "本次回测落后买入并持有 %@。";
 "result.reliability_note" = "一次回测只是历史证据，建议更换股票和时间区间再次验证。";
+"result.next_test" = "继续验证";
+"result.change_stock" = "更换股票";
+"result.change_strategy" = "更换策略";
+"result.change_settings" = "调整回测设置";
+"result.run_again" = "使用当前条件再次回测";
 
 "review.empty.description" = "保存的回测会显示在这里，便于对比复盘。";
 "review.empty.title" = "暂无可复盘内容";
 
 "settings.appearance" = "外观";
 "settings.capital" = "初始资金";
+"settings.commission" = "佣金";
 "settings.costs" = "佣金 / 滑点";
 "settings.data" = "行情数据";
 "settings.demo_data" = "离线演示数据";
@@ -87,6 +95,7 @@
 "settings.research_disclaimer" = "回测仅用于研究，不构成投资建议，也不代表未来表现。";
 "settings.reset_onboarding" = "重新体验第一次回测";
 "settings.storage" = "演示数据存储";
+"settings.slippage" = "滑点";
 "settings.theme" = "主题";
 
 "status.confirmed" = "已确认";
