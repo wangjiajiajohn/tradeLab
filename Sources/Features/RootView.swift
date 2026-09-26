@@ -54,57 +54,50 @@ extension View {
 }
 
 private struct PullDownResearchDisclosureModifier: ViewModifier {
-    @State private var pullDistance: CGFloat = 0
-
-    private let disclosureHeight: CGFloat = 36
+    @Environment(\.locale) private var locale
 
     func body(content: Content) -> some View {
         content
             .background {
-                ScrollPullObserver(distance: $pullDistance)
+                ScrollDisclosureInstaller(
+                    text: AppLocalization.string("disclosure.pull_down", locale: locale)
+                )
                     .frame(width: 0, height: 0)
-            }
-            .overlay(alignment: .top) {
-                Label("disclosure.pull_down", systemImage: "info.circle")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: disclosureHeight)
-                    // Keep the disclosure immediately above the scroll content at
-                    // rest. During overscroll it moves one-for-one with the list,
-                    // just like a header that belongs to the scrolling page.
-                    .offset(y: pullDistance - disclosureHeight)
-                    .opacity(pullDistance > 0 ? 1 : 0)
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(pullDistance < disclosureHeight * 0.8)
             }
     }
 }
 
-private struct ScrollPullObserver: UIViewRepresentable {
-    @Binding var distance: CGFloat
+private struct ScrollDisclosureInstaller: UIViewRepresentable {
+    let text: String
 
-    func makeUIView(context: Context) -> ScrollPullObserverView {
-        let view = ScrollPullObserverView()
-        view.onDistanceChange = { distance = $0 }
+    func makeUIView(context: Context) -> ScrollDisclosureInstallerView {
+        let view = ScrollDisclosureInstallerView()
+        view.text = text
         return view
     }
 
-    func updateUIView(_ uiView: ScrollPullObserverView, context: Context) {
-        uiView.onDistanceChange = { distance = $0 }
+    func updateUIView(_ uiView: ScrollDisclosureInstallerView, context: Context) {
+        uiView.text = text
         uiView.attachIfNeeded()
     }
 
-    static func dismantleUIView(_ uiView: ScrollPullObserverView, coordinator: ()) {
+    static func dismantleUIView(_ uiView: ScrollDisclosureInstallerView, coordinator: ()) {
         uiView.detach()
     }
 }
 
-private final class ScrollPullObserverView: UIView {
-    var onDistanceChange: ((CGFloat) -> Void)?
+private final class ScrollDisclosureInstallerView: UIView {
+    var text = "" {
+        didSet { updateTitle() }
+    }
+
     private weak var observedScrollView: UIScrollView?
+    private lazy var disclosureControl: UIRefreshControl = {
+        let control = UIRefreshControl()
+        control.tintColor = .secondaryLabel
+        control.addTarget(self, action: #selector(endDisclosure), for: .valueChanged)
+        return control
+    }()
 
     override func didMoveToWindow() {
         super.didMoveToWindow()
@@ -117,20 +110,32 @@ private final class ScrollPullObserverView: UIView {
 
     func attachIfNeeded() {
         guard observedScrollView == nil, let scrollView = nearestVerticalScrollView() else { return }
+        guard scrollView.refreshControl == nil || scrollView.refreshControl === disclosureControl else { return }
         observedScrollView = scrollView
-        scrollView.panGestureRecognizer.addTarget(self, action: #selector(handlePan))
+        scrollView.refreshControl = disclosureControl
+        updateTitle()
     }
 
     func detach() {
-        observedScrollView?.panGestureRecognizer.removeTarget(self, action: #selector(handlePan))
+        if observedScrollView?.refreshControl === disclosureControl {
+            observedScrollView?.refreshControl = nil
+        }
         observedScrollView = nil
-        onDistanceChange?(0)
     }
 
-    @objc private func handlePan() {
-        guard let scrollView = observedScrollView else { return }
-        let distance = max(0, -(scrollView.contentOffset.y + scrollView.adjustedContentInset.top))
-        onDistanceChange?(distance)
+    private func updateTitle() {
+        disclosureControl.attributedTitle = NSAttributedString(
+            string: text,
+            attributes: [
+                .font: UIFont.preferredFont(forTextStyle: .caption1),
+                .foregroundColor: UIColor.secondaryLabel
+            ]
+        )
+        disclosureControl.accessibilityLabel = text
+    }
+
+    @objc private func endDisclosure() {
+        disclosureControl.endRefreshing()
     }
 
     private func nearestVerticalScrollView() -> UIScrollView? {
