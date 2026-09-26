@@ -151,21 +151,25 @@ struct LongbridgeMarketDataProvider: Sendable {
         for endpoint in endpoints {
             do {
                 let catalog = try await securityCatalog(endpoint: endpoint, locale: locale)
-                let matches = Array(Self.filterCatalog(catalog, matching: trimmed, locale: locale).prefix(500))
+                let matches = Array(Self.filterCatalog(catalog, matching: trimmed, locale: locale).prefix(120))
                 guard !matches.isEmpty else { return [] }
 
                 // The security catalog does not expose a security type. Enrich the
                 // matched rows with static information so HK warrants do not get
                 // mixed in with ordinary shares. Search must still work if this
                 // optional enrichment request is unavailable.
-                let staticInfo = (try? await requestStaticInfo(
-                    symbols: matches.map(\.security.id),
-                    endpoint: endpoint
-                )) ?? []
-                let boardBySymbol = Dictionary(
-                    staticInfo.map { ($0.symbol, $0.board) },
-                    uniquingKeysWith: { first, _ in first }
-                )
+                let symbols = matches.map(\.security.id)
+                var boardBySymbol = await Self.staticInfoCache.boards(for: symbols)
+                let missingSymbols = symbols.filter { boardBySymbol[$0] == nil }
+                if !missingSymbols.isEmpty,
+                   let staticInfo = try? await requestStaticInfo(symbols: missingSymbols, endpoint: endpoint) {
+                    let fetchedBoards = Dictionary(
+                        staticInfo.map { ($0.symbol, $0.board) },
+                        uniquingKeysWith: { first, _ in first }
+                    )
+                    boardBySymbol.merge(fetchedBoards, uniquingKeysWith: { _, new in new })
+                    await Self.staticInfoCache.store(fetchedBoards)
+                }
 
                 return matches.sorted {
                     let lhsPriority = Self.searchSortPriority(
@@ -582,6 +586,7 @@ struct LongbridgeMarketDataProvider: Sendable {
     }
 
     private static let catalogCache = LongbridgeCatalogCache()
+    private static let staticInfoCache = LongbridgeStaticInfoCache()
 }
 
 private struct LongbridgeCatalogEnvelope: Decodable {
@@ -594,7 +599,7 @@ private struct LongbridgeCatalogEnvelope: Decodable {
     }
 }
 
-private struct LongbridgeCatalogSecurity: Decodable, Sendable {
+private struct LongbridgeCatalogSecurity: Codable, Sendable {
     let symbol: String
     let name: String?
     let nameCN: String?
@@ -622,9 +627,76 @@ private struct LongbridgeCatalogSecurity: Decodable, Sendable {
 
 private actor LongbridgeCatalogCache {
     private var storage: [String: [LongbridgeCatalogSecurity]] = [:]
+    private let lifetime: TimeInterval = 24 * 60 * 60
 
-    func value(for key: String) -> [LongbridgeCatalogSecurity]? { storage[key] }
-    func store(_ value: [LongbridgeCatalogSecurity], for key: String) { storage[key] = value }
+    func value(for key: String) -> [LongbridgeCatalogSecurity]? {
+        if let cached = storage[key] { return cached }
+        guard let data = try? Data(contentsOf: cacheURL(for: key)),
+              let payload = try? JSONDecoder().decode(LongbridgeCatalogCachePayload.self, from: data),
+              Date().timeIntervalSince(payload.createdAt) < lifetime
+        else { return nil }
+        storage[key] = payload.securities
+        return payload.securities
+    }
+
+    func store(_ value: [LongbridgeCatalogSecurity], for key: String) {
+        storage[key] = value
+        let payload = LongbridgeCatalogCachePayload(createdAt: Date(), securities: value)
+        guard let data = try? JSONEncoder().encode(payload) else { return }
+        try? FileManager.default.createDirectory(
+            at: cacheDirectory,
+            withIntermediateDirectories: true
+        )
+        try? data.write(to: cacheURL(for: key), options: .atomic)
+    }
+
+    private var cacheDirectory: URL {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            .appending(path: "LongbridgeCatalog", directoryHint: .isDirectory)
+    }
+
+    private func cacheURL(for key: String) -> URL {
+        let fileName = key.replacingOccurrences(of: "|", with: "-") + ".json"
+        return cacheDirectory.appending(path: fileName)
+    }
+}
+
+private struct LongbridgeCatalogCachePayload: Codable {
+    let createdAt: Date
+    let securities: [LongbridgeCatalogSecurity]
+}
+
+private actor LongbridgeStaticInfoCache {
+    private var boardBySymbol: [String: String] = [:]
+    private var didLoad = false
+
+    func boards(for symbols: [String]) -> [String: String] {
+        loadIfNeeded()
+        return Dictionary(uniqueKeysWithValues: symbols.compactMap { symbol in
+            boardBySymbol[symbol].map { (symbol, $0) }
+        })
+    }
+
+    func store(_ values: [String: String]) {
+        loadIfNeeded()
+        boardBySymbol.merge(values, uniquingKeysWith: { _, new in new })
+        guard let data = try? JSONEncoder().encode(boardBySymbol) else { return }
+        try? data.write(to: cacheURL, options: .atomic)
+    }
+
+    private func loadIfNeeded() {
+        guard !didLoad else { return }
+        didLoad = true
+        guard let data = try? Data(contentsOf: cacheURL),
+              let cached = try? JSONDecoder().decode([String: String].self, from: data)
+        else { return }
+        boardBySymbol = cached
+    }
+
+    private var cacheURL: URL {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            .appending(path: "LongbridgeStaticInfo.json")
+    }
 }
 
 private struct SocketTokenEnvelope: Decodable {
