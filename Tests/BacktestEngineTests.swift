@@ -96,4 +96,27 @@ final class BacktestEngineTests: XCTestCase {
             XCTAssertEqual(buy.date, firstTradingDate)
         }
     }
+
+    func testBacktestRecordCanBePersisted() throws {
+        let provider = DemoMarketDataProvider()
+        let result = try BacktestEngine.run(
+            security: provider.security,
+            candles: provider.candles(),
+            strategy: .dualMovingAverageDemo,
+            settings: .demo
+        )
+        let record = BacktestRecord(
+            result: result,
+            createdAt: Date(timeIntervalSince1970: 1_700_000_000)
+        )
+
+        let data = try JSONEncoder().encode(record)
+        let restored = try JSONDecoder().decode(BacktestRecord.self, from: data)
+
+        XCTAssertEqual(restored, record)
+        XCTAssertEqual(restored.securityID, result.security.id)
+        XCTAssertEqual(restored.strategyID, result.strategy.id)
+        XCTAssertEqual(restored.tradeCount, result.trades.count)
+        XCTAssertEqual(restored.excessReturn, result.excessReturn, accuracy: 0.000_001)
+    }
 }

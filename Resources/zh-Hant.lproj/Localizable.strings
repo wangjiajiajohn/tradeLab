@@ -80,6 +80,11 @@
 
 "review.empty.description" = "儲存的回測會顯示在這裡，方便比較和複盤。";
 "review.empty.title" = "暫無可複盤內容";
+"review.assumptions" = "本次假設";
+"review.detail" = "回測記錄";
+"review.performance" = "關鍵結果";
+"review.restore" = "使用這組條件再次驗證";
+"review.restore_hint" = "恢復股票、策略和回測設定，然後返回回測頁。不會直接執行。";
 
 "settings.appearance" = "外觀";
 "settings.capital" = "初始資金";

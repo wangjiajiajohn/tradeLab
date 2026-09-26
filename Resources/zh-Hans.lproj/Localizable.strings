@@ -80,6 +80,11 @@
 
 "review.empty.description" = "保存的回测会显示在这里，便于对比复盘。";
 "review.empty.title" = "暂无可复盘内容";
+"review.assumptions" = "本次假设";
+"review.detail" = "回测记录";
+"review.performance" = "关键结果";
+"review.restore" = "使用这组条件再次验证";
+"review.restore_hint" = "恢复股票、策略和回测设置，然后返回回测页。不会直接运行。";
 
 "settings.appearance" = "外观";
 "settings.capital" = "初始资金";

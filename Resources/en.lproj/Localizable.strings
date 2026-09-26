@@ -80,6 +80,11 @@
 
 "review.empty.description" = "Saved backtests will appear here for side-by-side review.";
 "review.empty.title" = "Nothing to Review Yet";
+"review.assumptions" = "Assumptions";
+"review.detail" = "Backtest Record";
+"review.performance" = "Key Results";
+"review.restore" = "Test These Conditions Again";
+"review.restore_hint" = "Restores the stock, strategy, and settings, then returns to Backtest. It will not run automatically.";
 
 "settings.appearance" = "Appearance";
 "settings.capital" = "Initial Capital";

@@ -30,8 +30,10 @@ final class AppModel: ObservableObject {
     private enum Keys {
         static let completedFirstBacktest = "v2.completed-first-backtest"
         static let appearance = "v2.appearance"
+        static let backtestHistory = "v2.backtest-history"
     }
 
+    private let defaults: UserDefaults
     let securities: [Security]
     let strategies: [TradingStrategy]
     private let marketData: MarketDataLibrary
@@ -44,17 +46,20 @@ final class AppModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var selectedTab: MainTab = .backtest
     @Published var hasCompletedFirstBacktest: Bool
+    @Published private(set) var backtestHistory: [BacktestRecord]
     @Published var appearance: Appearance {
-        didSet { UserDefaults.standard.set(appearance.rawValue, forKey: Keys.appearance) }
+        didSet { defaults.set(appearance.rawValue, forKey: Keys.appearance) }
     }
 
     init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
         let library = BuiltInMarketDataProvider.load()
         marketData = library
         securities = library.securities
         strategies = TradingStrategy.builtIn
         hasCompletedFirstBacktest = defaults.bool(forKey: Keys.completedFirstBacktest)
         appearance = Appearance(rawValue: defaults.string(forKey: Keys.appearance) ?? "") ?? .system
+        backtestHistory = Self.loadHistory(from: defaults)
     }
 
     var selectedSecurity: Security? {
@@ -105,16 +110,18 @@ final class AppModel: ObservableObject {
         }
 
         do {
-            result = try BacktestEngine.run(
+            let newResult = try BacktestEngine.run(
                 security: security,
                 candles: candles(for: security),
                 strategy: strategy,
                 settings: settings
             )
+            result = newResult
+            saveToHistory(newResult)
             errorMessage = nil
             if completesOnboarding {
                 hasCompletedFirstBacktest = true
-                UserDefaults.standard.set(true, forKey: Keys.completedFirstBacktest)
+                defaults.set(true, forKey: Keys.completedFirstBacktest)
             }
             selectedTab = .backtest
             return true
@@ -124,6 +131,18 @@ final class AppModel: ObservableObject {
         }
     }
 
+    func restoreConfiguration(from record: BacktestRecord) {
+        guard securities.contains(where: { $0.id == record.securityID }),
+              strategies.contains(where: { $0.id == record.strategyID })
+        else { return }
+        selectedSecurityID = record.securityID
+        selectedStrategyID = record.strategyID
+        settings = record.settings
+        hasConfirmedSettings = true
+        result = nil
+        selectedTab = .backtest
+    }
+
     func resetFirstRunExperience() {
         selectedSecurityID = nil
         selectedStrategyID = nil
@@ -131,6 +150,20 @@ final class AppModel: ObservableObject {
         result = nil
         errorMessage = nil
         hasCompletedFirstBacktest = false
-        UserDefaults.standard.removeObject(forKey: Keys.completedFirstBacktest)
+        defaults.removeObject(forKey: Keys.completedFirstBacktest)
+    }
+
+    private func saveToHistory(_ result: BacktestResult) {
+        backtestHistory.insert(BacktestRecord(result: result), at: 0)
+        backtestHistory = Array(backtestHistory.prefix(50))
+        guard let data = try? JSONEncoder().encode(backtestHistory) else { return }
+        defaults.set(data, forKey: Keys.backtestHistory)
+    }
+
+    private static func loadHistory(from defaults: UserDefaults) -> [BacktestRecord] {
+        guard let data = defaults.data(forKey: Keys.backtestHistory),
+              let history = try? JSONDecoder().decode([BacktestRecord].self, from: data)
+        else { return [] }
+        return history.sorted { $0.createdAt > $1.createdAt }
     }
 }

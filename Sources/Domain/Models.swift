@@ -131,3 +131,40 @@ struct BacktestResult: Hashable, Sendable {
             .reduce(0) { $0 + $1.price * Double($1.quantity) + $1.fee }
     }
 }
+
+struct BacktestRecord: Identifiable, Hashable, Codable, Sendable {
+    let id: UUID
+    let createdAt: Date
+    let securityID: String
+    let securitySymbol: String
+    let securityName: String
+    let currency: String
+    let strategyID: UUID
+    let strategyName: String
+    let settings: BacktestSettings
+    let finalValue: Double
+    let cumulativeReturn: Double
+    let benchmarkReturn: Double
+    let maxDrawdown: Double
+    let tradeCount: Int
+
+    init(result: BacktestResult, createdAt: Date = .now) {
+        id = UUID()
+        self.createdAt = createdAt
+        securityID = result.security.id
+        securitySymbol = result.security.symbol
+        securityName = result.security.name
+        currency = result.security.currency
+        strategyID = result.strategy.id
+        strategyName = result.strategy.name
+        settings = result.settings
+        finalValue = result.finalValue
+        cumulativeReturn = result.cumulativeReturn
+        benchmarkReturn = result.benchmarkReturn
+        maxDrawdown = result.maxDrawdown
+        tradeCount = result.trades.count
+    }
+
+    var excessReturn: Double { cumulativeReturn - benchmarkReturn }
+    var netProfit: Double { finalValue - settings.initialCapital }
+}
