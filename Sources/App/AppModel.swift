@@ -235,7 +235,6 @@ final class AppModel: ObservableObject {
         }
         guard selectedSecurityID != security.id else { return }
         selectedSecurityID = security.id
-        hasConfirmedSettings = false
         result = nil
     }
 
