@@ -3,3 +3,9 @@
 DerivedData/
 *.xcuserstate
 xcuserdata/
+
+# Real market data is development-only. Never commit or bundle it.
+DevelopmentData/
+*.partial
+.venv-longbridge/
+longbridge.*.log
