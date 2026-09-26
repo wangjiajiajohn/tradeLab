@@ -234,6 +234,15 @@ final class AppModel: ObservableObject {
         }
         guard selectedSecurityID != security.id else { return }
         selectedSecurityID = security.id
+        if marketDataSource != .offline, hasSelectedMarketDataCredentials {
+            if settings.startDate != nil || settings.endDate != nil {
+                var resetSettings = settings
+                resetSettings.startDate = nil
+                resetSettings.endDate = nil
+                settings = resetSettings
+            }
+            hasConfirmedSettings = false
+        }
         result = nil
     }
 
