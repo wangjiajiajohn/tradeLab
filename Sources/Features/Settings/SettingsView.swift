@@ -52,7 +52,7 @@ struct SettingsView: View {
                     Text("settings.research_disclaimer")
                 }
             }
-            .navigationTitle("tab.settings")
+            .navigationTitle(model.language.localized("tab.settings"))
         }
     }
 

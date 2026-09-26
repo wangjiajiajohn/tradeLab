@@ -33,7 +33,7 @@ struct StrategyListView: View {
                     }
                 }
             }
-            .navigationTitle("tab.strategies")
+            .navigationTitle(model.language.localized("tab.strategies"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("strategies.add", systemImage: "plus") { showingCreator = true }

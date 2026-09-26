@@ -66,7 +66,7 @@ struct ReviewView: View {
                     }
                 }
             }
-            .navigationTitle("tab.review")
+            .navigationTitle(model.language.localized("tab.review"))
             .toolbar {
                 if mode == .backtests && !model.backtestHistory.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -146,6 +146,7 @@ struct ReviewView: View {
 }
 
 private struct BacktestRecordRow: View {
+    @EnvironmentObject private var model: AppModel
     let record: BacktestRecord
 
     private var returnColor: Color { record.cumulativeReturn >= 0 ? .green : .red }
@@ -153,7 +154,7 @@ private struct BacktestRecordRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
-                Text(record.securityName)
+                Text(securityName)
                     .font(.headline)
                 Text(record.securitySymbol)
                     .font(.subheadline)
@@ -164,7 +165,7 @@ private struct BacktestRecordRow: View {
                     .foregroundStyle(returnColor)
             }
             HStack {
-                Text(record.strategyName)
+                Text(strategyName)
                     .lineLimit(1)
                 Spacer()
                 Text(record.createdAt, format: .dateTime.month().day().hour().minute())
@@ -173,6 +174,14 @@ private struct BacktestRecordRow: View {
             .foregroundStyle(.secondary)
         }
         .padding(.vertical, 5)
+    }
+
+    private var securityName: String {
+        model.localizedSecurityName(id: record.securityID, fallback: record.securityName)
+    }
+
+    private var strategyName: String {
+        model.localizedStrategyName(id: record.strategyID, fallback: record.strategyName)
     }
 }
 
@@ -185,9 +194,9 @@ private struct BacktestRecordDetail: View {
         List {
             Section {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(record.securityName)
+                    Text(securityName)
                         .font(.title2.weight(.semibold))
-                    Text("\(record.securitySymbol) · \(record.strategyName)")
+                    Text("\(record.securitySymbol) · \(strategyName)")
                         .foregroundStyle(.secondary)
                     Text(record.createdAt, format: .dateTime.year().month().day().hour().minute())
                         .font(.caption)
@@ -268,6 +277,14 @@ private struct BacktestRecordDetail: View {
         return "\(start.formatted(format)) – \(end.formatted(format))"
     }
 
+    private var securityName: String {
+        model.localizedSecurityName(id: record.securityID, fallback: record.securityName)
+    }
+
+    private var strategyName: String {
+        model.localizedStrategyName(id: record.strategyID, fallback: record.strategyName)
+    }
+
     private func optionalPercent(_ value: Double?) -> Text {
         guard let value else { return Text("—") }
         return Text(value, format: .percent.precision(.fractionLength(1)))
@@ -277,6 +294,7 @@ private struct BacktestRecordDetail: View {
 private struct BacktestComparisonView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
+    @EnvironmentObject private var model: AppModel
     let first: BacktestRecord
     let second: BacktestRecord
 
@@ -396,10 +414,10 @@ private struct BacktestComparisonView: View {
             ))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.tint)
-            Text(record.securityName)
+            Text(model.localizedSecurityName(id: record.securityID, fallback: record.securityName))
                 .font(.headline)
                 .lineLimit(1)
-            Text(record.strategyName)
+            Text(model.localizedStrategyName(id: record.strategyID, fallback: record.strategyName))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)

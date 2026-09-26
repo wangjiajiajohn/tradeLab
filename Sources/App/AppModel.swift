@@ -138,6 +138,14 @@ final class AppModel: ObservableObject {
         strategies.first { $0.id == selectedStrategyID }
     }
 
+    func localizedSecurityName(id: String, fallback: String) -> String {
+        securities.first { $0.id == id }?.name ?? fallback
+    }
+
+    func localizedStrategyName(id: UUID, fallback: String) -> String {
+        strategies.first { $0.id == id }?.name ?? fallback
+    }
+
     var selectedCandles: [Candle] {
         guard let selectedSecurity else { return [] }
         if marketDataSource == .longbridge,

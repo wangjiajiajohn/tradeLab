@@ -36,7 +36,7 @@ struct BacktestHomeView: View {
                     }
                 }
             }
-            .navigationTitle("tab.backtest")
+            .navigationTitle(model.language.localized("tab.backtest"))
             .sheet(item: $configurationSheet) { sheet in
                 switch sheet {
                 case .stock: StockPickerView()
@@ -234,6 +234,7 @@ private struct ResultSections: View {
 
 private struct ResultOverview: View {
     let result: BacktestResult
+    @EnvironmentObject private var model: AppModel
     @Environment(\.locale) private var locale
 
     private var resultColor: Color { result.netProfit >= 0 ? .green : .red }
@@ -241,7 +242,7 @@ private struct ResultOverview: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 5) {
-                Text("\(result.security.name) · \(result.strategy.name)")
+                Text("\(securityName) · \(strategyName)")
                     .font(.headline)
                 if let first = result.candles.first?.date,
                    let last = result.candles.last?.date {
@@ -330,6 +331,14 @@ private struct ResultOverview: View {
 
     private func formatted(_ date: Date) -> String {
         date.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: locale))
+    }
+
+    private var securityName: String {
+        model.localizedSecurityName(id: result.security.id, fallback: result.security.name)
+    }
+
+    private var strategyName: String {
+        model.localizedStrategyName(id: result.strategy.id, fallback: result.strategy.name)
     }
 }
 
