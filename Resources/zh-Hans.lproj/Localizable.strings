@@ -31,7 +31,6 @@
 "stock.search.prompt" = "搜索名称、代码或市场";
 "stock.search.no_results" = "没有匹配的股票";
 "stock.search.no_results.description" = "当前数据源中没有与搜索条件匹配的股票。";
-"action.clear" = "清除";
 
 "error.incomplete_setup" = "请先选择股票和策略，并确认回测设置。";
 "error.insufficient_data" = "价格数据不足，无法运行此策略。";

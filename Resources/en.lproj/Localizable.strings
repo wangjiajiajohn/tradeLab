@@ -31,7 +31,6 @@
 "stock.search.prompt" = "Search name, symbol, or market";
 "stock.search.no_results" = "No Matching Stocks";
 "stock.search.no_results.description" = "No stock in the current data source matches your search.";
-"action.clear" = "Clear";
 
 "error.incomplete_setup" = "Choose a stock and strategy, then confirm the backtest settings.";
 "error.insufficient_data" = "There is not enough price data for this strategy.";
