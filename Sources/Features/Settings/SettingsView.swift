@@ -480,6 +480,7 @@ private struct AISettingsView: View {
 
     private var canChooseModel: Bool {
         !isLoadingModels
+            && !trimmedAPIKey.isEmpty
             && !availableModels.isEmpty
             && validatedAPIKey == trimmedAPIKey
     }
