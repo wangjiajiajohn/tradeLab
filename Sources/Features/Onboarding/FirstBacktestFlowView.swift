@@ -282,6 +282,10 @@ struct FirstBacktestFlowView: View {
         case .stock: move(to: .strategy)
         case .strategy: move(to: .settings)
         case .settings:
+            var settings = model.settings
+            settings.startDate = onboardingPeriod.lowerBound
+            settings.endDate = onboardingPeriod.upperBound
+            model.updateSettings(settings)
             model.hasConfirmedSettings = true
             move(to: .run)
         case .run:
@@ -297,14 +301,22 @@ struct FirstBacktestFlowView: View {
     }
 
     private var selectedPeriod: String {
-        guard let availableFirst = model.selectedCandles.first?.date,
-              let availableLast = model.selectedCandles.last?.date
-        else { return "—" }
-        let first = model.settings.startDate ?? availableFirst
-        let last = model.settings.endDate ?? availableLast
-        return first.formatted(.dateTime.year().month(.abbreviated).locale(locale))
+        onboardingPeriod.lowerBound.formatted(.dateTime.year().month(.abbreviated).locale(locale))
             + " – "
-            + last.formatted(.dateTime.year().month(.abbreviated).locale(locale))
+            + onboardingPeriod.upperBound.formatted(.dateTime.year().month(.abbreviated).locale(locale))
+    }
+
+    private var onboardingPeriod: ClosedRange<Date> {
+        if let start = model.settings.startDate,
+           let end = model.settings.endDate {
+            return min(start, end)...max(start, end)
+        }
+        if let security = model.selectedSecurity,
+           let first = model.candles(for: security).first?.date,
+           let last = model.candles(for: security).last?.date {
+            return first...last
+        }
+        return BacktestSettings.defaultPeriod()
     }
 
     private func securitySubtitle(_ security: Security) -> String {
