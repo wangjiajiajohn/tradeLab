@@ -58,6 +58,11 @@ final class AppModel: ObservableObject {
         static let aiProvider = "v2.ai-provider"
         static let aiModel = "v2.ai-model"
         static let journalTrades = "v2.journal-trades"
+        static let selectedSecurityID = "v2.workspace.selected-security-id"
+        static let selectedStrategyID = "v2.workspace.selected-strategy-id"
+        static let backtestSettings = "v2.workspace.backtest-settings"
+        static let confirmedSettings = "v2.workspace.confirmed-settings"
+        static let latestResult = "v2.workspace.latest-result"
     }
 
     private let defaults: UserDefaults
@@ -65,11 +70,27 @@ final class AppModel: ObservableObject {
     @Published private(set) var strategies: [TradingStrategy]
     private var marketData: MarketDataLibrary
 
-    @Published var selectedSecurityID: String?
-    @Published var selectedStrategyID: UUID?
-    @Published var settings = BacktestSettings.demo
-    @Published var hasConfirmedSettings = false
-    @Published var result: BacktestResult?
+    @Published var selectedSecurityID: String? {
+        didSet { persistOptional(selectedSecurityID, forKey: Keys.selectedSecurityID) }
+    }
+    @Published var selectedStrategyID: UUID? {
+        didSet { persistOptional(selectedStrategyID?.uuidString, forKey: Keys.selectedStrategyID) }
+    }
+    @Published var settings = BacktestSettings.demo {
+        didSet { persist(settings, forKey: Keys.backtestSettings) }
+    }
+    @Published var hasConfirmedSettings = false {
+        didSet { defaults.set(hasConfirmedSettings, forKey: Keys.confirmedSettings) }
+    }
+    @Published var result: BacktestResult? {
+        didSet {
+            if let result {
+                persist(result, forKey: Keys.latestResult)
+            } else {
+                defaults.removeObject(forKey: Keys.latestResult)
+            }
+        }
+    }
     @Published var errorMessage: String?
     @Published private(set) var isRunningBacktest = false
     @Published var selectedTab: MainTab = .backtest
@@ -121,6 +142,11 @@ final class AppModel: ObservableObject {
         securities = library.securities
         strategies = TradingStrategy.builtIn(locale: initialLanguage.locale)
             + Self.loadCustomStrategies(from: defaults)
+        selectedSecurityID = nil
+        selectedStrategyID = nil
+        settings = .demo
+        hasConfirmedSettings = false
+        result = nil
         hasCompletedFirstBacktest = defaults.bool(forKey: Keys.completedFirstBacktest)
         appearance = Appearance(rawValue: defaults.string(forKey: Keys.appearance) ?? "") ?? .system
         backtestHistory = Self.loadHistory(from: defaults)
@@ -133,6 +159,24 @@ final class AppModel: ObservableObject {
         journalTrades = Self.loadJournalTrades(from: defaults)
         migrateLegacyAIKey(to: initialAIProvider)
         refreshCredentialStatus()
+
+        let storedSecurityID = defaults.string(forKey: Keys.selectedSecurityID)
+        selectedSecurityID = securities.contains { $0.id == storedSecurityID }
+            ? storedSecurityID
+            : nil
+        let storedStrategyID = defaults.string(forKey: Keys.selectedStrategyID).flatMap(UUID.init(uuidString:))
+        selectedStrategyID = strategies.contains { $0.id == storedStrategyID }
+            ? storedStrategyID
+            : nil
+        settings = Self.load(BacktestSettings.self, from: defaults, key: Keys.backtestSettings) ?? .demo
+        let hasValidWorkspace = selectedSecurityID != nil && selectedStrategyID != nil
+        hasConfirmedSettings = hasValidWorkspace && defaults.bool(forKey: Keys.confirmedSettings)
+        if let storedResult = Self.load(BacktestResult.self, from: defaults, key: Keys.latestResult),
+           storedResult.security.id == selectedSecurityID,
+           storedResult.strategy.id == selectedStrategyID,
+           hasValidWorkspace {
+            result = storedResult
+        }
     }
 
     private func reloadLocalizedContent() {
@@ -399,6 +443,28 @@ final class AppModel: ObservableObject {
     private func saveHistory() {
         guard let data = try? JSONEncoder().encode(backtestHistory) else { return }
         defaults.set(data, forKey: Keys.backtestHistory)
+    }
+
+    private func persist<T: Encodable>(_ value: T, forKey key: String) {
+        guard let data = try? JSONEncoder().encode(value) else { return }
+        defaults.set(data, forKey: key)
+    }
+
+    private func persistOptional(_ value: String?, forKey key: String) {
+        if let value {
+            defaults.set(value, forKey: key)
+        } else {
+            defaults.removeObject(forKey: key)
+        }
+    }
+
+    private static func load<T: Decodable>(
+        _ type: T.Type,
+        from defaults: UserDefaults,
+        key: String
+    ) -> T? {
+        guard let data = defaults.data(forKey: key) else { return nil }
+        return try? JSONDecoder().decode(type, from: data)
     }
 
     private static func loadHistory(from defaults: UserDefaults) -> [BacktestRecord] {

@@ -258,4 +258,42 @@ final class BacktestEngineTests: XCTestCase {
         XCTAssertEqual(second.trades.first?.side, .sell)
         XCTAssertEqual(second.rejectedRows, 0)
     }
+
+    @MainActor
+    func testWorkspaceRestoresAfterRelaunch() throws {
+        let suiteName = "TradeLabV2Tests.workspace.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let model = AppModel(defaults: defaults)
+        let security = try XCTUnwrap(model.securities.first)
+        let strategy = try XCTUnwrap(model.strategies.first)
+        let settings = BacktestSettings(
+            startDate: nil,
+            endDate: nil,
+            initialCapital: 88_000,
+            commissionRate: 0.0008,
+            slippageRate: 0.0003
+        )
+        model.selectSecurity(security)
+        model.selectStrategy(strategy)
+        model.updateSettings(settings)
+        model.hasConfirmedSettings = true
+        model.result = try BacktestEngine.run(
+            security: security,
+            candles: model.candles(for: security),
+            strategy: strategy,
+            settings: settings
+        )
+
+        let restored = AppModel(defaults: defaults)
+
+        XCTAssertEqual(restored.selectedSecurityID, security.id)
+        XCTAssertEqual(restored.selectedStrategyID, strategy.id)
+        XCTAssertEqual(restored.settings, settings)
+        XCTAssertTrue(restored.hasConfirmedSettings)
+        XCTAssertEqual(restored.result?.security.id, security.id)
+        XCTAssertEqual(restored.result?.strategy.id, strategy.id)
+        XCTAssertEqual(restored.result?.finalValue, model.result?.finalValue)
+    }
 }

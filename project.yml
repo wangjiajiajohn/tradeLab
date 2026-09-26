@@ -45,6 +45,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tradelab.backtest.v2.tests
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   TradeLabV2:
     build:

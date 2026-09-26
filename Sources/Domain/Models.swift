@@ -178,7 +178,7 @@ struct EquityPoint: Identifiable, Hashable, Codable, Sendable {
     let benchmarkValue: Double
 }
 
-struct BacktestResult: Hashable, Sendable {
+struct BacktestResult: Hashable, Codable, Sendable {
     let security: Security
     let strategy: TradingStrategy
     let settings: BacktestSettings
