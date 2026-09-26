@@ -390,7 +390,7 @@ private struct AISettingsView: View {
                 Section("provider.credentials") {
                     SecretEntryField(title: "provider.ai.api_key", text: $apiKey)
                 }
-                Section("provider.ai.model_section") {
+                Section {
                     if isLoadingModels {
                         HStack {
                             ProgressView()
@@ -409,13 +409,6 @@ private struct AISettingsView: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    Button {
-                        Task { await refreshModels() }
-                    } label: {
-                        Label("provider.ai.refresh_models", systemImage: "arrow.clockwise")
-                    }
-                    .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoadingModels)
-
                     DisclosureGroup("provider.ai.manual_model", isExpanded: $showsManualModelEntry) {
                         TextField("provider.ai.model_id", text: $model.aiModel)
                             .textInputAutocapitalization(.never)
@@ -426,6 +419,22 @@ private struct AISettingsView: View {
                         Text(modelLoadMessage)
                             .font(.footnote)
                             .foregroundStyle(.orange)
+                    }
+                } header: {
+                    HStack {
+                        Text("provider.ai.model_section")
+                        Spacer()
+                        Button {
+                            Task { await refreshModels() }
+                        } label: {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(
+                            apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                || isLoadingModels
+                        )
+                        .accessibilityLabel(Text("provider.ai.refresh_models"))
                     }
                 }
                 Section {
