@@ -10,10 +10,6 @@ struct StrategyListView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("strategies.built_in") {
-                    ForEach(builtInStrategies) { strategy in strategyRow(strategy) }
-                }
-
                 Section("strategies.custom") {
                     if customStrategies.isEmpty {
                         ContentUnavailableView(
@@ -31,6 +27,10 @@ struct StrategyListView: View {
                                 }
                         }
                     }
+                }
+
+                Section("strategies.built_in") {
+                    ForEach(builtInStrategies) { strategy in strategyRow(strategy) }
                 }
             }
             .navigationTitle(model.language.localized("tab.strategies"))
