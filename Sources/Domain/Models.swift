@@ -10,6 +10,8 @@ enum Market: String, Codable, Sendable {
 enum MarketDataSource: String, CaseIterable, Identifiable, Codable, Sendable {
     case offline
     case longbridge
+    case alpaca
+    case twelveData
 
     var id: String { rawValue }
 }

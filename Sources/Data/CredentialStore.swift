@@ -11,6 +11,9 @@ enum CredentialKey: String, CaseIterable {
     case longbridgeAppKey = "longbridge-app-key"
     case longbridgeAppSecret = "longbridge-app-secret"
     case longbridgeAccessToken = "longbridge-access-token"
+    case alpacaAPIKey = "alpaca-api-key"
+    case alpacaAPISecret = "alpaca-api-secret"
+    case twelveDataAPIKey = "twelve-data-api-key"
 }
 
 extension AIProvider {

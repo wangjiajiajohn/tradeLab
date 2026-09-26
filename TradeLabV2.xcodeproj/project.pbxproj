@@ -40,6 +40,7 @@
 		A45E4ADDCC6A8BDB19BBD693 /* TSLA.US-1m.csv.gz in Resources */ = {isa = PBXBuildFile; fileRef = 88AC7F59463389E54CA2BB8E /* TSLA.US-1m.csv.gz */; };
 		B98D3F402A8D55CEB05E3FF8 /* StrategyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA32C5EFF7917518807914 /* StrategyListView.swift */; };
 		BA909EBF0187431CA64909A9 /* LongbridgeMarketDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83857B46A12FB7474BCBABC3 /* LongbridgeMarketDataProvider.swift */; };
+		C14A9E73026A4D7B91F3C842 /* RESTMarketDataProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = C24A9E73026A4D7B91F3C842 /* RESTMarketDataProviders.swift */; };
 		D77282956D1ADFEB4BC0D44C /* validation.json in Resources */ = {isa = PBXBuildFile; fileRef = 6BDD39422955678A418C352A /* validation.json */; };
 		D99D9F560B6BC0E9AFA0219B /* BacktestEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F051947413FF9FC4E7C0E4 /* BacktestEngineTests.swift */; };
 		DC9C39231C3A67C83D2D1E0B /* TSLA.US-daily.csv in Resources */ = {isa = PBXBuildFile; fileRef = 88134A7EF8D27F38E0A29C04 /* TSLA.US-daily.csv */; };
@@ -83,6 +84,7 @@
 		82F3A7BD159228F1A3972E77 /* MarketData.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MarketData.json; sourceTree = "<group>"; };
 		830F4FD4FB5DBCD9CE56DEE5 /* TradeCSVImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradeCSVImporter.swift; sourceTree = "<group>"; };
 		83857B46A12FB7474BCBABC3 /* LongbridgeMarketDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongbridgeMarketDataProvider.swift; sourceTree = "<group>"; };
+		C24A9E73026A4D7B91F3C842 /* RESTMarketDataProviders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RESTMarketDataProviders.swift; sourceTree = "<group>"; };
 		85B650C8E8763E3124A3C56B /* StrategyAnalysisService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategyAnalysisService.swift; sourceTree = "<group>"; };
 		866A0FC1D24FDAB934BABC14 /* 700.HK-1m.csv.gz */ = {isa = PBXFileReference; lastKnownFileType = archive.gzip; path = "700.HK-1m.csv.gz"; sourceTree = "<group>"; };
 		88134A7EF8D27F38E0A29C04 /* TSLA.US-daily.csv */ = {isa = PBXFileReference; path = "TSLA.US-daily.csv"; sourceTree = "<group>"; };
@@ -199,6 +201,7 @@
 				D161F823190FAB7345A03F8D /* CSVExports.swift */,
 				7E0B43C4D9A12A7671FE746D /* DemoMarketDataProvider.swift */,
 				83857B46A12FB7474BCBABC3 /* LongbridgeMarketDataProvider.swift */,
+				C24A9E73026A4D7B91F3C842 /* RESTMarketDataProviders.swift */,
 				85B650C8E8763E3124A3C56B /* StrategyAnalysisService.swift */,
 				830F4FD4FB5DBCD9CE56DEE5 /* TradeCSVImporter.swift */,
 			);
@@ -415,6 +418,7 @@
 				8406FBF52AEB8BA2384D59E8 /* DemoMarketDataProvider.swift in Sources */,
 				915A6E71F719F44873BD114D /* FirstBacktestFlowView.swift in Sources */,
 				BA909EBF0187431CA64909A9 /* LongbridgeMarketDataProvider.swift in Sources */,
+				C14A9E73026A4D7B91F3C842 /* RESTMarketDataProviders.swift in Sources */,
 				3B0D9021AC7A8657FA57AFCD /* Models.swift in Sources */,
 				E0CF6703C94593CCCBDB6DC7 /* ReviewView.swift in Sources */,
 				4991CC45732691215F00E008 /* RootView.swift in Sources */,

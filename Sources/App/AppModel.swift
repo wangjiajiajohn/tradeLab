@@ -78,6 +78,7 @@ final class AppModel: ObservableObject {
     @Published var marketDataSource: MarketDataSource {
         didSet {
             defaults.set(marketDataSource.rawValue, forKey: Keys.marketDataSource)
+            onlineCandles.removeAll()
             result = nil
         }
     }
@@ -94,6 +95,8 @@ final class AppModel: ObservableObject {
         }
     }
     @Published private(set) var hasLongbridgeCredentials = false
+    @Published private(set) var hasAlpacaCredentials = false
+    @Published private(set) var hasTwelveDataCredentials = false
     @Published private(set) var hasAIAPIKey = false
     @Published private(set) var journalTrades: [JournalTrade]
     private var onlineCandles: [String: [Candle]] = [:]
@@ -158,9 +161,18 @@ final class AppModel: ObservableObject {
 
     var selectedCandles: [Candle] {
         guard let selectedSecurity else { return [] }
-        if marketDataSource == .longbridge,
+        if marketDataSource != .offline,
            let cached = onlineCandles[selectedSecurity.id] { return cached }
         return candles(for: selectedSecurity)
+    }
+
+    var hasSelectedMarketDataCredentials: Bool {
+        switch marketDataSource {
+        case .offline: true
+        case .longbridge: hasLongbridgeCredentials
+        case .alpaca: hasAlpacaCredentials
+        case .twelveData: hasTwelveDataCredentials
+        }
     }
 
     var canRunBacktest: Bool {
@@ -201,21 +213,38 @@ final class AppModel: ObservableObject {
         defer { isRunningBacktest = false }
         do {
             let inputCandles: [Candle]
-            if marketDataSource == .longbridge {
-                guard let credentials = LongbridgeCredentials.saved else {
-                    throw OnlineMarketDataError.missingCredentials
-                }
+            if marketDataSource == .offline {
+                inputCandles = candles(for: security)
+            } else {
                 let end = settings.endDate ?? Date()
                 let start = settings.startDate
                     ?? Calendar(identifier: .gregorian).date(byAdding: .year, value: -2, to: end)
                     ?? end.addingTimeInterval(-730 * 86_400)
+                switch marketDataSource {
+                case .offline:
+                    inputCandles = candles(for: security)
+                case .longbridge:
+                guard let credentials = LongbridgeCredentials.saved else {
+                    throw OnlineMarketDataError.missingCredentials
+                }
                 inputCandles = try await LongbridgeMarketDataProvider(credentials: credentials)
                     .dailyCandles(for: security, from: start, to: end)
+                case .alpaca:
+                    guard let credentials = AlpacaCredentials.saved else {
+                        throw OnlineMarketDataError.missingCredentials
+                    }
+                    inputCandles = try await AlpacaMarketDataProvider(credentials: credentials)
+                        .dailyCandles(for: security, from: start, to: end)
+                case .twelveData:
+                    guard let apiKey = TwelveDataMarketDataProvider.savedAPIKey else {
+                        throw OnlineMarketDataError.missingCredentials
+                    }
+                    inputCandles = try await TwelveDataMarketDataProvider(apiKey: apiKey)
+                        .dailyCandles(for: security, from: start, to: end)
+                }
                 onlineCandles[security.id] = inputCandles
-            } else {
-                inputCandles = candles(for: security)
             }
-            let resultSecurity = marketDataSource == .longbridge
+            let resultSecurity = marketDataSource != .offline
                 ? Security(
                     id: security.id,
                     symbol: security.symbol,
@@ -313,6 +342,9 @@ final class AppModel: ObservableObject {
         hasLongbridgeCredentials = CredentialStore.hasValue(for: .longbridgeAppKey)
             && CredentialStore.hasValue(for: .longbridgeAppSecret)
             && CredentialStore.hasValue(for: .longbridgeAccessToken)
+        hasAlpacaCredentials = CredentialStore.hasValue(for: .alpacaAPIKey)
+            && CredentialStore.hasValue(for: .alpacaAPISecret)
+        hasTwelveDataCredentials = CredentialStore.hasValue(for: .twelveDataAPIKey)
         hasAIAPIKey = aiProvider.credentialKey.map { CredentialStore.hasValue(for: $0) } ?? false
     }
 

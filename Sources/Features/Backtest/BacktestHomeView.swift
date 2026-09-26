@@ -493,7 +493,7 @@ private struct StockPickerView: View {
     }
 
     private var needsDataSourceSetup: Bool {
-        model.marketDataSource == .offline || !model.hasLongbridgeCredentials
+        model.marketDataSource == .offline || !model.hasSelectedMarketDataCredentials
     }
 
     private var filteredSecurities: [Security] {

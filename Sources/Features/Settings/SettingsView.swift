@@ -63,6 +63,14 @@ struct SettingsView: View {
             model.hasLongbridgeCredentials
                 ? AppLocalization.string("provider.longbridge", locale: locale)
                 : AppLocalization.string("status.needs_configuration", locale: locale)
+        case .alpaca:
+            model.hasAlpacaCredentials
+                ? "Alpaca"
+                : AppLocalization.string("status.needs_configuration", locale: locale)
+        case .twelveData:
+            model.hasTwelveDataCredentials
+                ? "Twelve Data"
+                : AppLocalization.string("status.needs_configuration", locale: locale)
         }
     }
 
@@ -99,9 +107,18 @@ struct MarketDataSettingsView: View {
     }
 
     private var canSave: Bool {
-        !appKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !appSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !accessToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        switch model.marketDataSource {
+        case .offline: false
+        case .longbridge:
+            !appKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                && !appSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                && !accessToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        case .alpaca:
+            !appKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                && !appSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        case .twelveData:
+            !appKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
     }
 
     var body: some View {
@@ -129,26 +146,20 @@ struct MarketDataSettingsView: View {
                 }
             } footer: {
                 Text(LocalizedStringKey(
-                    model.marketDataSource == .offline
-                        ? "provider.offline.description"
-                        : "provider.longbridge.description"
+                    providerDescription(model.marketDataSource)
                 ))
             }
 
-            if model.marketDataSource == .longbridge {
+            if model.marketDataSource != .offline {
                 Section("provider.credentials") {
-                    TextField("provider.longbridge.app_key", text: $appKey)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    SecretEntryField(title: "provider.longbridge.app_secret", text: $appSecret)
-                    SecretEntryField(title: "provider.longbridge.access_token", text: $accessToken)
+                    credentialFields
                 }
                 Section {
                     Label("provider.keychain_note", systemImage: "lock.shield")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
-                if model.hasLongbridgeCredentials {
+                if model.hasSelectedMarketDataCredentials {
                     Section {
                         Button("provider.remove_credentials", role: .destructive) { removeCredentials() }
                     }
@@ -159,7 +170,7 @@ struct MarketDataSettingsView: View {
         .navigationTitle("settings.market_data_provider")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if model.marketDataSource == .longbridge {
+            if model.marketDataSource != .offline {
                 Button {
                     save()
                 } label: {
@@ -185,6 +196,7 @@ struct MarketDataSettingsView: View {
                 showingProviderPicker = true
             }
         }
+        .onChange(of: model.marketDataSource) { _, _ in loadCredentials() }
         .onChange(of: appKey) { _, _ in didSave = false }
         .onChange(of: appSecret) { _, _ in didSave = false }
         .onChange(of: accessToken) { _, _ in didSave = false }
@@ -200,6 +212,10 @@ struct MarketDataSettingsView: View {
             providerButton(.offline)
             Divider()
             providerButton(.longbridge)
+            Divider()
+            providerButton(.alpaca)
+            Divider()
+            providerButton(.twelveData)
         }
         .padding(.vertical, 6)
         .frame(minWidth: 220)
@@ -230,21 +246,77 @@ struct MarketDataSettingsView: View {
         switch source {
         case .offline: "provider.offline"
         case .longbridge: "provider.longbridge"
+        case .alpaca: "provider.alpaca"
+        case .twelveData: "provider.twelve_data"
+        }
+    }
+
+    private func providerDescription(_ source: MarketDataSource) -> String {
+        switch source {
+        case .offline: "provider.offline.description"
+        case .longbridge: "provider.longbridge.description"
+        case .alpaca: "provider.alpaca.description"
+        case .twelveData: "provider.twelve_data.description"
+        }
+    }
+
+    @ViewBuilder
+    private var credentialFields: some View {
+        switch model.marketDataSource {
+        case .offline:
+            EmptyView()
+        case .longbridge:
+            TextField("provider.longbridge.app_key", text: $appKey)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            SecretEntryField(title: "provider.longbridge.app_secret", text: $appSecret)
+            SecretEntryField(title: "provider.longbridge.access_token", text: $accessToken)
+        case .alpaca:
+            TextField("provider.alpaca.api_key", text: $appKey)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            SecretEntryField(title: "provider.alpaca.api_secret", text: $appSecret)
+        case .twelveData:
+            SecretEntryField(title: "provider.twelve_data.api_key", text: $appKey)
         }
     }
 
     private func loadCredentials() {
-        appKey = CredentialStore.value(for: .longbridgeAppKey) ?? ""
-        appSecret = CredentialStore.value(for: .longbridgeAppSecret) ?? ""
-        accessToken = CredentialStore.value(for: .longbridgeAccessToken) ?? ""
+        switch model.marketDataSource {
+        case .offline:
+            appKey = ""
+            appSecret = ""
+            accessToken = ""
+        case .longbridge:
+            appKey = CredentialStore.value(for: .longbridgeAppKey) ?? ""
+            appSecret = CredentialStore.value(for: .longbridgeAppSecret) ?? ""
+            accessToken = CredentialStore.value(for: .longbridgeAccessToken) ?? ""
+        case .alpaca:
+            appKey = CredentialStore.value(for: .alpacaAPIKey) ?? ""
+            appSecret = CredentialStore.value(for: .alpacaAPISecret) ?? ""
+            accessToken = ""
+        case .twelveData:
+            appKey = CredentialStore.value(for: .twelveDataAPIKey) ?? ""
+            appSecret = ""
+            accessToken = ""
+        }
+        didSave = false
     }
 
     private func save() {
         do {
-            if model.marketDataSource == .longbridge {
+            switch model.marketDataSource {
+            case .offline:
+                return
+            case .longbridge:
                 try CredentialStore.set(appKey, for: .longbridgeAppKey)
                 try CredentialStore.set(appSecret, for: .longbridgeAppSecret)
                 try CredentialStore.set(accessToken, for: .longbridgeAccessToken)
+            case .alpaca:
+                try CredentialStore.set(appKey, for: .alpacaAPIKey)
+                try CredentialStore.set(appSecret, for: .alpacaAPISecret)
+            case .twelveData:
+                try CredentialStore.set(appKey, for: .twelveDataAPIKey)
             }
             model.refreshCredentialStatus()
             didSave = true
@@ -256,13 +328,22 @@ struct MarketDataSettingsView: View {
 
     private func removeCredentials() {
         do {
-            try CredentialStore.remove(.longbridgeAppKey)
-            try CredentialStore.remove(.longbridgeAppSecret)
-            try CredentialStore.remove(.longbridgeAccessToken)
+            switch model.marketDataSource {
+            case .offline:
+                return
+            case .longbridge:
+                try CredentialStore.remove(.longbridgeAppKey)
+                try CredentialStore.remove(.longbridgeAppSecret)
+                try CredentialStore.remove(.longbridgeAccessToken)
+            case .alpaca:
+                try CredentialStore.remove(.alpacaAPIKey)
+                try CredentialStore.remove(.alpacaAPISecret)
+            case .twelveData:
+                try CredentialStore.remove(.twelveDataAPIKey)
+            }
             appKey = ""
             appSecret = ""
             accessToken = ""
-            model.marketDataSource = .offline
             model.refreshCredentialStatus()
             didSave = false
         } catch {

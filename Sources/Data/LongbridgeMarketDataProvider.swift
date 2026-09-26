@@ -28,6 +28,7 @@ enum OnlineMarketDataError: LocalizedError {
     case history(Int)
     case malformed
     case noData
+    case unsupportedMarket
 
     var errorDescription: String? {
         localizedDescription(locale: .current)
@@ -52,6 +53,7 @@ enum OnlineMarketDataError: LocalizedError {
         )
         case .malformed: AppLocalization.string("market_error.malformed", locale: locale)
         case .noData: AppLocalization.string("market_error.no_data", locale: locale)
+        case .unsupportedMarket: AppLocalization.string("market_error.unsupported_market", locale: locale)
         }
     }
 }
