@@ -85,6 +85,7 @@
 "review.performance" = "Key Results";
 "review.restore" = "Test These Conditions Again";
 "review.restore_hint" = "Restores the stock, strategy, and settings, then returns to Backtest. It will not run automatically.";
+"review.restore_unavailable" = "The stock or custom strategy used by this record is no longer available.";
 
 "settings.appearance" = "Appearance";
 "settings.capital" = "Initial Capital";
@@ -115,6 +116,29 @@
 "strategies.custom.empty" = "No Custom Strategies";
 "strategies.custom.later" = "Structured strategy creation will be added in the next implementation slice.";
 "strategies.demo_badge" = "Demo";
+"strategies.create" = "New Strategy";
+"strategies.custom" = "My Strategies";
+"strategies.custom.description" = "Tap the plus button to create a strategy from structured rules.";
+"strategies.delete" = "Delete";
+"strategies.entry_window" = "Breakout Lookback";
+"strategies.error.breakout_order" = "The breakout lookback must be longer than the exit lookback.";
+"strategies.error.window_order" = "The long moving average must be longer than the short moving average.";
+"strategies.exit_window" = "Exit Lookback";
+"strategies.local_note" = "Strategies stay on this device. Creating and running them requires no network connection.";
+"strategies.long_window" = "Long Moving Average";
+"strategies.name" = "Strategy Name";
+"strategies.name.placeholder" = "For example, My Trend Strategy";
+"strategies.no_parameters" = "This strategy type has no additional parameters.";
+"strategies.parameters" = "Rule Parameters";
+"strategies.save" = "Save";
+"strategies.short_window" = "Short Moving Average";
+"strategies.summary.breakout_format" = "Buy when the close breaks above the prior %d-day high; sell when it falls below the prior %d-day low.";
+"strategies.summary.moving_average_format" = "Buy when the %d-day average crosses above the %d-day average; sell when the %d-day average crosses below the %d-day average.";
+"strategies.type" = "Strategy Type";
+"strategies.type.breakout" = "Range Breakout";
+"strategies.type.buy_hold" = "Buy and Hold";
+"strategies.type.dca" = "Monthly Investing";
+"strategies.type.moving_average" = "Moving Average Trend";
 "strategy.demo.name" = "10/30 Trend Following";
 "strategy.demo.summary" = "Buy when the 10-day average crosses above the 30-day average; exit on the reverse cross.";
 "strategy.buy_hold.name" = "Buy and Hold";

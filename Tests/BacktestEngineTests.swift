@@ -119,4 +119,24 @@ final class BacktestEngineTests: XCTestCase {
         XCTAssertEqual(restored.tradeCount, result.trades.count)
         XCTAssertEqual(restored.excessReturn, result.excessReturn, accuracy: 0.000_001)
     }
+
+    @MainActor
+    func testCustomStrategyPersistsAcrossModelInstances() throws {
+        let suiteName = "TradeLabV2Tests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let firstModel = AppModel(defaults: defaults)
+        firstModel.addCustomStrategy(
+            name: "Test Trend",
+            rule: .dualMovingAverage(short: 7, long: 21)
+        )
+
+        let saved = try XCTUnwrap(firstModel.strategies.first { !$0.isBuiltIn })
+        let restoredModel = AppModel(defaults: defaults)
+        let restored = try XCTUnwrap(restoredModel.strategies.first { $0.id == saved.id })
+
+        XCTAssertEqual(restored.name, "Test Trend")
+        XCTAssertEqual(restored.rule, .dualMovingAverage(short: 7, long: 21))
+    }
 }

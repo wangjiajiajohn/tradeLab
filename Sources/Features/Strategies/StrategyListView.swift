@@ -2,48 +2,189 @@ import SwiftUI
 
 struct StrategyListView: View {
     @EnvironmentObject private var model: AppModel
+    @State private var showingCreator = false
+
+    private var builtInStrategies: [TradingStrategy] { model.strategies.filter(\.isBuiltIn) }
+    private var customStrategies: [TradingStrategy] { model.strategies.filter { !$0.isBuiltIn } }
 
     var body: some View {
         NavigationStack {
             List {
                 Section("strategies.built_in") {
-                    ForEach(model.strategies) { strategy in
-                        Button {
-                            model.selectStrategy(strategy)
-                        } label: {
-                            VStack(alignment: .leading, spacing: 5) {
-                            HStack {
-                                Text(strategy.name).font(.headline)
-                                Spacer()
-                                if model.selectedStrategyID == strategy.id {
-                                    Image(systemName: "checkmark")
-                                        .foregroundStyle(.tint)
-                                }
-                            }
-                            Text(strategy.summary)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.vertical, 4)
-                    }
+                    ForEach(builtInStrategies) { strategy in strategyRow(strategy) }
                 }
 
-                Section {
-                    ContentUnavailableView(
-                        "strategies.custom.empty",
-                        systemImage: "slider.horizontal.3",
-                        description: Text("strategies.custom.later")
-                    )
+                Section("strategies.custom") {
+                    if customStrategies.isEmpty {
+                        ContentUnavailableView(
+                            "strategies.custom.empty",
+                            systemImage: "slider.horizontal.3",
+                            description: Text("strategies.custom.description")
+                        )
+                    } else {
+                        ForEach(customStrategies) { strategy in
+                            strategyRow(strategy)
+                                .swipeActions {
+                                    Button("strategies.delete", role: .destructive) {
+                                        model.deleteCustomStrategy(strategy)
+                                    }
+                                }
+                        }
+                    }
                 }
             }
             .navigationTitle("tab.strategies")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("strategies.add", systemImage: "plus") {}
-                        .disabled(true)
+                    Button("strategies.add", systemImage: "plus") { showingCreator = true }
                 }
+            }
+            .sheet(isPresented: $showingCreator) {
+                StrategyCreatorView()
+            }
+        }
+    }
+
+    private func strategyRow(_ strategy: TradingStrategy) -> some View {
+        Button {
+            model.selectStrategy(strategy)
+        } label: {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack {
+                    Text(strategy.name).font(.headline)
+                    Spacer()
+                    if model.selectedStrategyID == strategy.id {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(.tint)
+                    }
+                }
+                Text(strategy.summary)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .buttonStyle(.plain)
+        .padding(.vertical, 4)
+    }
+}
+
+private struct StrategyCreatorView: View {
+    private enum Kind: String, CaseIterable, Identifiable {
+        case buyAndHold
+        case monthlyDCA
+        case movingAverage
+        case breakout
+
+        var id: String { rawValue }
+
+        var title: LocalizedStringKey {
+            switch self {
+            case .buyAndHold: "strategies.type.buy_hold"
+            case .monthlyDCA: "strategies.type.dca"
+            case .movingAverage: "strategies.type.moving_average"
+            case .breakout: "strategies.type.breakout"
+            }
+        }
+    }
+
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var kind: Kind = .movingAverage
+    @State private var shortWindow = 10
+    @State private var longWindow = 30
+    @State private var entryWindow = 20
+    @State private var exitWindow = 10
+
+    private var rule: TradingStrategy.Rule {
+        switch kind {
+        case .buyAndHold: .buyAndHold
+        case .monthlyDCA: .monthlyDCA
+        case .movingAverage: .dualMovingAverage(short: shortWindow, long: longWindow)
+        case .breakout: .breakout(entryWindow: entryWindow, exitWindow: exitWindow)
+        }
+    }
+
+    private var isValid: Bool {
+        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return false }
+        return switch kind {
+        case .movingAverage: shortWindow > 0 && longWindow > shortWindow
+        case .breakout: entryWindow > exitWindow && exitWindow > 0
+        default: true
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("strategies.name") {
+                    TextField("strategies.name.placeholder", text: $name)
+                }
+                Section("strategies.type") {
+                    Picker("strategies.type", selection: $kind) {
+                        ForEach(Kind.allCases) { kind in Text(kind.title).tag(kind) }
+                    }
+                    .pickerStyle(.navigationLink)
+                }
+                parameters
+                Section {
+                    Label("strategies.local_note", systemImage: "lock.shield")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("strategies.create")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("action.cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("strategies.save") {
+                        model.addCustomStrategy(name: name, rule: rule)
+                        dismiss()
+                    }
+                    .disabled(!isValid)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var parameters: some View {
+        switch kind {
+        case .movingAverage:
+            Section("strategies.parameters") {
+                Stepper(value: $shortWindow, in: 2...100) {
+                    LabeledContent("strategies.short_window", value: "\(shortWindow)")
+                }
+                Stepper(value: $longWindow, in: 3...250) {
+                    LabeledContent("strategies.long_window", value: "\(longWindow)")
+                }
+                if longWindow <= shortWindow {
+                    Text("strategies.error.window_order")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+            }
+        case .breakout:
+            Section("strategies.parameters") {
+                Stepper(value: $entryWindow, in: 2...250) {
+                    LabeledContent("strategies.entry_window", value: "\(entryWindow)")
+                }
+                Stepper(value: $exitWindow, in: 1...100) {
+                    LabeledContent("strategies.exit_window", value: "\(exitWindow)")
+                }
+                if entryWindow <= exitWindow {
+                    Text("strategies.error.breakout_order")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+            }
+        case .buyAndHold, .monthlyDCA:
+            Section("strategies.parameters") {
+                Text("strategies.no_parameters")
+                    .foregroundStyle(.secondary)
             }
         }
     }

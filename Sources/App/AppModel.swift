@@ -31,11 +31,12 @@ final class AppModel: ObservableObject {
         static let completedFirstBacktest = "v2.completed-first-backtest"
         static let appearance = "v2.appearance"
         static let backtestHistory = "v2.backtest-history"
+        static let customStrategies = "v2.custom-strategies"
     }
 
     private let defaults: UserDefaults
     let securities: [Security]
-    let strategies: [TradingStrategy]
+    @Published private(set) var strategies: [TradingStrategy]
     private let marketData: MarketDataLibrary
 
     @Published var selectedSecurityID: String?
@@ -56,7 +57,7 @@ final class AppModel: ObservableObject {
         let library = BuiltInMarketDataProvider.load()
         marketData = library
         securities = library.securities
-        strategies = TradingStrategy.builtIn
+        strategies = TradingStrategy.builtIn + Self.loadCustomStrategies(from: defaults)
         hasCompletedFirstBacktest = defaults.bool(forKey: Keys.completedFirstBacktest)
         appearance = Appearance(rawValue: defaults.string(forKey: Keys.appearance) ?? "") ?? .system
         backtestHistory = Self.loadHistory(from: defaults)
@@ -132,15 +133,43 @@ final class AppModel: ObservableObject {
     }
 
     func restoreConfiguration(from record: BacktestRecord) {
-        guard securities.contains(where: { $0.id == record.securityID }),
-              strategies.contains(where: { $0.id == record.strategyID })
-        else { return }
+        guard canRestoreConfiguration(from: record) else { return }
         selectedSecurityID = record.securityID
         selectedStrategyID = record.strategyID
         settings = record.settings
         hasConfirmedSettings = true
         result = nil
         selectedTab = .backtest
+    }
+
+    func canRestoreConfiguration(from record: BacktestRecord) -> Bool {
+        securities.contains(where: { $0.id == record.securityID })
+            && strategies.contains(where: { $0.id == record.strategyID })
+    }
+
+    func addCustomStrategy(name: String, rule: TradingStrategy.Rule) {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { return }
+        let strategy = TradingStrategy(
+            id: UUID(),
+            name: trimmedName,
+            summary: strategySummary(for: rule),
+            rule: rule,
+            isBuiltIn: false
+        )
+        strategies.append(strategy)
+        selectStrategy(strategy)
+        saveCustomStrategies()
+    }
+
+    func deleteCustomStrategy(_ strategy: TradingStrategy) {
+        guard !strategy.isBuiltIn else { return }
+        strategies.removeAll { $0.id == strategy.id }
+        if selectedStrategyID == strategy.id {
+            selectedStrategyID = nil
+            result = nil
+        }
+        saveCustomStrategies()
     }
 
     func resetFirstRunExperience() {
@@ -165,5 +194,41 @@ final class AppModel: ObservableObject {
               let history = try? JSONDecoder().decode([BacktestRecord].self, from: data)
         else { return [] }
         return history.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    private func strategySummary(for rule: TradingStrategy.Rule) -> String {
+        switch rule {
+        case .buyAndHold:
+            String(localized: "strategy.buy_hold.summary")
+        case .monthlyDCA:
+            String(localized: "strategy.dca.summary")
+        case let .dualMovingAverage(short, long):
+            String(
+                format: String(localized: "strategies.summary.moving_average_format"),
+                short,
+                long,
+                short,
+                long
+            )
+        case let .breakout(entryWindow, exitWindow):
+            String(
+                format: String(localized: "strategies.summary.breakout_format"),
+                entryWindow,
+                exitWindow
+            )
+        }
+    }
+
+    private func saveCustomStrategies() {
+        let custom = strategies.filter { !$0.isBuiltIn }
+        guard let data = try? JSONEncoder().encode(custom) else { return }
+        defaults.set(data, forKey: Keys.customStrategies)
+    }
+
+    private static func loadCustomStrategies(from defaults: UserDefaults) -> [TradingStrategy] {
+        guard let data = defaults.data(forKey: Keys.customStrategies),
+              let strategies = try? JSONDecoder().decode([TradingStrategy].self, from: data)
+        else { return [] }
+        return strategies.filter { !$0.isBuiltIn }
     }
 }

@@ -115,8 +115,13 @@ private struct BacktestRecordDetail: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
+                .disabled(!model.canRestoreConfiguration(from: record))
             } footer: {
-                Text("review.restore_hint")
+                Text(LocalizedStringKey(
+                    model.canRestoreConfiguration(from: record)
+                        ? "review.restore_hint"
+                        : "review.restore_unavailable"
+                ))
             }
         }
         .navigationTitle("review.detail")

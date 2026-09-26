@@ -85,6 +85,7 @@
 "review.performance" = "關鍵結果";
 "review.restore" = "使用這組條件再次驗證";
 "review.restore_hint" = "恢復股票、策略和回測設定，然後返回回測頁。不會直接執行。";
+"review.restore_unavailable" = "這條記錄使用的股票或自訂策略已不可用。";
 
 "settings.appearance" = "外觀";
 "settings.capital" = "初始資金";
@@ -115,6 +116,29 @@
 "strategies.custom.empty" = "尚無自訂策略";
 "strategies.custom.later" = "結構化策略建立功能將在下一階段加入。";
 "strategies.demo_badge" = "示範";
+"strategies.create" = "新增策略";
+"strategies.custom" = "我的策略";
+"strategies.custom.description" = "點擊右上角加號，用結構化規則建立策略。";
+"strategies.delete" = "刪除";
+"strategies.entry_window" = "突破觀察週期";
+"strategies.error.breakout_order" = "突破週期必須大於退出週期。";
+"strategies.error.window_order" = "長期均線週期必須大於短期均線週期。";
+"strategies.exit_window" = "退出觀察週期";
+"strategies.local_note" = "策略儲存在本機，建立和執行均無需連線。";
+"strategies.long_window" = "長期均線週期";
+"strategies.name" = "策略名稱";
+"strategies.name.placeholder" = "例如：我的趨勢策略";
+"strategies.no_parameters" = "此策略類型不需要額外參數。";
+"strategies.parameters" = "規則參數";
+"strategies.save" = "儲存";
+"strategies.short_window" = "短期均線週期";
+"strategies.summary.breakout_format" = "收市價突破前 %d 日高位時買入，跌破前 %d 日低位時賣出。";
+"strategies.summary.moving_average_format" = "%d 日均線上穿 %d 日均線時買入，%d 日均線下穿 %d 日均線時賣出。";
+"strategies.type" = "策略類型";
+"strategies.type.breakout" = "區間突破";
+"strategies.type.buy_hold" = "買入並持有";
+"strategies.type.dca" = "每月定投";
+"strategies.type.moving_average" = "雙均線趨勢";
 "strategy.demo.name" = "10/30 趨勢跟隨";
 "strategy.demo.summary" = "10 日均線上穿 30 日均線時買入，反向下穿時賣出。";
 "strategy.buy_hold.name" = "買入並持有";
