@@ -26,7 +26,7 @@
 "onboarding.progress.settings" = "回測設定";
 "onboarding.progress.stock" = "選擇股票";
 "onboarding.progress.strategy" = "選擇策略";
-"onboarding.question" = "你的交易策略，在市場上真的有效嗎？";
+"onboarding.question" = "您的交易策略，在市場上真的有效嗎？";
 "onboarding.run.button" = "執行第一次回測";
 "onboarding.run.conditions_ready" = "回測設定已確認";
 "onboarding.run.subtitle" = "資料只在本機處理。執行模擬，查看歷史證據。";

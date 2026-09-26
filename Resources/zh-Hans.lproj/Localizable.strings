@@ -26,7 +26,7 @@
 "onboarding.progress.settings" = "回测设置";
 "onboarding.progress.stock" = "选择股票";
 "onboarding.progress.strategy" = "选择策略";
-"onboarding.question" = "你的交易策略，在市场上真的有效吗？";
+"onboarding.question" = "您的交易策略，在市场上真的有效吗？";
 "onboarding.run.button" = "运行第一次回测";
 "onboarding.run.conditions_ready" = "回测设置已确认";
 "onboarding.run.subtitle" = "数据只在本机处理。运行模拟，看看历史证据。";
