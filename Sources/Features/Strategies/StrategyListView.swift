@@ -250,7 +250,9 @@ private struct StrategyCreatorView: View {
                 requestAnalysis()
             } label: {
                 HStack {
-                    if isAnalyzing { ProgressView().controlSize(.small) }
+                    if isAnalyzing {
+                        BacktestActivityMark(tint: .accentColor, compact: true)
+                    }
                     Label("strategies.analyze", systemImage: "sparkles")
                 }
                 .frame(maxWidth: .infinity)

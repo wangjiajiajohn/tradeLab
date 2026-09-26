@@ -338,8 +338,7 @@ struct MarketDataSettingsView: View {
                     Group {
                         if isValidating {
                             HStack(spacing: 8) {
-                                ProgressView()
-                                    .tint(.white)
+                                BacktestActivityMark(tint: .white, compact: true)
                                 Text(verificationCountdownText)
                                     .monospacedDigit()
                             }
@@ -724,8 +723,7 @@ private struct AISettingsView: View {
                                 Task { await refreshModels() }
                             } label: {
                                 if isLoadingModels {
-                                    ProgressView()
-                                        .controlSize(.small)
+                                    BacktestActivityMark(tint: .accentColor, compact: true)
                                 } else {
                                     Image(systemName: "arrow.clockwise")
                                 }
@@ -770,8 +768,7 @@ private struct AISettingsView: View {
                     Group {
                         if isLoadingModels {
                             HStack(spacing: 8) {
-                                ProgressView()
-                                    .tint(.white)
+                                BacktestActivityMark(tint: .white, compact: true)
                                 Text(verificationCountdownText)
                                     .monospacedDigit()
                             }

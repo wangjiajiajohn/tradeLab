@@ -861,8 +861,8 @@ private struct StockPickerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .overlay {
                 if (isSearching || isWaitingForSearchResponse) && filteredSecurities.isEmpty {
-                    ProgressView()
-                        .controlSize(.large)
+                    BacktestActivityMark(tint: .accentColor)
+                        .scaleEffect(1.7)
                 } else if let searchError, filteredSecurities.isEmpty {
                     ContentUnavailableView {
                         Label("stock.search.failed", systemImage: "wifi.exclamationmark")
