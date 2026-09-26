@@ -50,7 +50,7 @@ struct BacktestHomeView: View {
                         model.isRunningBacktest ? model.backtestRunPhase.localizationKey : "backtest.run"
                     ))
                     .tabToolbarJellyEffect()
-                    .scaleEffect(model.isRunningBacktest ? 1.18 : 1)
+                    .scaleEffect(model.isRunningBacktest ? 1.32 : 1)
                     .animation(
                         .spring(response: 0.32, dampingFraction: 0.62),
                         value: model.isRunningBacktest
