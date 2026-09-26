@@ -56,9 +56,7 @@ extension View {
 private struct PullDownResearchDisclosureModifier: ViewModifier {
     @State private var pullDistance: CGFloat = 0
 
-    private var progress: CGFloat {
-        min(max((pullDistance - 16) / 32, 0), 1)
-    }
+    private let disclosureHeight: CGFloat = 36
 
     func body(content: Content) -> some View {
         content
@@ -72,14 +70,15 @@ private struct PullDownResearchDisclosureModifier: ViewModifier {
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
-                    .padding(.horizontal, 12)
-                    .frame(height: 30)
-                    .background(.thinMaterial, in: Capsule())
-                    .opacity(progress)
-                    .scaleEffect(0.92 + progress * 0.08)
-                    .offset(y: 8 + min(pullDistance * 0.08, 6))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: disclosureHeight)
+                    // Keep the disclosure immediately above the scroll content at
+                    // rest. During overscroll it moves one-for-one with the list,
+                    // just like a header that belongs to the scrolling page.
+                    .offset(y: pullDistance - disclosureHeight)
+                    .opacity(pullDistance > 0 ? 1 : 0)
                     .allowsHitTesting(false)
-                    .accessibilityHidden(progress < 0.8)
+                    .accessibilityHidden(pullDistance < disclosureHeight * 0.8)
             }
     }
 }
