@@ -1215,7 +1215,7 @@ private struct BacktestSettingsSheet: View {
     private var effectiveStartDate: Date {
         guard let availableRange else { return .now }
         return min(
-            max(draft.startDate ?? availableRange.lowerBound, availableRange.lowerBound),
+            max(draft.startDate ?? preferredInitialPeriod.lowerBound, availableRange.lowerBound),
             availableRange.upperBound
         )
     }
@@ -1223,9 +1223,18 @@ private struct BacktestSettingsSheet: View {
     private var effectiveEndDate: Date {
         guard let availableRange else { return .now }
         return min(
-            max(draft.endDate ?? availableRange.upperBound, effectiveStartDate),
+            max(draft.endDate ?? preferredInitialPeriod.upperBound, effectiveStartDate),
             availableRange.upperBound
         )
+    }
+
+    private var preferredInitialPeriod: ClosedRange<Date> {
+        if let security = model.selectedSecurity,
+           let first = model.candles(for: security).first?.date,
+           let last = model.candles(for: security).last?.date {
+            return first...last
+        }
+        return BacktestSettings.defaultPeriod()
     }
 
     private func clampDraftPeriod() {
