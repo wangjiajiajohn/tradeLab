@@ -461,27 +461,33 @@ struct MarketDataSettingsView: View {
             case .offline:
                 return
             case .longbridge:
-                try await LongbridgeMarketDataProvider(
-                    credentials: LongbridgeCredentials(
-                        appKey: trimmedAppKey,
-                        appSecret: trimmedAppSecret,
-                        accessToken: trimmedAccessToken
-                    )
-                ).validateCredentials()
+                try await withMarketDataValidationTimeout {
+                    try await LongbridgeMarketDataProvider(
+                        credentials: LongbridgeCredentials(
+                            appKey: trimmedAppKey,
+                            appSecret: trimmedAppSecret,
+                            accessToken: trimmedAccessToken
+                        )
+                    ).validateCredentials()
+                }
                 try CredentialStore.set(trimmedAppKey, for: .longbridgeAppKey)
                 try CredentialStore.set(trimmedAppSecret, for: .longbridgeAppSecret)
                 try CredentialStore.set(trimmedAccessToken, for: .longbridgeAccessToken)
             case .alpaca:
-                try await AlpacaMarketDataProvider(
-                    credentials: AlpacaCredentials(
-                        apiKey: trimmedAppKey,
-                        apiSecret: trimmedAppSecret
-                    )
-                ).validateCredentials()
+                try await withMarketDataValidationTimeout {
+                    try await AlpacaMarketDataProvider(
+                        credentials: AlpacaCredentials(
+                            apiKey: trimmedAppKey,
+                            apiSecret: trimmedAppSecret
+                        )
+                    ).validateCredentials()
+                }
                 try CredentialStore.set(trimmedAppKey, for: .alpacaAPIKey)
                 try CredentialStore.set(trimmedAppSecret, for: .alpacaAPISecret)
             case .twelveData:
-                try await TwelveDataMarketDataProvider(apiKey: trimmedAppKey).validateCredentials()
+                try await withMarketDataValidationTimeout {
+                    try await TwelveDataMarketDataProvider(apiKey: trimmedAppKey).validateCredentials()
+                }
                 try CredentialStore.set(trimmedAppKey, for: .twelveDataAPIKey)
             }
             model.refreshCredentialStatus()

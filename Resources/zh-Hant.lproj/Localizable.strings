@@ -285,6 +285,7 @@
 "trades.export" = "匯出交易 CSV";
 "market_error.missing_credentials" = "使用線上行情前，請先在設定中完整填寫目前資料源的憑證。";
 "market_error.network_format" = "無法連接行情服務：%@";
+"market_error.validation_timeout" = "驗證逾時，請檢查網路和憑證後重試。";
 "market_error.token" = "長橋未能發出 Socket Token，請檢查憑證及網絡。";
 "market_error.authentication" = "長橋行情認證失敗，請檢查 Access Token 是否過期。";
 "market_error.entitlement_format" = "長橋行情權限初始化失敗（狀態 %d）。";

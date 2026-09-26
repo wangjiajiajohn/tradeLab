@@ -29,6 +29,7 @@ enum OnlineMarketDataError: LocalizedError {
     case malformed
     case noData
     case unsupportedMarket
+    case validationTimeout
 
     var errorDescription: String? {
         localizedDescription(locale: .current)
@@ -54,7 +55,29 @@ enum OnlineMarketDataError: LocalizedError {
         case .malformed: AppLocalization.string("market_error.malformed", locale: locale)
         case .noData: AppLocalization.string("market_error.no_data", locale: locale)
         case .unsupportedMarket: AppLocalization.string("market_error.unsupported_market", locale: locale)
+        case .validationTimeout: AppLocalization.string("market_error.validation_timeout", locale: locale)
         }
+    }
+}
+
+func withMarketDataValidationTimeout<T: Sendable>(
+    _ duration: Duration = .seconds(15),
+    operation: @escaping @Sendable () async throws -> T
+) async throws -> T {
+    try await withThrowingTaskGroup(of: T.self) { group in
+        group.addTask {
+            try await operation()
+        }
+        group.addTask {
+            try await Task.sleep(for: duration)
+            throw OnlineMarketDataError.validationTimeout
+        }
+
+        defer { group.cancelAll() }
+        guard let result = try await group.next() else {
+            throw OnlineMarketDataError.validationTimeout
+        }
+        return result
     }
 }
 
@@ -93,32 +116,7 @@ struct LongbridgeMarketDataProvider: Sendable {
         var lastError: Error?
         for endpoint in endpoints {
             do {
-                let otp = try await socketToken(endpoint: endpoint)
-                var request = URLRequest(url: endpoint.quote)
-                request.setValue(dataCenter, forHTTPHeaderField: "X-Dc-Region")
-                request.setValue("en-US", forHTTPHeaderField: "Accept-Language")
-                let socket = Self.session.webSocketTask(with: request)
-                socket.resume()
-                defer { socket.cancel(with: .normalClosure, reason: nil) }
-
-                try await socket.send(.data(LongbridgeWire.request(
-                    command: 2,
-                    id: 1,
-                    body: LongbridgeProto.auth(otp)
-                )))
-                guard try await receive(socket, id: 1).status == 0 else {
-                    throw OnlineMarketDataError.authentication
-                }
-
-                try await socket.send(.data(LongbridgeWire.request(
-                    command: 4,
-                    id: 2,
-                    body: LongbridgeProto.profile()
-                )))
-                let profile = try await receive(socket, id: 2)
-                guard profile.status == 0 else {
-                    throw OnlineMarketDataError.entitlement(Int(profile.status))
-                }
+                _ = try await socketToken(endpoint: endpoint, requestTimeout: 10)
                 return
             } catch {
                 lastError = error
@@ -187,7 +185,10 @@ struct LongbridgeMarketDataProvider: Sendable {
         return candles
     }
 
-    private func socketToken(endpoint: LongbridgeEndpoint) async throws -> String {
+    private func socketToken(
+        endpoint: LongbridgeEndpoint,
+        requestTimeout: TimeInterval? = nil
+    ) async throws -> String {
         let timestamp = String(Int(Date().timeIntervalSince1970))
         let signedHeaders = "authorization:\(credentials.accessToken)\nx-api-key:\(credentials.appKey)\nx-timestamp:\(timestamp)\n"
         let canonical = "GET|/v1/socket/token||\(signedHeaders)|authorization;x-api-key;x-timestamp|"
@@ -196,6 +197,9 @@ struct LongbridgeMarketDataProvider: Sendable {
         let signature = HMAC<SHA256>.authenticationCode(for: Data(stringToSign.utf8), using: key)
             .map { String(format: "%02x", $0) }.joined()
         var request = URLRequest(url: endpoint.http.appending(path: "/v1/socket/token"))
+        if let requestTimeout {
+            request.timeoutInterval = requestTimeout
+        }
         request.setValue(credentials.appKey, forHTTPHeaderField: "X-Api-Key")
         request.setValue(credentials.accessToken, forHTTPHeaderField: "Authorization")
         request.setValue(timestamp, forHTTPHeaderField: "X-Timestamp")

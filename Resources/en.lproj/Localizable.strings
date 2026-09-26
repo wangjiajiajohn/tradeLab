@@ -285,6 +285,7 @@
 "trades.export" = "Export Trades as CSV";
 "market_error.missing_credentials" = "Complete the selected market-data provider's credentials in Settings before using online data.";
 "market_error.network_format" = "Could not connect to the market-data service: %@";
+"market_error.validation_timeout" = "Verification timed out. Check the network and credentials, then try again.";
 "market_error.token" = "Longbridge could not issue a socket token. Check the credentials and network.";
 "market_error.authentication" = "Longbridge quote authentication failed. Check whether the access token has expired.";
 "market_error.entitlement_format" = "Longbridge quote access could not be initialized (status %d).";
