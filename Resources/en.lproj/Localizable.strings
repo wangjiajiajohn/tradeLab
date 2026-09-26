@@ -205,3 +205,13 @@
 "provider.show_secret" = "Show credential";
 "provider.hide_secret" = "Hide credential";
 "error.keychain_format" = "The system Keychain could not be accessed (error %d).";
+"strategies.creation_mode" = "Creation Method";
+"strategies.creation_mode.describe" = "Describe Idea";
+"strategies.creation_mode.manual" = "Set Manually";
+"strategies.describe" = "Trading Idea";
+"strategies.describe.placeholder" = "For example: Buy when the 10-day average crosses above the 30-day average; sell on the opposite cross.";
+"strategies.analyze" = "Analyze and Create Draft";
+"strategy_analysis.not_configured" = "Configure an AI service in Settings, or switch to manual setup.";
+"strategy_analysis.invalid_response" = "The strategy format returned by AI could not be read. Try again or use manual setup.";
+"strategy_analysis.unsupported" = "This idea cannot currently be represented by a supported strategy template.";
+"strategy_analysis.http_error_format" = "The AI request failed (HTTP %d).";

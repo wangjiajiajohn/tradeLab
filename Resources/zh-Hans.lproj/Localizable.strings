@@ -205,3 +205,13 @@
 "provider.show_secret" = "显示凭证";
 "provider.hide_secret" = "隐藏凭证";
 "error.keychain_format" = "无法访问系统钥匙串（错误 %d）。";
+"strategies.creation_mode" = "创建方式";
+"strategies.creation_mode.describe" = "描述想法";
+"strategies.creation_mode.manual" = "手动设置";
+"strategies.describe" = "交易想法";
+"strategies.describe.placeholder" = "例如：10 日均线上穿 30 日均线时买入，反向下穿时卖出。";
+"strategies.analyze" = "分析并生成草稿";
+"strategy_analysis.not_configured" = "请先在“设置”中配置 AI 服务；也可以切换到手动设置。";
+"strategy_analysis.invalid_response" = "AI 返回的策略格式无法读取，请重试或改用手动设置。";
+"strategy_analysis.unsupported" = "这个想法暂时无法转换为应用支持的策略模板。";
+"strategy_analysis.http_error_format" = "AI 服务请求失败（HTTP %d）。";

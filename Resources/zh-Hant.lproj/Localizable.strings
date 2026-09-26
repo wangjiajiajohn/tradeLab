@@ -205,3 +205,13 @@
 "provider.show_secret" = "顯示憑證";
 "provider.hide_secret" = "隱藏憑證";
 "error.keychain_format" = "無法存取系統鑰匙圈（錯誤 %d）。";
+"strategies.creation_mode" = "建立方式";
+"strategies.creation_mode.describe" = "描述想法";
+"strategies.creation_mode.manual" = "手動設定";
+"strategies.describe" = "交易想法";
+"strategies.describe.placeholder" = "例如：10 日均線上穿 30 日均線時買入，反向下穿時賣出。";
+"strategies.analyze" = "分析並產生草稿";
+"strategy_analysis.not_configured" = "請先在「設定」中配置 AI 服務；也可以切換到手動設定。";
+"strategy_analysis.invalid_response" = "AI 返回的策略格式無法讀取，請重試或改用手動設定。";
+"strategy_analysis.unsupported" = "這個想法暫時無法轉換為 App 支援的策略範本。";
+"strategy_analysis.http_error_format" = "AI 服務請求失敗（HTTP %d）。";
