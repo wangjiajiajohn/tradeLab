@@ -36,11 +36,11 @@ struct SettingsView: View {
                 Section("settings.privacy") {
                     LabeledContent(
                         "settings.network_first_run",
-                        value: String(localized: "status.disabled", locale: locale)
+                        value: AppLocalization.string("status.disabled", locale: locale)
                     )
                     LabeledContent(
                         "settings.storage",
-                        value: String(localized: "settings.on_device", locale: locale)
+                        value: AppLocalization.string("settings.on_device", locale: locale)
                     )
                 }
 
@@ -58,21 +58,21 @@ struct SettingsView: View {
 
     private var marketDataStatus: String {
         switch model.marketDataSource {
-        case .offline: String(localized: "provider.offline", locale: locale)
+        case .offline: AppLocalization.string("provider.offline", locale: locale)
         case .longbridge:
             model.hasLongbridgeCredentials
-                ? String(localized: "provider.longbridge", locale: locale)
-                : String(localized: "status.needs_configuration", locale: locale)
+                ? AppLocalization.string("provider.longbridge", locale: locale)
+                : AppLocalization.string("status.needs_configuration", locale: locale)
         }
     }
 
     private var aiStatus: String {
         switch model.aiProvider {
-        case .disabled: String(localized: "status.disabled", locale: locale)
+        case .disabled: AppLocalization.string("status.disabled", locale: locale)
         case .openAI:
-            model.hasAIAPIKey ? "OpenAI" : String(localized: "status.needs_configuration", locale: locale)
+            model.hasAIAPIKey ? "OpenAI" : AppLocalization.string("status.needs_configuration", locale: locale)
         case .deepSeek:
-            model.hasAIAPIKey ? "DeepSeek" : String(localized: "status.needs_configuration", locale: locale)
+            model.hasAIAPIKey ? "DeepSeek" : AppLocalization.string("status.needs_configuration", locale: locale)
         }
     }
 }

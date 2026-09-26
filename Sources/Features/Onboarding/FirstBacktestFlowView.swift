@@ -209,7 +209,7 @@ struct FirstBacktestFlowView: View {
             VStack(alignment: .leading, spacing: 14) {
                 ReadyRow(text: model.selectedSecurity?.name ?? "—")
                 ReadyRow(text: model.selectedStrategy?.name ?? "—")
-                ReadyRow(text: String(localized: "onboarding.run.conditions_ready", locale: locale))
+                ReadyRow(text: AppLocalization.string("onboarding.run.conditions_ready", locale: locale))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(18)
@@ -297,11 +297,11 @@ struct FirstBacktestFlowView: View {
 
     private func securitySubtitle(_ security: Security) -> String {
         let market = security.market == .hk
-            ? String(localized: "market.hk", locale: locale)
-            : String(localized: "market.us", locale: locale)
+            ? AppLocalization.string("market.hk", locale: locale)
+            : AppLocalization.string("market.us", locale: locale)
         let source = security.isSyntheticDemo
-            ? String(localized: "data.synthetic", locale: locale)
-            : String(localized: "data.development_offline", locale: locale)
+            ? AppLocalization.string("data.synthetic", locale: locale)
+            : AppLocalization.string("data.development_offline", locale: locale)
         return "\(security.symbol) · \(market) · \(source)"
     }
 
@@ -336,7 +336,7 @@ private struct StepProgressView: View {
             }
             HStack {
                 Text(String(
-                    format: String(localized: "onboarding.progress_format", locale: locale),
+                    format: AppLocalization.string("onboarding.progress_format", locale: locale),
                     currentStep
                 ))
                 Spacer()

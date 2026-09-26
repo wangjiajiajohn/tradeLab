@@ -131,7 +131,7 @@ struct TradeJournalView: View {
             Section("trades.data_issues") {
                 Label {
                     Text(String(
-                        format: String(localized: "trades.oversold_format", locale: locale),
+                        format: AppLocalization.string("trades.oversold_format", locale: locale),
                         analysis.oversoldSymbols.joined(separator: ", ")
                     ))
                 } icon: {
@@ -161,7 +161,7 @@ struct TradeJournalView: View {
             let parsed = try TradeCSVImporter.parse(data: Data(contentsOf: url))
             model.addJournalTrades(parsed.trades)
             importMessage = String(
-                format: String(localized: "trades.import.success_format", locale: locale),
+                format: AppLocalization.string("trades.import.success_format", locale: locale),
                 parsed.trades.count,
                 parsed.rejectedRows
             )

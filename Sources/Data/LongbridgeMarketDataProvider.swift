@@ -35,23 +35,23 @@ enum OnlineMarketDataError: LocalizedError {
 
     func localizedDescription(locale: Locale) -> String {
         switch self {
-        case .missingCredentials: String(localized: "market_error.missing_credentials", locale: locale)
+        case .missingCredentials: AppLocalization.string("market_error.missing_credentials", locale: locale)
         case let .network(message): String(
-            format: String(localized: "market_error.network_format", locale: locale),
+            format: AppLocalization.string("market_error.network_format", locale: locale),
             message
         )
-        case .token: String(localized: "market_error.token", locale: locale)
-        case .authentication: String(localized: "market_error.authentication", locale: locale)
+        case .token: AppLocalization.string("market_error.token", locale: locale)
+        case .authentication: AppLocalization.string("market_error.authentication", locale: locale)
         case let .entitlement(status): String(
-            format: String(localized: "market_error.entitlement_format", locale: locale),
+            format: AppLocalization.string("market_error.entitlement_format", locale: locale),
             status
         )
         case let .history(status): String(
-            format: String(localized: "market_error.history_format", locale: locale),
+            format: AppLocalization.string("market_error.history_format", locale: locale),
             status
         )
-        case .malformed: String(localized: "market_error.malformed", locale: locale)
-        case .noData: String(localized: "market_error.no_data", locale: locale)
+        case .malformed: AppLocalization.string("market_error.malformed", locale: locale)
+        case .noData: AppLocalization.string("market_error.no_data", locale: locale)
         }
     }
 }

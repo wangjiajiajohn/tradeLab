@@ -19,7 +19,7 @@ enum CredentialStoreError: LocalizedError {
         switch self {
         case let .keychain(status):
             String(
-                format: String(localized: "error.keychain_format", locale: locale),
+                format: AppLocalization.string("error.keychain_format", locale: locale),
                 status
             )
         }

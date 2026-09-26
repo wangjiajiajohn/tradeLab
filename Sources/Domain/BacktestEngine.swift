@@ -12,10 +12,10 @@ enum BacktestError: LocalizedError {
 
     func localizedDescription(locale: Locale) -> String {
         switch self {
-        case .insufficientData: String(localized: "error.insufficient_data", locale: locale)
-        case .invalidStrategy: String(localized: "error.invalid_strategy", locale: locale)
-        case .invalidCapital: String(localized: "error.invalid_capital", locale: locale)
-        case .invalidPeriod: String(localized: "error.invalid_period", locale: locale)
+        case .insufficientData: AppLocalization.string("error.insufficient_data", locale: locale)
+        case .invalidStrategy: AppLocalization.string("error.invalid_strategy", locale: locale)
+        case .invalidCapital: AppLocalization.string("error.invalid_capital", locale: locale)
+        case .invalidPeriod: AppLocalization.string("error.invalid_period", locale: locale)
         }
     }
 }
@@ -81,7 +81,7 @@ enum BacktestEngine {
                     buyAll(
                         candle: candle,
                         settings: settings,
-                        reason: String(localized: "trade.reason.period_start", locale: locale),
+                        reason: AppLocalization.string("trade.reason.period_start", locale: locale),
                         cash: &cash,
                         quantity: &quantity,
                         trades: &trades
@@ -95,7 +95,7 @@ enum BacktestEngine {
                         amount: monthlyInvestment,
                         candle: candle,
                         settings: settings,
-                        reason: String(localized: "trade.reason.monthly_dca", locale: locale),
+                        reason: AppLocalization.string("trade.reason.monthly_dca", locale: locale),
                         cash: &cash,
                         quantity: &quantity,
                         trades: &trades
@@ -116,7 +116,7 @@ enum BacktestEngine {
                             buyAll(
                                 candle: candle,
                                 settings: settings,
-                                reason: String(localized: "trade.reason.cross_up", locale: locale),
+                                reason: AppLocalization.string("trade.reason.cross_up", locale: locale),
                                 cash: &cash,
                                 quantity: &quantity,
                                 trades: &trades
@@ -125,7 +125,7 @@ enum BacktestEngine {
                             sellAll(
                                 candle: candle,
                                 settings: settings,
-                                reason: String(localized: "trade.reason.cross_down", locale: locale),
+                                reason: AppLocalization.string("trade.reason.cross_down", locale: locale),
                                 cash: &cash,
                                 quantity: &quantity,
                                 trades: &trades
@@ -148,7 +148,7 @@ enum BacktestEngine {
                         buyAll(
                             candle: candle,
                             settings: settings,
-                            reason: String(localized: "trade.reason.breakout", locale: locale),
+                            reason: AppLocalization.string("trade.reason.breakout", locale: locale),
                             cash: &cash,
                             quantity: &quantity,
                             trades: &trades
@@ -157,7 +157,7 @@ enum BacktestEngine {
                         sellAll(
                             candle: candle,
                             settings: settings,
-                            reason: String(localized: "trade.reason.breakdown", locale: locale),
+                            reason: AppLocalization.string("trade.reason.breakdown", locale: locale),
                             cash: &cash,
                             quantity: &quantity,
                             trades: &trades
@@ -179,7 +179,7 @@ enum BacktestEngine {
             sellAll(
                 candle: last,
                 settings: settings,
-                reason: String(localized: "trade.reason.period_end", locale: locale),
+                reason: AppLocalization.string("trade.reason.period_end", locale: locale),
                 cash: &cash,
                 quantity: &quantity,
                 trades: &trades

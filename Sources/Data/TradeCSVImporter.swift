@@ -16,9 +16,9 @@ enum TradeCSVImportError: LocalizedError {
 
     func localizedDescription(locale: Locale) -> String {
         switch self {
-        case .unreadable: String(localized: "trades.import.unreadable", locale: locale)
-        case .missingColumns: String(localized: "trades.import.missing_columns", locale: locale)
-        case .noValidRows: String(localized: "trades.import.no_valid_rows", locale: locale)
+        case .unreadable: AppLocalization.string("trades.import.unreadable", locale: locale)
+        case .missingColumns: AppLocalization.string("trades.import.missing_columns", locale: locale)
+        case .noValidRows: AppLocalization.string("trades.import.no_valid_rows", locale: locale)
         }
     }
 }

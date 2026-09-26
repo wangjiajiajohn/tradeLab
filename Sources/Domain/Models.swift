@@ -57,32 +57,32 @@ struct TradingStrategy: Identifiable, Hashable, Codable, Sendable {
 
     static let dualMovingAverageDemo = TradingStrategy(
         id: UUID(uuidString: "72E7B1D4-2FE3-43C8-A09E-10471B8323AC")!,
-        name: String(localized: "strategy.demo.name"),
-        summary: String(localized: "strategy.demo.summary"),
+        name: AppLocalization.string("strategy.demo.name", locale: Locale(identifier: "en")),
+        summary: AppLocalization.string("strategy.demo.summary", locale: Locale(identifier: "en")),
         rule: .dualMovingAverage(short: 10, long: 30),
         isBuiltIn: true
     )
 
     static let buyAndHoldDemo = TradingStrategy(
         id: UUID(uuidString: "6B5518CF-3034-4E42-9C48-105D32105E90")!,
-        name: String(localized: "strategy.buy_hold.name"),
-        summary: String(localized: "strategy.buy_hold.summary"),
+        name: AppLocalization.string("strategy.buy_hold.name", locale: Locale(identifier: "en")),
+        summary: AppLocalization.string("strategy.buy_hold.summary", locale: Locale(identifier: "en")),
         rule: .buyAndHold,
         isBuiltIn: true
     )
 
     static let monthlyDCADemo = TradingStrategy(
         id: UUID(uuidString: "18FC7953-A3E7-4F29-BE40-6F7939C506B6")!,
-        name: String(localized: "strategy.dca.name"),
-        summary: String(localized: "strategy.dca.summary"),
+        name: AppLocalization.string("strategy.dca.name", locale: Locale(identifier: "en")),
+        summary: AppLocalization.string("strategy.dca.summary", locale: Locale(identifier: "en")),
         rule: .monthlyDCA,
         isBuiltIn: true
     )
 
     static let breakoutDemo = TradingStrategy(
         id: UUID(uuidString: "C0FC3762-D419-4976-9ED4-74ED70AC60D6")!,
-        name: String(localized: "strategy.breakout.name"),
-        summary: String(localized: "strategy.breakout.summary"),
+        name: AppLocalization.string("strategy.breakout.name", locale: Locale(identifier: "en")),
+        summary: AppLocalization.string("strategy.breakout.summary", locale: Locale(identifier: "en")),
         rule: .breakout(entryWindow: 20, exitWindow: 10),
         isBuiltIn: true
     )
@@ -95,29 +95,29 @@ struct TradingStrategy: Identifiable, Hashable, Codable, Sendable {
         [
             TradingStrategy(
                 id: monthlyDCADemo.id,
-                name: String(localized: "strategy.dca.name", locale: locale),
-                summary: String(localized: "strategy.dca.summary", locale: locale),
+                name: AppLocalization.string("strategy.dca.name", locale: locale),
+                summary: AppLocalization.string("strategy.dca.summary", locale: locale),
                 rule: .monthlyDCA,
                 isBuiltIn: true
             ),
             TradingStrategy(
                 id: buyAndHoldDemo.id,
-                name: String(localized: "strategy.buy_hold.name", locale: locale),
-                summary: String(localized: "strategy.buy_hold.summary", locale: locale),
+                name: AppLocalization.string("strategy.buy_hold.name", locale: locale),
+                summary: AppLocalization.string("strategy.buy_hold.summary", locale: locale),
                 rule: .buyAndHold,
                 isBuiltIn: true
             ),
             TradingStrategy(
                 id: dualMovingAverageDemo.id,
-                name: String(localized: "strategy.demo.name", locale: locale),
-                summary: String(localized: "strategy.demo.summary", locale: locale),
+                name: AppLocalization.string("strategy.demo.name", locale: locale),
+                summary: AppLocalization.string("strategy.demo.summary", locale: locale),
                 rule: .dualMovingAverage(short: 10, long: 30),
                 isBuiltIn: true
             ),
             TradingStrategy(
                 id: breakoutDemo.id,
-                name: String(localized: "strategy.breakout.name", locale: locale),
-                summary: String(localized: "strategy.breakout.summary", locale: locale),
+                name: AppLocalization.string("strategy.breakout.name", locale: locale),
+                summary: AppLocalization.string("strategy.breakout.summary", locale: locale),
                 rule: .breakout(entryWindow: 20, exitWindow: 10),
                 isBuiltIn: true
             ),

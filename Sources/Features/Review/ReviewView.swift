@@ -94,7 +94,7 @@ struct ReviewView: View {
                         showingComparison = true
                     } label: {
                         Text(String(
-                            format: String(localized: "review.compare_selected_format", locale: locale),
+                            format: AppLocalization.string("review.compare_selected_format", locale: locale),
                             selectedRecordIDs.count
                         ))
                             .font(.headline)
@@ -263,7 +263,7 @@ private struct BacktestRecordDetail: View {
     private var recordPeriod: String {
         guard let start = record.settings.startDate,
               let end = record.settings.endDate
-        else { return String(localized: "settings.full_period", locale: locale) }
+        else { return AppLocalization.string("settings.full_period", locale: locale) }
         let format = Date.FormatStyle(date: .abbreviated, time: .omitted, locale: locale)
         return "\(start.formatted(format)) – \(end.formatted(format))"
     }
@@ -391,7 +391,7 @@ private struct BacktestComparisonView: View {
     private func comparisonHeader(_ record: BacktestRecord, index: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(String(
-                format: String(localized: "review.test_format", locale: locale),
+                format: AppLocalization.string("review.test_format", locale: locale),
                 index
             ))
                 .font(.caption.weight(.semibold))
@@ -454,7 +454,7 @@ private struct BacktestComparisonView: View {
     private func period(for record: BacktestRecord) -> String {
         guard let start = record.settings.startDate,
               let end = record.settings.endDate
-        else { return String(localized: "settings.full_period", locale: locale) }
+        else { return AppLocalization.string("settings.full_period", locale: locale) }
         let format = Date.FormatStyle(date: .numeric, time: .omitted, locale: locale)
         return "\(start.formatted(format))\n\(end.formatted(format))"
     }

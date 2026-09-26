@@ -61,7 +61,7 @@ struct BacktestHomeView: View {
                 ConfigurationRow(
                     title: "backtest.stock",
                     value: model.selectedSecurity?.name
-                        ?? String(localized: "status.not_selected", locale: locale),
+                        ?? AppLocalization.string("status.not_selected", locale: locale),
                     symbol: "chart.line.uptrend.xyaxis"
                 )
             }
@@ -69,7 +69,7 @@ struct BacktestHomeView: View {
                 ConfigurationRow(
                     title: "backtest.strategy",
                     value: model.selectedStrategy?.name
-                        ?? String(localized: "status.not_selected", locale: locale),
+                        ?? AppLocalization.string("status.not_selected", locale: locale),
                     symbol: "slider.horizontal.3"
                 )
             }
@@ -77,8 +77,8 @@ struct BacktestHomeView: View {
                 ConfigurationRow(
                     title: "backtest.conditions",
                     value: model.hasConfirmedSettings
-                        ? String(localized: "status.confirmed", locale: locale)
-                        : String(localized: "status.not_confirmed", locale: locale),
+                        ? AppLocalization.string("status.confirmed", locale: locale)
+                        : AppLocalization.string("status.not_confirmed", locale: locale),
                     symbol: "calendar.badge.clock"
                 )
             }
@@ -173,20 +173,20 @@ private struct ResultSections: View {
                     LineMark(x: .value("Date", point.date), y: .value("Strategy", point.strategyValue))
                         .foregroundStyle(by: .value(
                             "Series",
-                            String(localized: "result.strategy_value", locale: locale)
+                            AppLocalization.string("result.strategy_value", locale: locale)
                         ))
                 }
                 ForEach(result.equityCurve) { point in
                     LineMark(x: .value("Date", point.date), y: .value("Benchmark", point.benchmarkValue))
                         .foregroundStyle(by: .value(
                             "Series",
-                            String(localized: "result.benchmark", locale: locale)
+                            AppLocalization.string("result.benchmark", locale: locale)
                         ))
                 }
             }
             .chartForegroundStyleScale([
-                String(localized: "result.strategy_value", locale: locale): Color.accentColor,
-                String(localized: "result.benchmark", locale: locale): Color.secondary
+                AppLocalization.string("result.strategy_value", locale: locale): Color.accentColor,
+                AppLocalization.string("result.benchmark", locale: locale): Color.secondary
             ])
             .frame(height: 220)
         }
@@ -226,7 +226,7 @@ private struct ResultSections: View {
             ? "result.benchmark_outperformed_format"
             : "result.benchmark_underperformed_format"
         return String(
-            format: String(localized: String.LocalizationValue(key), locale: locale),
+            format: AppLocalization.string(key, locale: locale),
             value
         )
     }
@@ -424,8 +424,8 @@ private struct StockPickerView: View {
 
     private func marketName(_ market: Market) -> String {
         switch market {
-        case .hk: String(localized: "market.hk", locale: locale)
-        case .us: String(localized: "market.us", locale: locale)
+        case .hk: AppLocalization.string("market.hk", locale: locale)
+        case .us: AppLocalization.string("market.us", locale: locale)
         default: market.rawValue.uppercased()
         }
     }

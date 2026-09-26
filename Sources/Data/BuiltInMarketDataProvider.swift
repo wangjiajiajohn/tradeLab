@@ -92,7 +92,7 @@ enum BuiltInMarketDataProvider {
             let security = Security(
                 id: descriptor.id,
                 symbol: descriptor.symbol,
-                name: String(localized: String.LocalizationValue(descriptor.nameKey), locale: locale),
+                name: AppLocalization.string(descriptor.nameKey, locale: locale),
                 market: market,
                 currency: item.currency,
                 isSyntheticDemo: false
@@ -110,7 +110,7 @@ enum BuiltInMarketDataProvider {
             let security = Security(
                 id: descriptor.id,
                 symbol: descriptor.symbol,
-                name: String(localized: String.LocalizationValue(descriptor.nameKey), locale: locale),
+                name: AppLocalization.string(descriptor.nameKey, locale: locale),
                 market: descriptor.market,
                 currency: descriptor.currency,
                 isSyntheticDemo: true

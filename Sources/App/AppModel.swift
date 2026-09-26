@@ -44,7 +44,7 @@ final class AppModel: ObservableObject {
         }
 
         func localized(_ key: String) -> String {
-            String(localized: String.LocalizationValue(key), locale: locale)
+            AppLocalization.string(key, locale: locale)
         }
     }
 

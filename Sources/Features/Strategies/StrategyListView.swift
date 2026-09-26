@@ -319,7 +319,7 @@ private struct StrategyCreatorView: View {
             if let value = draft.entryWindow { entryWindow = value }
             if let value = draft.exitWindow { exitWindow = value }
         default:
-            analysisError = String(localized: "strategy_analysis.unsupported", locale: locale)
+            analysisError = AppLocalization.string("strategy_analysis.unsupported", locale: locale)
             analysisCompleted = false
             return
         }

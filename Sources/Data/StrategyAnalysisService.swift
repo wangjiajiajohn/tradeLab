@@ -34,9 +34,9 @@ enum StrategyAnalysisError: LocalizedError {
     func localizedDescription(locale: Locale) -> String {
         switch self {
         case .unavailable:
-            String(localized: "strategy_analysis.not_configured", locale: locale)
+            AppLocalization.string("strategy_analysis.not_configured", locale: locale)
         case .invalidResponse:
-            String(localized: "strategy_analysis.invalid_response", locale: locale)
+            AppLocalization.string("strategy_analysis.invalid_response", locale: locale)
         case let .provider(message):
             message
         }
@@ -113,7 +113,7 @@ enum StrategyAnalysisService {
         guard 200..<300 ~= http.statusCode else {
             let message = (try? JSONDecoder().decode(ErrorEnvelope.self, from: data).error?.message)
                 ?? String(
-                    format: String(localized: "strategy_analysis.http_error_format", locale: locale),
+                    format: AppLocalization.string("strategy_analysis.http_error_format", locale: locale),
                     http.statusCode
                 )
             throw StrategyAnalysisError.provider(message)
