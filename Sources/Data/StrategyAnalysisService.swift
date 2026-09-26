@@ -28,11 +28,15 @@ enum StrategyAnalysisError: LocalizedError {
     case provider(String)
 
     var errorDescription: String? {
+        localizedDescription(locale: .current)
+    }
+
+    func localizedDescription(locale: Locale) -> String {
         switch self {
         case .unavailable:
-            String(localized: "strategy_analysis.not_configured")
+            String(localized: "strategy_analysis.not_configured", locale: locale)
         case .invalidResponse:
-            String(localized: "strategy_analysis.invalid_response")
+            String(localized: "strategy_analysis.invalid_response", locale: locale)
         case let .provider(message):
             message
         }
@@ -76,6 +80,7 @@ enum StrategyAnalysisService {
         _ description: String,
         provider: AIProvider,
         model: String,
+        locale: Locale = .current,
         session: URLSession = .shared
     ) async throws -> StrategyDraft {
         guard provider != .disabled,
@@ -107,7 +112,10 @@ enum StrategyAnalysisService {
         }
         guard 200..<300 ~= http.statusCode else {
             let message = (try? JSONDecoder().decode(ErrorEnvelope.self, from: data).error?.message)
-                ?? String(format: String(localized: "strategy_analysis.http_error_format"), http.statusCode)
+                ?? String(
+                    format: String(localized: "strategy_analysis.http_error_format", locale: locale),
+                    http.statusCode
+                )
             throw StrategyAnalysisError.provider(message)
         }
         guard let content = try JSONDecoder().decode(Response.self, from: data).choices.first?.message.content,

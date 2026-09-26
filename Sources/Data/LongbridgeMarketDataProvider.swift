@@ -30,15 +30,28 @@ enum OnlineMarketDataError: LocalizedError {
     case noData
 
     var errorDescription: String? {
+        localizedDescription(locale: .current)
+    }
+
+    func localizedDescription(locale: Locale) -> String {
         switch self {
-        case .missingCredentials: String(localized: "market_error.missing_credentials")
-        case let .network(message): String(format: String(localized: "market_error.network_format"), message)
-        case .token: String(localized: "market_error.token")
-        case .authentication: String(localized: "market_error.authentication")
-        case let .entitlement(status): String(format: String(localized: "market_error.entitlement_format"), status)
-        case let .history(status): String(format: String(localized: "market_error.history_format"), status)
-        case .malformed: String(localized: "market_error.malformed")
-        case .noData: String(localized: "market_error.no_data")
+        case .missingCredentials: String(localized: "market_error.missing_credentials", locale: locale)
+        case let .network(message): String(
+            format: String(localized: "market_error.network_format", locale: locale),
+            message
+        )
+        case .token: String(localized: "market_error.token", locale: locale)
+        case .authentication: String(localized: "market_error.authentication", locale: locale)
+        case let .entitlement(status): String(
+            format: String(localized: "market_error.entitlement_format", locale: locale),
+            status
+        )
+        case let .history(status): String(
+            format: String(localized: "market_error.history_format", locale: locale),
+            status
+        )
+        case .malformed: String(localized: "market_error.malformed", locale: locale)
+        case .noData: String(localized: "market_error.no_data", locale: locale)
         }
     }
 }

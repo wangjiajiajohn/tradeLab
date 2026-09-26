@@ -15,6 +15,7 @@ struct FirstBacktestFlowView: View {
 
     @EnvironmentObject private var model: AppModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.locale) private var locale
     @State private var stage: Stage = .intro
 
     var body: some View {
@@ -124,8 +125,8 @@ struct FirstBacktestFlowView: View {
     private var stockStep: some View {
         StepContainer(
             symbol: "chart.line.uptrend.xyaxis",
-            title: String(localized: "onboarding.stock.title"),
-            subtitle: String(localized: "onboarding.stock.subtitle"),
+            title: "onboarding.stock.title",
+            subtitle: "onboarding.stock.subtitle",
             accent: .blue
         ) {
             LazyVStack(spacing: 10) {
@@ -149,8 +150,8 @@ struct FirstBacktestFlowView: View {
     private var strategyStep: some View {
         StepContainer(
             symbol: "slider.horizontal.3",
-            title: String(localized: "onboarding.strategy.title"),
-            subtitle: String(localized: "onboarding.strategy.subtitle"),
+            title: "onboarding.strategy.title",
+            subtitle: "onboarding.strategy.subtitle",
             accent: .purple
         ) {
             LazyVStack(spacing: 10) {
@@ -174,8 +175,8 @@ struct FirstBacktestFlowView: View {
     private var settingsStep: some View {
         StepContainer(
             symbol: "calendar.badge.clock",
-            title: String(localized: "onboarding.settings.title"),
-            subtitle: String(localized: "onboarding.settings.subtitle"),
+            title: "onboarding.settings.title",
+            subtitle: "onboarding.settings.subtitle",
             accent: .orange
         ) {
             VStack(spacing: 0) {
@@ -201,14 +202,14 @@ struct FirstBacktestFlowView: View {
     private var runStep: some View {
         StepContainer(
             symbol: "play.fill",
-            title: String(localized: "onboarding.run.title"),
-            subtitle: String(localized: "onboarding.run.subtitle"),
+            title: "onboarding.run.title",
+            subtitle: "onboarding.run.subtitle",
             accent: .green
         ) {
             VStack(alignment: .leading, spacing: 14) {
                 ReadyRow(text: model.selectedSecurity?.name ?? "—")
                 ReadyRow(text: model.selectedStrategy?.name ?? "—")
-                ReadyRow(text: String(localized: "onboarding.run.conditions_ready"))
+                ReadyRow(text: String(localized: "onboarding.run.conditions_ready", locale: locale))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(18)
@@ -289,18 +290,18 @@ struct FirstBacktestFlowView: View {
         else { return "—" }
         let first = model.settings.startDate ?? availableFirst
         let last = model.settings.endDate ?? availableLast
-        return first.formatted(.dateTime.year().month(.abbreviated))
+        return first.formatted(.dateTime.year().month(.abbreviated).locale(locale))
             + " – "
-            + last.formatted(.dateTime.year().month(.abbreviated))
+            + last.formatted(.dateTime.year().month(.abbreviated).locale(locale))
     }
 
     private func securitySubtitle(_ security: Security) -> String {
         let market = security.market == .hk
-            ? String(localized: "market.hk")
-            : String(localized: "market.us")
+            ? String(localized: "market.hk", locale: locale)
+            : String(localized: "market.us", locale: locale)
         let source = security.isSyntheticDemo
-            ? String(localized: "data.synthetic")
-            : String(localized: "data.development_offline")
+            ? String(localized: "data.synthetic", locale: locale)
+            : String(localized: "data.development_offline", locale: locale)
         return "\(security.symbol) · \(market) · \(source)"
     }
 
@@ -321,6 +322,7 @@ struct FirstBacktestFlowView: View {
 private struct StepProgressView: View {
     let currentStep: Int
     private let colors: [Color] = [.blue, .purple, .orange, .green]
+    @Environment(\.locale) private var locale
 
     var body: some View {
         VStack(spacing: 10) {
@@ -333,7 +335,10 @@ private struct StepProgressView: View {
                 }
             }
             HStack {
-                Text(String(format: String(localized: "onboarding.progress_format"), currentStep))
+                Text(String(
+                    format: String(localized: "onboarding.progress_format", locale: locale),
+                    currentStep
+                ))
                 Spacer()
                 Text(stepName)
             }
@@ -356,8 +361,8 @@ private struct StepProgressView: View {
 
 private struct StepContainer<Content: View>: View {
     let symbol: String
-    let title: String
-    let subtitle: String
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
     let accent: Color
     @ViewBuilder let content: Content
 

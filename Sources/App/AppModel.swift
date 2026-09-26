@@ -42,6 +42,10 @@ final class AppModel: ObservableObject {
             case .traditionalChinese: "繁體中文"
             }
         }
+
+        func localized(_ key: String) -> String {
+            String(localized: String.LocalizationValue(key), locale: locale)
+        }
     }
 
     private enum Keys {
@@ -171,7 +175,7 @@ final class AppModel: ObservableObject {
     @discardableResult
     func runBacktest(completesOnboarding: Bool = false) async -> Bool {
         guard let security = selectedSecurity, let strategy = selectedStrategy, canRunBacktest else {
-            errorMessage = String(localized: "error.incomplete_setup")
+            errorMessage = language.localized("error.incomplete_setup")
             return false
         }
 
@@ -207,7 +211,8 @@ final class AppModel: ObservableObject {
                 security: resultSecurity,
                 candles: inputCandles,
                 strategy: strategy,
-                settings: settings
+                settings: settings,
+                locale: language.locale
             )
             result = newResult
             saveToHistory(newResult)
@@ -219,7 +224,13 @@ final class AppModel: ObservableObject {
             selectedTab = .backtest
             return true
         } catch {
-            errorMessage = error.localizedDescription
+            if let error = error as? BacktestError {
+                errorMessage = error.localizedDescription(locale: language.locale)
+            } else if let error = error as? OnlineMarketDataError {
+                errorMessage = error.localizedDescription(locale: language.locale)
+            } else {
+                errorMessage = error.localizedDescription
+            }
             return false
         }
     }
@@ -341,12 +352,12 @@ final class AppModel: ObservableObject {
     private func strategySummary(for rule: TradingStrategy.Rule) -> String {
         switch rule {
         case .buyAndHold:
-            String(localized: "strategy.buy_hold.summary")
+            language.localized("strategy.buy_hold.summary")
         case .monthlyDCA:
-            String(localized: "strategy.dca.summary")
+            language.localized("strategy.dca.summary")
         case let .dualMovingAverage(short, long):
             String(
-                format: String(localized: "strategies.summary.moving_average_format"),
+                format: language.localized("strategies.summary.moving_average_format"),
                 short,
                 long,
                 short,
@@ -354,7 +365,7 @@ final class AppModel: ObservableObject {
             )
         case let .breakout(entryWindow, exitWindow):
             String(
-                format: String(localized: "strategies.summary.breakout_format"),
+                format: language.localized("strategies.summary.breakout_format"),
                 entryWindow,
                 exitWindow
             )

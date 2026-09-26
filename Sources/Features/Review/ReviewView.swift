@@ -8,6 +8,7 @@ struct ReviewView: View {
     }
 
     @EnvironmentObject private var model: AppModel
+    @Environment(\.locale) private var locale
     @State private var mode: ReviewMode = .backtests
     @State private var isSelectingForComparison = false
     @State private var selectedRecordIDs: [UUID] = []
@@ -92,7 +93,10 @@ struct ReviewView: View {
                     Button {
                         showingComparison = true
                     } label: {
-                        Text(String(format: String(localized: "review.compare_selected_format"), selectedRecordIDs.count))
+                        Text(String(
+                            format: String(localized: "review.compare_selected_format", locale: locale),
+                            selectedRecordIDs.count
+                        ))
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                     }
@@ -174,6 +178,7 @@ private struct BacktestRecordRow: View {
 
 private struct BacktestRecordDetail: View {
     @EnvironmentObject private var model: AppModel
+    @Environment(\.locale) private var locale
     let record: BacktestRecord
 
     var body: some View {
@@ -258,8 +263,9 @@ private struct BacktestRecordDetail: View {
     private var recordPeriod: String {
         guard let start = record.settings.startDate,
               let end = record.settings.endDate
-        else { return String(localized: "settings.full_period") }
-        return "\(start.formatted(date: .abbreviated, time: .omitted)) – \(end.formatted(date: .abbreviated, time: .omitted))"
+        else { return String(localized: "settings.full_period", locale: locale) }
+        let format = Date.FormatStyle(date: .abbreviated, time: .omitted, locale: locale)
+        return "\(start.formatted(format)) – \(end.formatted(format))"
     }
 
     private func optionalPercent(_ value: Double?) -> Text {
@@ -270,6 +276,7 @@ private struct BacktestRecordDetail: View {
 
 private struct BacktestComparisonView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.locale) private var locale
     let first: BacktestRecord
     let second: BacktestRecord
 
@@ -383,7 +390,10 @@ private struct BacktestComparisonView: View {
 
     private func comparisonHeader(_ record: BacktestRecord, index: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(String(format: String(localized: "review.test_format"), index))
+            Text(String(
+                format: String(localized: "review.test_format", locale: locale),
+                index
+            ))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.tint)
             Text(record.securityName)
@@ -444,8 +454,9 @@ private struct BacktestComparisonView: View {
     private func period(for record: BacktestRecord) -> String {
         guard let start = record.settings.startDate,
               let end = record.settings.endDate
-        else { return String(localized: "settings.full_period") }
-        return "\(start.formatted(date: .numeric, time: .omitted))\n\(end.formatted(date: .numeric, time: .omitted))"
+        else { return String(localized: "settings.full_period", locale: locale) }
+        let format = Date.FormatStyle(date: .numeric, time: .omitted, locale: locale)
+        return "\(start.formatted(format))\n\(end.formatted(format))"
     }
 
     private func percent(_ value: Double?) -> String {

@@ -7,11 +7,15 @@ enum BacktestError: LocalizedError {
     case invalidPeriod
 
     var errorDescription: String? {
+        localizedDescription(locale: .current)
+    }
+
+    func localizedDescription(locale: Locale) -> String {
         switch self {
-        case .insufficientData: String(localized: "error.insufficient_data")
-        case .invalidStrategy: String(localized: "error.invalid_strategy")
-        case .invalidCapital: String(localized: "error.invalid_capital")
-        case .invalidPeriod: String(localized: "error.invalid_period")
+        case .insufficientData: String(localized: "error.insufficient_data", locale: locale)
+        case .invalidStrategy: String(localized: "error.invalid_strategy", locale: locale)
+        case .invalidCapital: String(localized: "error.invalid_capital", locale: locale)
+        case .invalidPeriod: String(localized: "error.invalid_period", locale: locale)
         }
     }
 }
@@ -21,7 +25,8 @@ enum BacktestEngine {
         security: Security,
         candles: [Candle],
         strategy: TradingStrategy,
-        settings: BacktestSettings
+        settings: BacktestSettings,
+        locale: Locale = .current
     ) throws -> BacktestResult {
         guard settings.initialCapital > 0 else { throw BacktestError.invalidCapital }
         let calendar = Calendar(identifier: .gregorian)
@@ -76,7 +81,7 @@ enum BacktestEngine {
                     buyAll(
                         candle: candle,
                         settings: settings,
-                        reason: String(localized: "trade.reason.period_start"),
+                        reason: String(localized: "trade.reason.period_start", locale: locale),
                         cash: &cash,
                         quantity: &quantity,
                         trades: &trades
@@ -90,7 +95,7 @@ enum BacktestEngine {
                         amount: monthlyInvestment,
                         candle: candle,
                         settings: settings,
-                        reason: String(localized: "trade.reason.monthly_dca"),
+                        reason: String(localized: "trade.reason.monthly_dca", locale: locale),
                         cash: &cash,
                         quantity: &quantity,
                         trades: &trades
@@ -111,7 +116,7 @@ enum BacktestEngine {
                             buyAll(
                                 candle: candle,
                                 settings: settings,
-                                reason: String(localized: "trade.reason.cross_up"),
+                                reason: String(localized: "trade.reason.cross_up", locale: locale),
                                 cash: &cash,
                                 quantity: &quantity,
                                 trades: &trades
@@ -120,7 +125,7 @@ enum BacktestEngine {
                             sellAll(
                                 candle: candle,
                                 settings: settings,
-                                reason: String(localized: "trade.reason.cross_down"),
+                                reason: String(localized: "trade.reason.cross_down", locale: locale),
                                 cash: &cash,
                                 quantity: &quantity,
                                 trades: &trades
@@ -143,7 +148,7 @@ enum BacktestEngine {
                         buyAll(
                             candle: candle,
                             settings: settings,
-                            reason: String(localized: "trade.reason.breakout"),
+                            reason: String(localized: "trade.reason.breakout", locale: locale),
                             cash: &cash,
                             quantity: &quantity,
                             trades: &trades
@@ -152,7 +157,7 @@ enum BacktestEngine {
                         sellAll(
                             candle: candle,
                             settings: settings,
-                            reason: String(localized: "trade.reason.breakdown"),
+                            reason: String(localized: "trade.reason.breakdown", locale: locale),
                             cash: &cash,
                             quantity: &quantity,
                             trades: &trades
@@ -174,7 +179,7 @@ enum BacktestEngine {
             sellAll(
                 candle: last,
                 settings: settings,
-                reason: String(localized: "trade.reason.period_end"),
+                reason: String(localized: "trade.reason.period_end", locale: locale),
                 cash: &cash,
                 quantity: &quantity,
                 trades: &trades

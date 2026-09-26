@@ -11,6 +11,7 @@ struct BacktestHomeView: View {
     }
 
     @EnvironmentObject private var model: AppModel
+    @Environment(\.locale) private var locale
     @State private var configurationSheet: ConfigurationSheet?
 
     var body: some View {
@@ -59,21 +60,25 @@ struct BacktestHomeView: View {
             Button { configurationSheet = .stock } label: {
                 ConfigurationRow(
                     title: "backtest.stock",
-                    value: model.selectedSecurity?.name ?? String(localized: "status.not_selected"),
+                    value: model.selectedSecurity?.name
+                        ?? String(localized: "status.not_selected", locale: locale),
                     symbol: "chart.line.uptrend.xyaxis"
                 )
             }
             Button { configurationSheet = .strategy } label: {
                 ConfigurationRow(
                     title: "backtest.strategy",
-                    value: model.selectedStrategy?.name ?? String(localized: "status.not_selected"),
+                    value: model.selectedStrategy?.name
+                        ?? String(localized: "status.not_selected", locale: locale),
                     symbol: "slider.horizontal.3"
                 )
             }
             Button { configurationSheet = .settings } label: {
                 ConfigurationRow(
                     title: "backtest.conditions",
-                    value: model.hasConfirmedSettings ? String(localized: "status.confirmed") : String(localized: "status.not_confirmed"),
+                    value: model.hasConfirmedSettings
+                        ? String(localized: "status.confirmed", locale: locale)
+                        : String(localized: "status.not_confirmed", locale: locale),
                     symbol: "calendar.badge.clock"
                 )
             }
@@ -99,6 +104,7 @@ private struct ResultSections: View {
     let changeStrategy: () -> Void
     let changeSettings: () -> Void
     let runAgain: () -> Void
+    @Environment(\.locale) private var locale
 
     var body: some View {
         Section {
@@ -165,16 +171,22 @@ private struct ResultSections: View {
             Chart {
                 ForEach(result.equityCurve) { point in
                     LineMark(x: .value("Date", point.date), y: .value("Strategy", point.strategyValue))
-                        .foregroundStyle(by: .value("Series", String(localized: "result.strategy_value")))
+                        .foregroundStyle(by: .value(
+                            "Series",
+                            String(localized: "result.strategy_value", locale: locale)
+                        ))
                 }
                 ForEach(result.equityCurve) { point in
                     LineMark(x: .value("Date", point.date), y: .value("Benchmark", point.benchmarkValue))
-                        .foregroundStyle(by: .value("Series", String(localized: "result.benchmark")))
+                        .foregroundStyle(by: .value(
+                            "Series",
+                            String(localized: "result.benchmark", locale: locale)
+                        ))
                 }
             }
             .chartForegroundStyleScale([
-                String(localized: "result.strategy_value"): Color.accentColor,
-                String(localized: "result.benchmark"): Color.secondary
+                String(localized: "result.strategy_value", locale: locale): Color.accentColor,
+                String(localized: "result.benchmark", locale: locale): Color.secondary
             ])
             .frame(height: 220)
         }
@@ -213,12 +225,16 @@ private struct ResultSections: View {
         let key = result.excessReturn >= 0
             ? "result.benchmark_outperformed_format"
             : "result.benchmark_underperformed_format"
-        return String(format: String(localized: String.LocalizationValue(key)), value)
+        return String(
+            format: String(localized: String.LocalizationValue(key), locale: locale),
+            value
+        )
     }
 }
 
 private struct ResultOverview: View {
     let result: BacktestResult
+    @Environment(\.locale) private var locale
 
     private var resultColor: Color { result.netProfit >= 0 ? .green : .red }
 
@@ -229,7 +245,7 @@ private struct ResultOverview: View {
                     .font(.headline)
                 if let first = result.candles.first?.date,
                    let last = result.candles.last?.date {
-                    Text("\(first.formatted(date: .abbreviated, time: .omitted)) – \(last.formatted(date: .abbreviated, time: .omitted))")
+                    Text("\(formatted(first)) – \(formatted(last))")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -311,6 +327,10 @@ private struct ResultOverview: View {
                 .stroke(.separator.opacity(0.35), lineWidth: 0.5)
         }
     }
+
+    private func formatted(_ date: Date) -> String {
+        date.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted, locale: locale))
+    }
 }
 
 private struct ResultMetric: View {
@@ -365,6 +385,7 @@ private struct ConfigurationRow: View {
 private struct StockPickerView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.locale) private var locale
 
     var body: some View {
         NavigationStack {
@@ -403,8 +424,8 @@ private struct StockPickerView: View {
 
     private func marketName(_ market: Market) -> String {
         switch market {
-        case .hk: String(localized: "market.hk")
-        case .us: String(localized: "market.us")
+        case .hk: String(localized: "market.hk", locale: locale)
+        case .us: String(localized: "market.us", locale: locale)
         default: market.rawValue.uppercased()
         }
     }

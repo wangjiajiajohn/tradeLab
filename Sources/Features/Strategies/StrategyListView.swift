@@ -96,6 +96,7 @@ private struct StrategyCreatorView: View {
 
     @EnvironmentObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.locale) private var locale
     @State private var name = ""
     @State private var kind: Kind = .movingAverage
     @State private var creationMode: CreationMode = .describe
@@ -286,11 +287,13 @@ private struct StrategyCreatorView: View {
                 let draft = try await StrategyAnalysisService.analyze(
                     strategyDescription,
                     provider: model.aiProvider,
-                    model: model.aiModel
+                    model: model.aiModel,
+                    locale: locale
                 )
                 apply(draft)
             } catch {
-                analysisError = error.localizedDescription
+                analysisError = (error as? StrategyAnalysisError)?.localizedDescription(locale: locale)
+                    ?? error.localizedDescription
             }
         }
     }
@@ -316,7 +319,7 @@ private struct StrategyCreatorView: View {
             if let value = draft.entryWindow { entryWindow = value }
             if let value = draft.exitWindow { exitWindow = value }
         default:
-            analysisError = String(localized: "strategy_analysis.unsupported")
+            analysisError = String(localized: "strategy_analysis.unsupported", locale: locale)
             analysisCompleted = false
             return
         }

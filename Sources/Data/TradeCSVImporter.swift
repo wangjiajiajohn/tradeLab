@@ -11,10 +11,14 @@ enum TradeCSVImportError: LocalizedError {
     case noValidRows
 
     var errorDescription: String? {
+        localizedDescription(locale: .current)
+    }
+
+    func localizedDescription(locale: Locale) -> String {
         switch self {
-        case .unreadable: String(localized: "trades.import.unreadable")
-        case .missingColumns: String(localized: "trades.import.missing_columns")
-        case .noValidRows: String(localized: "trades.import.no_valid_rows")
+        case .unreadable: String(localized: "trades.import.unreadable", locale: locale)
+        case .missingColumns: String(localized: "trades.import.missing_columns", locale: locale)
+        case .noValidRows: String(localized: "trades.import.no_valid_rows", locale: locale)
         }
     }
 }

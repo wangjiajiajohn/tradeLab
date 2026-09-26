@@ -13,6 +13,7 @@ struct RootView: View {
                     .transition(.opacity)
             }
         }
+        .id(model.language.rawValue)
         .animation(.easeInOut(duration: 0.25), value: model.hasCompletedFirstBacktest)
     }
 }

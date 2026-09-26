@@ -12,9 +12,16 @@ enum CredentialStoreError: LocalizedError {
     case keychain(OSStatus)
 
     var errorDescription: String? {
+        localizedDescription(locale: .current)
+    }
+
+    func localizedDescription(locale: Locale) -> String {
         switch self {
         case let .keychain(status):
-            String(format: String(localized: "error.keychain_format"), status)
+            String(
+                format: String(localized: "error.keychain_format", locale: locale),
+                status
+            )
         }
     }
 }

@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct TradeJournalView: View {
     @EnvironmentObject private var model: AppModel
+    @Environment(\.locale) private var locale
     @State private var showingEntry = false
     @State private var showingImporter = false
     @State private var importMessage: String?
@@ -130,7 +131,7 @@ struct TradeJournalView: View {
             Section("trades.data_issues") {
                 Label {
                     Text(String(
-                        format: String(localized: "trades.oversold_format"),
+                        format: String(localized: "trades.oversold_format", locale: locale),
                         analysis.oversoldSymbols.joined(separator: ", ")
                     ))
                 } icon: {
@@ -160,12 +161,13 @@ struct TradeJournalView: View {
             let parsed = try TradeCSVImporter.parse(data: Data(contentsOf: url))
             model.addJournalTrades(parsed.trades)
             importMessage = String(
-                format: String(localized: "trades.import.success_format"),
+                format: String(localized: "trades.import.success_format", locale: locale),
                 parsed.trades.count,
                 parsed.rejectedRows
             )
         } catch {
-            importError = error.localizedDescription
+            importError = (error as? TradeCSVImportError)?.localizedDescription(locale: locale)
+                ?? error.localizedDescription
         }
     }
 }

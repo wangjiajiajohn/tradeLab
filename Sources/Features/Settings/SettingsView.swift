@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
+    @Environment(\.locale) private var locale
 
     var body: some View {
         NavigationStack {
@@ -33,8 +34,14 @@ struct SettingsView: View {
                 }
 
                 Section("settings.privacy") {
-                    LabeledContent("settings.network_first_run", value: String(localized: "status.disabled"))
-                    LabeledContent("settings.storage", value: String(localized: "settings.on_device"))
+                    LabeledContent(
+                        "settings.network_first_run",
+                        value: String(localized: "status.disabled", locale: locale)
+                    )
+                    LabeledContent(
+                        "settings.storage",
+                        value: String(localized: "settings.on_device", locale: locale)
+                    )
                 }
 
                 Section {
@@ -51,21 +58,21 @@ struct SettingsView: View {
 
     private var marketDataStatus: String {
         switch model.marketDataSource {
-        case .offline: String(localized: "provider.offline")
+        case .offline: String(localized: "provider.offline", locale: locale)
         case .longbridge:
             model.hasLongbridgeCredentials
-                ? String(localized: "provider.longbridge")
-                : String(localized: "status.needs_configuration")
+                ? String(localized: "provider.longbridge", locale: locale)
+                : String(localized: "status.needs_configuration", locale: locale)
         }
     }
 
     private var aiStatus: String {
         switch model.aiProvider {
-        case .disabled: String(localized: "status.disabled")
+        case .disabled: String(localized: "status.disabled", locale: locale)
         case .openAI:
-            model.hasAIAPIKey ? "OpenAI" : String(localized: "status.needs_configuration")
+            model.hasAIAPIKey ? "OpenAI" : String(localized: "status.needs_configuration", locale: locale)
         case .deepSeek:
-            model.hasAIAPIKey ? "DeepSeek" : String(localized: "status.needs_configuration")
+            model.hasAIAPIKey ? "DeepSeek" : String(localized: "status.needs_configuration", locale: locale)
         }
     }
 }
@@ -160,7 +167,8 @@ private struct MarketDataSettingsView: View {
             model.refreshCredentialStatus()
             didSave = true
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = (error as? CredentialStoreError)?.localizedDescription(locale: model.language.locale)
+                ?? error.localizedDescription
         }
     }
 
@@ -176,7 +184,8 @@ private struct MarketDataSettingsView: View {
             model.refreshCredentialStatus()
             didSave = false
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = (error as? CredentialStoreError)?.localizedDescription(locale: model.language.locale)
+                ?? error.localizedDescription
         }
     }
 
@@ -265,7 +274,8 @@ private struct AISettingsView: View {
             model.refreshCredentialStatus()
             didSave = true
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = (error as? CredentialStoreError)?.localizedDescription(locale: model.language.locale)
+                ?? error.localizedDescription
         }
     }
 
@@ -277,7 +287,8 @@ private struct AISettingsView: View {
             model.refreshCredentialStatus()
             didSave = false
         } catch {
-            errorMessage = error.localizedDescription
+            errorMessage = (error as? CredentialStoreError)?.localizedDescription(locale: model.language.locale)
+                ?? error.localizedDescription
         }
     }
 
