@@ -473,11 +473,6 @@ private struct AISettingsView: View {
         apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private var needsModelVerification: Bool {
-        !trimmedAPIKey.isEmpty
-            && (validatedAPIKey != trimmedAPIKey || availableModels.isEmpty)
-    }
-
     private var canChooseModel: Bool {
         !trimmedAPIKey.isEmpty
             && !availableModels.isEmpty
@@ -583,7 +578,7 @@ private struct AISettingsView: View {
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if model.aiProvider != .disabled && needsModelVerification {
+            if model.aiProvider != .disabled {
                 Button {
                     Task { await refreshModels() }
                 } label: {
