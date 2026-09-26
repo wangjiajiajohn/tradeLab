@@ -144,7 +144,7 @@ struct LongbridgeMarketDataProvider: Sendable {
     }
 
     func searchSecurities(matching query: String, locale: Locale) async throws -> [Security] {
-        let candidates = Self.symbolCandidates(for: query)
+        let candidates = Self.searchSymbolCandidates(for: query)
         guard !candidates.isEmpty else { return [] }
 
         var lastError: Error?
@@ -334,7 +334,7 @@ struct LongbridgeMarketDataProvider: Sendable {
         return false
     }
 
-    private static func symbolCandidates(for query: String) -> [String] {
+    static func searchSymbolCandidates(for query: String) -> [String] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [] }
         let lookupKey = trimmed.folding(
@@ -354,7 +354,9 @@ struct LongbridgeMarketDataProvider: Sendable {
     }
 
     private static let securityAliases: [String: [String]] = [
-        "蔚来": ["NIO.US"], "蔚來": ["NIO.US"], "nio": ["NIO.US"],
+        "蔚来": ["NIO.US", "9866.HK"], "蔚来汽车": ["NIO.US", "9866.HK"],
+        "蔚來": ["NIO.US", "9866.HK"], "蔚來汽車": ["NIO.US", "9866.HK"],
+        "nio": ["NIO.US", "9866.HK"],
         "小鹏": ["XPEV.US"], "小鵬": ["XPEV.US"], "xpeng": ["XPEV.US"],
         "理想": ["LI.US"], "li auto": ["LI.US"],
         "拼多多": ["PDD.US"], "pdd": ["PDD.US"],
