@@ -165,12 +165,9 @@ struct MarketDataSettingsView: View {
             }
 
         }
-        .scrollDismissesKeyboard(.interactively)
-        .background {
-            Color.clear
-                .contentShape(Rectangle())
-                .onTapGesture { isCredentialFieldFocused = false }
-        }
+        .scrollDismissesKeyboard(.immediately)
+        .contentShape(Rectangle())
+        .onTapGesture { isCredentialFieldFocused = false }
         .navigationTitle("settings.market_data_provider")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -513,12 +510,9 @@ private struct AISettingsView: View {
             }
 
         }
-        .scrollDismissesKeyboard(.interactively)
-        .background {
-            Color.clear
-                .contentShape(Rectangle())
-                .onTapGesture { isCredentialFieldFocused = false }
-        }
+        .scrollDismissesKeyboard(.immediately)
+        .contentShape(Rectangle())
+        .onTapGesture { isCredentialFieldFocused = false }
         .navigationTitle("settings.ai_provider")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
