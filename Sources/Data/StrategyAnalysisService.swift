@@ -109,7 +109,8 @@ enum StrategyAnalysisService {
         session: URLSession = .shared
     ) async throws -> StrategyDraft {
         guard provider != .disabled,
-              let apiKey = CredentialStore.value(for: .aiAPIKey),
+              let credentialKey = provider.credentialKey,
+              let apiKey = CredentialStore.value(for: credentialKey),
               !apiKey.isEmpty,
               let endpoint = endpoint(for: provider)
         else { throw StrategyAnalysisError.unavailable }

@@ -343,12 +343,9 @@ private struct AISettingsView: View {
                 .background(.bar)
             }
         }
-        .onAppear { apiKey = CredentialStore.value(for: .aiAPIKey) ?? "" }
+        .onAppear { loadConfiguration(for: model.aiProvider) }
         .onChange(of: model.aiProvider) { _, provider in
-            if provider != .disabled {
-                model.aiModel = provider.defaultModel
-            }
-            didSave = false
+            loadConfiguration(for: provider)
         }
         .onChange(of: apiKey) { _, _ in didSave = false }
         .onChange(of: model.aiModel) { _, _ in didSave = false }
@@ -361,9 +358,8 @@ private struct AISettingsView: View {
 
     private func save() {
         do {
-            if model.aiProvider != .disabled {
-                try CredentialStore.set(apiKey, for: .aiAPIKey)
-            }
+            guard let credentialKey = model.aiProvider.credentialKey else { return }
+            try CredentialStore.set(apiKey, for: credentialKey)
             model.refreshCredentialStatus()
             didSave = true
         } catch {
@@ -374,15 +370,22 @@ private struct AISettingsView: View {
 
     private func removeCredential() {
         do {
-            try CredentialStore.remove(.aiAPIKey)
+            guard let credentialKey = model.aiProvider.credentialKey else { return }
+            try CredentialStore.remove(credentialKey)
             apiKey = ""
-            model.aiProvider = .disabled
             model.refreshCredentialStatus()
             didSave = false
         } catch {
             errorMessage = (error as? CredentialStoreError)?.localizedDescription(locale: model.language.locale)
                 ?? error.localizedDescription
         }
+    }
+
+    private func loadConfiguration(for provider: AIProvider) {
+        apiKey = provider.credentialKey.flatMap { CredentialStore.value(for: $0) } ?? ""
+        model.aiModel = model.savedAIModel(for: provider)
+        model.refreshCredentialStatus()
+        didSave = false
     }
 
     private var errorPresented: Binding<Bool> {

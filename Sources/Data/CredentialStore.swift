@@ -3,9 +3,27 @@ import Security
 
 enum CredentialKey: String, CaseIterable {
     case aiAPIKey = "ai-api-key"
+    case openAIAPIKey = "ai-api-key-openai"
+    case deepSeekAPIKey = "ai-api-key-deepseek"
+    case claudeAPIKey = "ai-api-key-claude"
+    case geminiAPIKey = "ai-api-key-gemini"
+    case kimiAPIKey = "ai-api-key-kimi"
     case longbridgeAppKey = "longbridge-app-key"
     case longbridgeAppSecret = "longbridge-app-secret"
     case longbridgeAccessToken = "longbridge-access-token"
+}
+
+extension AIProvider {
+    var credentialKey: CredentialKey? {
+        switch self {
+        case .disabled: nil
+        case .openAI: .openAIAPIKey
+        case .deepSeek: .deepSeekAPIKey
+        case .claude: .claudeAPIKey
+        case .gemini: .geminiAPIKey
+        case .kimi: .kimiAPIKey
+        }
+    }
 }
 
 enum CredentialStoreError: LocalizedError {

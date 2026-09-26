@@ -82,10 +82,16 @@ final class AppModel: ObservableObject {
         }
     }
     @Published var aiProvider: AIProvider {
-        didSet { defaults.set(aiProvider.rawValue, forKey: Keys.aiProvider) }
+        didSet {
+            defaults.set(aiProvider.rawValue, forKey: Keys.aiProvider)
+            refreshCredentialStatus()
+        }
     }
     @Published var aiModel: String {
-        didSet { defaults.set(aiModel, forKey: Keys.aiModel) }
+        didSet {
+            defaults.set(aiModel, forKey: Keys.aiModel)
+            defaults.set(aiModel, forKey: aiModelKey(for: aiProvider))
+        }
     }
     @Published private(set) var hasLongbridgeCredentials = false
     @Published private(set) var hasAIAPIKey = false
@@ -116,9 +122,13 @@ final class AppModel: ObservableObject {
         appearance = Appearance(rawValue: defaults.string(forKey: Keys.appearance) ?? "") ?? .system
         backtestHistory = Self.loadHistory(from: defaults)
         marketDataSource = MarketDataSource(rawValue: defaults.string(forKey: Keys.marketDataSource) ?? "") ?? .offline
-        aiProvider = AIProvider(rawValue: defaults.string(forKey: Keys.aiProvider) ?? "") ?? .disabled
-        aiModel = defaults.string(forKey: Keys.aiModel) ?? "deepseek-chat"
+        let initialAIProvider = AIProvider(rawValue: defaults.string(forKey: Keys.aiProvider) ?? "") ?? .disabled
+        aiProvider = initialAIProvider
+        aiModel = defaults.string(forKey: Self.aiModelKey(for: initialAIProvider))
+            ?? defaults.string(forKey: Keys.aiModel)
+            ?? initialAIProvider.defaultModel
         journalTrades = Self.loadJournalTrades(from: defaults)
+        migrateLegacyAIKey(to: initialAIProvider)
         refreshCredentialStatus()
     }
 
@@ -303,7 +313,28 @@ final class AppModel: ObservableObject {
         hasLongbridgeCredentials = CredentialStore.hasValue(for: .longbridgeAppKey)
             && CredentialStore.hasValue(for: .longbridgeAppSecret)
             && CredentialStore.hasValue(for: .longbridgeAccessToken)
-        hasAIAPIKey = CredentialStore.hasValue(for: .aiAPIKey)
+        hasAIAPIKey = aiProvider.credentialKey.map { CredentialStore.hasValue(for: $0) } ?? false
+    }
+
+    func savedAIModel(for provider: AIProvider) -> String {
+        defaults.string(forKey: Self.aiModelKey(for: provider)) ?? provider.defaultModel
+    }
+
+    private static func aiModelKey(for provider: AIProvider) -> String {
+        "\(Keys.aiModel).\(provider.rawValue)"
+    }
+
+    private func aiModelKey(for provider: AIProvider) -> String {
+        Self.aiModelKey(for: provider)
+    }
+
+    private func migrateLegacyAIKey(to provider: AIProvider) {
+        guard let destination = provider.credentialKey,
+              !CredentialStore.hasValue(for: destination),
+              let legacyValue = CredentialStore.value(for: .aiAPIKey)
+        else { return }
+        try? CredentialStore.set(legacyValue, for: destination)
+        try? CredentialStore.remove(.aiAPIKey)
     }
 
     func addJournalTrade(_ trade: JournalTrade) {
