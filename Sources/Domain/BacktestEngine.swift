@@ -26,7 +26,7 @@ enum BacktestEngine {
 
         let minimumCount: Int
         switch strategy.rule {
-        case .buyAndHold:
+        case .buyAndHold, .monthlyDCA:
             minimumCount = 2
         case let .dualMovingAverage(short, long):
             guard short > 0, long > short else { throw BacktestError.invalidStrategy }
@@ -47,6 +47,10 @@ enum BacktestEngine {
         var previousShort: Double?
         var previousLong: Double?
         let firstClose = candles[0].close
+        let calendar = Calendar(identifier: .gregorian)
+        let dcaMonthCount = Set(candles.map { monthKey(for: $0.date, calendar: calendar) }).count
+        let monthlyInvestment = settings.initialCapital / Double(max(dcaMonthCount, 1))
+        var previousDCAMonth: DateComponents?
 
         for index in candles.indices {
             let candle = candles[index]
@@ -62,6 +66,21 @@ enum BacktestEngine {
                         quantity: &quantity,
                         trades: &trades
                     )
+                }
+
+            case .monthlyDCA:
+                let month = monthKey(for: candle.date, calendar: calendar)
+                if month != previousDCAMonth {
+                    buy(
+                        amount: monthlyInvestment,
+                        candle: candle,
+                        settings: settings,
+                        reason: String(localized: "trade.reason.monthly_dca"),
+                        cash: &cash,
+                        quantity: &quantity,
+                        trades: &trades
+                    )
+                    previousDCAMonth = month
                 }
 
             case let .dualMovingAverage(shortWindow, longWindow):
@@ -175,6 +194,40 @@ enum BacktestEngine {
     private static func meanClose(in candles: [Candle], endingAt index: Int, window: Int) -> Double {
         let start = index - window + 1
         return candles[start...index].reduce(0) { $0 + $1.close } / Double(window)
+    }
+
+    private static func monthKey(for date: Date, calendar: Calendar) -> DateComponents {
+        calendar.dateComponents([.year, .month], from: date)
+    }
+
+    private static func buy(
+        amount: Double,
+        candle: Candle,
+        settings: BacktestSettings,
+        reason: String,
+        cash: inout Double,
+        quantity: inout Int,
+        trades: inout [SimulatedTrade]
+    ) {
+        let executionPrice = candle.close * (1 + settings.slippageRate)
+        let unitCost = executionPrice * (1 + settings.commissionRate)
+        let purchasable = Int(floor(min(amount, cash) / unitCost))
+        guard purchasable > 0 else { return }
+        let gross = executionPrice * Double(purchasable)
+        let fee = gross * settings.commissionRate
+        cash -= gross + fee
+        quantity += purchasable
+        trades.append(
+            SimulatedTrade(
+                id: UUID(),
+                date: candle.date,
+                side: .buy,
+                price: executionPrice,
+                quantity: purchasable,
+                fee: fee,
+                reason: reason
+            )
+        )
     }
 
     private static func buyAll(

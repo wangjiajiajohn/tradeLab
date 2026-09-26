@@ -29,6 +29,7 @@ struct Candle: Identifiable, Hashable, Codable, Sendable {
 struct TradingStrategy: Identifiable, Hashable, Codable, Sendable {
     enum Rule: Hashable, Codable, Sendable {
         case buyAndHold
+        case monthlyDCA
         case dualMovingAverage(short: Int, long: Int)
         case breakout(entryWindow: Int, exitWindow: Int)
     }
@@ -55,6 +56,14 @@ struct TradingStrategy: Identifiable, Hashable, Codable, Sendable {
         isBuiltIn: true
     )
 
+    static let monthlyDCADemo = TradingStrategy(
+        id: UUID(uuidString: "18FC7953-A3E7-4F29-BE40-6F7939C506B6")!,
+        name: String(localized: "strategy.dca.name"),
+        summary: String(localized: "strategy.dca.summary"),
+        rule: .monthlyDCA,
+        isBuiltIn: true
+    )
+
     static let breakoutDemo = TradingStrategy(
         id: UUID(uuidString: "C0FC3762-D419-4976-9ED4-74ED70AC60D6")!,
         name: String(localized: "strategy.breakout.name"),
@@ -64,7 +73,7 @@ struct TradingStrategy: Identifiable, Hashable, Codable, Sendable {
     )
 
     static var builtIn: [TradingStrategy] {
-        [.buyAndHoldDemo, .dualMovingAverageDemo, .breakoutDemo]
+        [.monthlyDCADemo, .buyAndHoldDemo, .dualMovingAverageDemo, .breakoutDemo]
     }
 }
 

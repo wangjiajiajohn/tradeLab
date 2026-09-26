@@ -67,4 +67,22 @@ final class BacktestEngineTests: XCTestCase {
             )
         )
     }
+
+    func testMonthlyDCAInvestsOnEachMonthsFirstTradingDayAndCloses() throws {
+        let provider = DemoMarketDataProvider()
+        let result = try BacktestEngine.run(
+            security: provider.security,
+            candles: provider.candles(),
+            strategy: .monthlyDCADemo,
+            settings: .demo
+        )
+
+        let buys = result.trades.filter { $0.side == .buy }
+        let calendar = Calendar(identifier: .gregorian)
+        let investedMonths = Set(buys.map { calendar.dateComponents([.year, .month], from: $0.date) })
+
+        XCTAssertEqual(buys.count, investedMonths.count)
+        XCTAssertGreaterThan(buys.count, 1)
+        XCTAssertEqual(result.trades.last?.side, .sell)
+    }
 }

@@ -101,6 +101,8 @@
 "strategy.buy_hold.summary" = "回测首个交易日买入，并持有到最后一个交易日。";
 "strategy.breakout.name" = "20 日突破";
 "strategy.breakout.summary" = "收盘价突破前 20 日高点时买入，跌破前 10 日低点时卖出。";
+"strategy.dca.name" = "每月定投";
+"strategy.dca.summary" = "将初始资金等分，每月首个交易日按收盘价买入，回测结束时全部卖出。";
 
 "tab.backtest" = "回测";
 "tab.review" = "复盘";
@@ -119,3 +121,4 @@
 "trade.reason.period_start" = "回测周期开始";
 "trade.reason.breakout" = "收盘价突破前 20 日高点";
 "trade.reason.breakdown" = "收盘价跌破前 10 日低点";
+"trade.reason.monthly_dca" = "每月首个交易日定投";

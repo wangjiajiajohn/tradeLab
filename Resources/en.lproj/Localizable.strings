@@ -101,6 +101,8 @@
 "strategy.buy_hold.summary" = "Buy at the start of the period and hold until the final trading day.";
 "strategy.breakout.name" = "20-Day Breakout";
 "strategy.breakout.summary" = "Buy above the prior 20-day high; exit below the prior 10-day low.";
+"strategy.dca.name" = "Monthly Investing";
+"strategy.dca.summary" = "Split the starting capital evenly, invest at each month's first close, and exit at the end of the backtest.";
 
 "tab.backtest" = "Backtest";
 "tab.review" = "Review";
@@ -119,3 +121,4 @@
 "trade.reason.period_start" = "Backtest period started";
 "trade.reason.breakout" = "Closed above the prior 20-day high";
 "trade.reason.breakdown" = "Closed below the prior 10-day low";
+"trade.reason.monthly_dca" = "Monthly investment on the first trading day";
