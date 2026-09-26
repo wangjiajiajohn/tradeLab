@@ -112,10 +112,6 @@ private struct ResultSections: View {
             ResultOverview(result: result)
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
-
-            Label("result.hypothetical_disclosure", systemImage: "info.circle")
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
 
         Section {
@@ -679,6 +675,13 @@ private struct ResultOverview: View {
                     )
                 }
             }
+
+            Divider()
+
+            Label("result.hypothetical_disclosure", systemImage: "info.circle")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(20)
         .background(.background, in: .rect(cornerRadius: 22))
