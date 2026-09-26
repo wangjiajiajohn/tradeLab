@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct RootView: View {
     @EnvironmentObject private var model: AppModel
@@ -45,6 +46,113 @@ private struct MainTabView: View {
 extension View {
     func tabToolbarJellyEffect() -> some View {
         modifier(TabToolbarJellyModifier())
+    }
+
+    func pullDownResearchDisclosure() -> some View {
+        modifier(PullDownResearchDisclosureModifier())
+    }
+}
+
+private struct PullDownResearchDisclosureModifier: ViewModifier {
+    @State private var pullDistance: CGFloat = 0
+
+    private var progress: CGFloat {
+        min(max((pullDistance - 16) / 32, 0), 1)
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .background {
+                ScrollPullObserver(distance: $pullDistance)
+                    .frame(width: 0, height: 0)
+            }
+            .overlay(alignment: .top) {
+                Label("disclosure.pull_down", systemImage: "info.circle")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .padding(.horizontal, 12)
+                    .frame(height: 30)
+                    .background(.thinMaterial, in: Capsule())
+                    .opacity(progress)
+                    .scaleEffect(0.92 + progress * 0.08)
+                    .offset(y: 8 + min(pullDistance * 0.08, 6))
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(progress < 0.8)
+            }
+    }
+}
+
+private struct ScrollPullObserver: UIViewRepresentable {
+    @Binding var distance: CGFloat
+
+    func makeUIView(context: Context) -> ScrollPullObserverView {
+        let view = ScrollPullObserverView()
+        view.onDistanceChange = { distance = $0 }
+        return view
+    }
+
+    func updateUIView(_ uiView: ScrollPullObserverView, context: Context) {
+        uiView.onDistanceChange = { distance = $0 }
+        uiView.attachIfNeeded()
+    }
+
+    static func dismantleUIView(_ uiView: ScrollPullObserverView, coordinator: ()) {
+        uiView.detach()
+    }
+}
+
+private final class ScrollPullObserverView: UIView {
+    var onDistanceChange: ((CGFloat) -> Void)?
+    private weak var observedScrollView: UIScrollView?
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window == nil {
+            detach()
+        } else {
+            DispatchQueue.main.async { [weak self] in self?.attachIfNeeded() }
+        }
+    }
+
+    func attachIfNeeded() {
+        guard observedScrollView == nil, let scrollView = nearestVerticalScrollView() else { return }
+        observedScrollView = scrollView
+        scrollView.panGestureRecognizer.addTarget(self, action: #selector(handlePan))
+    }
+
+    func detach() {
+        observedScrollView?.panGestureRecognizer.removeTarget(self, action: #selector(handlePan))
+        observedScrollView = nil
+        onDistanceChange?(0)
+    }
+
+    @objc private func handlePan() {
+        guard let scrollView = observedScrollView else { return }
+        let distance = max(0, -(scrollView.contentOffset.y + scrollView.adjustedContentInset.top))
+        onDistanceChange?(distance)
+    }
+
+    private func nearestVerticalScrollView() -> UIScrollView? {
+        var ancestor = superview
+        while let view = ancestor {
+            if let scrollView = view as? UIScrollView { return scrollView }
+            if let scrollView = verticalScrollView(in: view) { return scrollView }
+            ancestor = view.superview
+        }
+        return nil
+    }
+
+    private func verticalScrollView(in view: UIView) -> UIScrollView? {
+        for subview in view.subviews where subview !== self {
+            if let scrollView = subview as? UIScrollView,
+               scrollView.alwaysBounceVertical || scrollView.contentSize.height > scrollView.bounds.height {
+                return scrollView
+            }
+            if let match = verticalScrollView(in: subview) { return match }
+        }
+        return nil
     }
 }
 

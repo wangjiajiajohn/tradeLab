@@ -34,11 +34,17 @@ struct ReviewView: View {
                 if mode == .trades {
                     TradeJournalView()
                 } else if model.backtestHistory.isEmpty {
-                    ContentUnavailableView(
-                        "review.empty.title",
-                        systemImage: "book.pages",
-                        description: Text("review.empty.description")
-                    )
+                    ScrollView {
+                        ContentUnavailableView(
+                            "review.empty.title",
+                            systemImage: "book.pages",
+                            description: Text("review.empty.description")
+                        )
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 80)
+                    }
+                    .scrollBounceBehavior(.always)
+                    .pullDownResearchDisclosure()
                 } else {
                     List {
                         ForEach(model.backtestHistory) { record in
@@ -64,6 +70,7 @@ struct ReviewView: View {
                         }
                         .onDelete(perform: model.deleteBacktests)
                     }
+                    .pullDownResearchDisclosure()
                 }
             }
             .navigationTitle(model.language.localized("tab.review"))

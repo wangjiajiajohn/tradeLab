@@ -32,6 +32,7 @@ struct StrategyListView: View {
                     ForEach(builtInStrategies) { strategy in strategyRow(strategy) }
                 }
             }
+            .pullDownResearchDisclosure()
             .navigationTitle(model.language.localized("tab.strategies"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

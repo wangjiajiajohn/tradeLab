@@ -113,6 +113,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .pullDownResearchDisclosure()
             .navigationTitle(model.language.localized("tab.settings"))
         }
     }

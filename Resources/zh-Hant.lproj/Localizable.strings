@@ -212,6 +212,7 @@
 "settings.disclosure.assumptions" = "結果取決於歷史資料、成交假設、佣金及滑點；資料可能存在延遲、缺失或誤差。";
 "settings.disclosure.ai" = "AI 解析可能不準確。使用前請核對生成的規則與參數。";
 "settings.research_disclaimer" = "回測僅供研究，不構成投資建議，也不代表未來表現。";
+"disclosure.pull_down" = "僅供研究與復盤，不構成投資建議。";
 "settings.reset_onboarding" = "重新查看新手引導";
 "settings.storage" = "示範資料儲存";
 "settings.slippage" = "滑點";
