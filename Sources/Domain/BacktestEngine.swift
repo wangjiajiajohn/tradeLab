@@ -4,12 +4,14 @@ enum BacktestError: LocalizedError {
     case insufficientData
     case invalidStrategy
     case invalidCapital
+    case invalidPeriod
 
     var errorDescription: String? {
         switch self {
         case .insufficientData: String(localized: "error.insufficient_data")
         case .invalidStrategy: String(localized: "error.invalid_strategy")
         case .invalidCapital: String(localized: "error.invalid_capital")
+        case .invalidPeriod: String(localized: "error.invalid_period")
         }
     }
 }
@@ -22,7 +24,21 @@ enum BacktestEngine {
         settings: BacktestSettings
     ) throws -> BacktestResult {
         guard settings.initialCapital > 0 else { throw BacktestError.invalidCapital }
-        let candles = candles.sorted { $0.date < $1.date }
+        let calendar = Calendar(identifier: .gregorian)
+        if let startDate = settings.startDate, let endDate = settings.endDate,
+           calendar.startOfDay(for: startDate) > calendar.startOfDay(for: endDate) {
+            throw BacktestError.invalidPeriod
+        }
+        let candles = candles
+            .filter { candle in
+                let day = calendar.startOfDay(for: candle.date)
+                if let startDate = settings.startDate,
+                   day < calendar.startOfDay(for: startDate) { return false }
+                if let endDate = settings.endDate,
+                   day > calendar.startOfDay(for: endDate) { return false }
+                return true
+            }
+            .sorted { $0.date < $1.date }
 
         let minimumCount: Int
         switch strategy.rule {
@@ -47,7 +63,6 @@ enum BacktestEngine {
         var previousShort: Double?
         var previousLong: Double?
         let firstClose = candles[0].close
-        let calendar = Calendar(identifier: .gregorian)
         let dcaMonthCount = Set(candles.map { monthKey(for: $0.date, calendar: calendar) }).count
         let monthlyInvestment = settings.initialCapital / Double(max(dcaMonthCount, 1))
         var previousDCAMonth: DateComponents?

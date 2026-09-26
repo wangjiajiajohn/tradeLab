@@ -284,9 +284,11 @@ struct FirstBacktestFlowView: View {
     }
 
     private var selectedPeriod: String {
-        guard let first = model.selectedCandles.first?.date,
-              let last = model.selectedCandles.last?.date
+        guard let availableFirst = model.selectedCandles.first?.date,
+              let availableLast = model.selectedCandles.last?.date
         else { return "—" }
+        let first = model.settings.startDate ?? availableFirst
+        let last = model.settings.endDate ?? availableLast
         return first.formatted(.dateTime.year().month(.abbreviated))
             + " – "
             + last.formatted(.dateTime.year().month(.abbreviated))

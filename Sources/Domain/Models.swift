@@ -78,6 +78,8 @@ struct TradingStrategy: Identifiable, Hashable, Codable, Sendable {
 }
 
 struct BacktestSettings: Hashable, Codable, Sendable {
+    var startDate: Date? = nil
+    var endDate: Date? = nil
     var initialCapital: Double
     var commissionRate: Double
     var slippageRate: Double

@@ -139,4 +139,45 @@ final class BacktestEngineTests: XCTestCase {
         XCTAssertEqual(restored.name, "Test Trend")
         XCTAssertEqual(restored.rule, .dualMovingAverage(short: 7, long: 21))
     }
+
+    func testBacktestUsesOnlySelectedDateRange() throws {
+        let provider = DemoMarketDataProvider()
+        let candles = provider.candles()
+        var settings = BacktestSettings.demo
+        settings.startDate = candles[20].date
+        settings.endDate = candles[80].date
+
+        let result = try BacktestEngine.run(
+            security: provider.security,
+            candles: candles,
+            strategy: .buyAndHoldDemo,
+            settings: settings
+        )
+
+        XCTAssertEqual(result.candles.first?.date, candles[20].date)
+        XCTAssertEqual(result.candles.last?.date, candles[80].date)
+        XCTAssertEqual(result.trades.first?.date, candles[20].date)
+        XCTAssertEqual(result.trades.last?.date, candles[80].date)
+    }
+
+    func testBacktestRejectsReversedDateRange() {
+        let provider = DemoMarketDataProvider()
+        let candles = provider.candles()
+        var settings = BacktestSettings.demo
+        settings.startDate = candles[80].date
+        settings.endDate = candles[20].date
+
+        XCTAssertThrowsError(
+            try BacktestEngine.run(
+                security: provider.security,
+                candles: candles,
+                strategy: .buyAndHoldDemo,
+                settings: settings
+            )
+        ) { error in
+            guard case BacktestError.invalidPeriod = error else {
+                return XCTFail("Expected invalidPeriod, received \(error)")
+            }
+        }
+    }
 }

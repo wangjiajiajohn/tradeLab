@@ -32,6 +32,7 @@
 "error.incomplete_setup" = "Choose a stock and strategy, then confirm the backtest settings.";
 "error.insufficient_data" = "There is not enough price data for this strategy.";
 "error.invalid_capital" = "Initial capital must be greater than zero.";
+"error.invalid_period" = "The backtest start date cannot be later than the end date.";
 "error.invalid_strategy" = "The strategy parameters are invalid.";
 "error.title" = "Unable to Run Backtest";
 
@@ -97,6 +98,9 @@
 "settings.on_device" = "On Device";
 "settings.online_provider" = "Online Provider";
 "settings.period" = "Period";
+"settings.start_date" = "Start Date";
+"settings.end_date" = "End Date";
+"settings.full_period" = "All Available Data";
 "settings.privacy" = "Privacy";
 "settings.research_disclaimer" = "Backtests are research tools, not investment advice or a promise of future performance.";
 "settings.reset_onboarding" = "Show First Backtest Again";

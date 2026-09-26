@@ -216,6 +216,12 @@ private struct ResultOverview: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text("\(result.security.name) · \(result.strategy.name)")
                     .font(.headline)
+                if let first = result.candles.first?.date,
+                   let last = result.candles.last?.date {
+                    Text("\(first.formatted(date: .abbreviated, time: .omitted)) – \(last.formatted(date: .abbreviated, time: .omitted))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 Text("result.final_value")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -412,6 +418,22 @@ private struct BacktestSettingsSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                if let availableRange {
+                    Section("settings.period") {
+                        DatePicker(
+                            "settings.start_date",
+                            selection: startDateBinding,
+                            in: availableRange.lowerBound...effectiveEndDate,
+                            displayedComponents: .date
+                        )
+                        DatePicker(
+                            "settings.end_date",
+                            selection: endDateBinding,
+                            in: effectiveStartDate...availableRange.upperBound,
+                            displayedComponents: .date
+                        )
+                    }
+                }
                 Section("settings.capital") {
                     TextField("settings.capital", value: $draft.initialCapital, format: .number)
                         .keyboardType(.decimalPad)
@@ -429,7 +451,10 @@ private struct BacktestSettingsSheet: View {
             }
             .navigationTitle("backtest.conditions")
             .navigationBarTitleDisplayMode(.inline)
-            .onAppear { draft = model.settings }
+            .onAppear {
+                draft = model.settings
+                clampDraftPeriod()
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("action.cancel") { dismiss() }
@@ -444,5 +469,48 @@ private struct BacktestSettingsSheet: View {
                 }
             }
         }
+    }
+
+    private var availableRange: ClosedRange<Date>? {
+        guard let first = model.selectedCandles.first?.date,
+              let last = model.selectedCandles.last?.date
+        else { return nil }
+        return first...last
+    }
+
+    private var startDateBinding: Binding<Date> {
+        Binding(
+            get: { effectiveStartDate },
+            set: { draft.startDate = min($0, effectiveEndDate) }
+        )
+    }
+
+    private var endDateBinding: Binding<Date> {
+        Binding(
+            get: { effectiveEndDate },
+            set: { draft.endDate = max($0, effectiveStartDate) }
+        )
+    }
+
+    private var effectiveStartDate: Date {
+        guard let availableRange else { return .now }
+        return min(
+            max(draft.startDate ?? availableRange.lowerBound, availableRange.lowerBound),
+            availableRange.upperBound
+        )
+    }
+
+    private var effectiveEndDate: Date {
+        guard let availableRange else { return .now }
+        return min(
+            max(draft.endDate ?? availableRange.upperBound, effectiveStartDate),
+            availableRange.upperBound
+        )
+    }
+
+    private func clampDraftPeriod() {
+        guard availableRange != nil else { return }
+        draft.startDate = effectiveStartDate
+        draft.endDate = effectiveEndDate
     }
 }

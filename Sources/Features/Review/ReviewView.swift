@@ -96,6 +96,7 @@ private struct BacktestRecordDetail: View {
             }
 
             Section("review.assumptions") {
+                LabeledContent("settings.period", value: recordPeriod)
                 LabeledContent("settings.capital") {
                     Text(record.settings.initialCapital, format: .currency(code: record.currency))
                 }
@@ -126,5 +127,12 @@ private struct BacktestRecordDetail: View {
         }
         .navigationTitle("review.detail")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var recordPeriod: String {
+        guard let start = record.settings.startDate,
+              let end = record.settings.endDate
+        else { return String(localized: "settings.full_period") }
+        return "\(start.formatted(date: .abbreviated, time: .omitted)) – \(end.formatted(date: .abbreviated, time: .omitted))"
     }
 }

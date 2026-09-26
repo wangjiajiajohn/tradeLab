@@ -32,6 +32,7 @@
 "error.incomplete_setup" = "請先選擇股票和策略，並確認回測設定。";
 "error.insufficient_data" = "價格資料不足，無法執行此策略。";
 "error.invalid_capital" = "初始資金必須大於零。";
+"error.invalid_period" = "回測開始日期不能晚於結束日期。";
 "error.invalid_strategy" = "策略參數無效。";
 "error.title" = "無法執行回測";
 
@@ -97,6 +98,9 @@
 "settings.on_device" = "僅本機";
 "settings.online_provider" = "線上資料來源";
 "settings.period" = "時間區間";
+"settings.start_date" = "開始日期";
+"settings.end_date" = "結束日期";
+"settings.full_period" = "全部可用資料";
 "settings.privacy" = "私隱";
 "settings.research_disclaimer" = "回測僅供研究，不構成投資建議，也不代表未來表現。";
 "settings.reset_onboarding" = "重新體驗第一次回測";
