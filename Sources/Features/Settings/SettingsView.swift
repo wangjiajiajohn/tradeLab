@@ -479,8 +479,7 @@ private struct AISettingsView: View {
     }
 
     private var canChooseModel: Bool {
-        !isLoadingModels
-            && !trimmedAPIKey.isEmpty
+        !trimmedAPIKey.isEmpty
             && !availableModels.isEmpty
             && validatedAPIKey == trimmedAPIKey
     }
@@ -544,9 +543,15 @@ private struct AISettingsView: View {
                             Button {
                                 Task { await refreshModels() }
                             } label: {
-                                Image(systemName: "arrow.clockwise")
+                                if isLoadingModels {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                } else {
+                                    Image(systemName: "arrow.clockwise")
+                                }
                             }
                             .buttonStyle(.plain)
+                            .disabled(isLoadingModels)
                             .accessibilityLabel(Text("provider.ai.refresh_models"))
                         }
                     } footer: {
