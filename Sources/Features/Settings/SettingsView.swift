@@ -1,4 +1,62 @@
 import SwiftUI
+import UIKit
+
+private struct KeyboardDismissCapture: UIViewRepresentable {
+    func makeUIView(context: Context) -> KeyboardDismissCaptureView {
+        KeyboardDismissCaptureView()
+    }
+
+    func updateUIView(_ uiView: KeyboardDismissCaptureView, context: Context) {}
+
+    static func dismantleUIView(_ uiView: KeyboardDismissCaptureView, coordinator: ()) {
+        uiView.detach()
+    }
+}
+
+private final class KeyboardDismissCaptureView: UIView, UIGestureRecognizerDelegate {
+    private weak var installedWindow: UIWindow?
+    private lazy var dismissRecognizer: UITapGestureRecognizer = {
+        let recognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        recognizer.cancelsTouchesInView = false
+        recognizer.delegate = self
+        return recognizer
+    }()
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        guard window !== installedWindow else { return }
+        detach()
+        installedWindow = window
+        window?.addGestureRecognizer(dismissRecognizer)
+    }
+
+    func detach() {
+        installedWindow?.removeGestureRecognizer(dismissRecognizer)
+        installedWindow = nil
+    }
+
+    @objc private func dismissKeyboard() {
+        installedWindow?.endEditing(true)
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        var touchedView: UIView? = touch.view
+        while let view = touchedView {
+            if view is UITextField || view is UITextView {
+                return false
+            }
+            touchedView = view.superview
+        }
+        return true
+    }
+
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        true
+    }
+}
 
 struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
@@ -166,8 +224,7 @@ struct MarketDataSettingsView: View {
 
         }
         .scrollDismissesKeyboard(.immediately)
-        .contentShape(Rectangle())
-        .onTapGesture { isCredentialFieldFocused = false }
+        .background(KeyboardDismissCapture())
         .navigationTitle("settings.market_data_provider")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -511,8 +568,7 @@ private struct AISettingsView: View {
 
         }
         .scrollDismissesKeyboard(.immediately)
-        .contentShape(Rectangle())
-        .onTapGesture { isCredentialFieldFocused = false }
+        .background(KeyboardDismissCapture())
         .navigationTitle("settings.ai_provider")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
