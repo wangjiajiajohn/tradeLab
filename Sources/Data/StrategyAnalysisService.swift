@@ -206,3 +206,134 @@ enum StrategyAnalysisService {
     Use null for inapplicable or unspecified numeric fields. Never invent missing parameters. Put required missing parameters in missing_fields. Do not bind a stock, market, currency, capital, date range, fee, or slippage to the strategy; add a concise warning when the user includes them because those belong to the backtest configuration. Keep suggested_name short and use the user's language. Keep warnings and missing_fields concise and in the user's language.
     """
 }
+
+struct AIModelOption: Identifiable, Hashable, Codable, Sendable {
+    let id: String
+    let displayName: String
+}
+
+enum AIModelCatalogService {
+    private struct CatalogErrorEnvelope: Decodable {
+        struct APIError: Decodable { let message: String? }
+        let error: APIError?
+    }
+
+    private struct OpenAIModelList: Decodable {
+        struct Item: Decodable {
+            let id: String
+            let displayName: String?
+
+            enum CodingKeys: String, CodingKey {
+                case id
+                case displayName = "display_name"
+            }
+        }
+
+        let data: [Item]
+    }
+
+    private struct GeminiModelList: Decodable {
+        struct Item: Decodable {
+            let name: String
+            let displayName: String?
+            let supportedGenerationMethods: [String]?
+        }
+
+        let models: [Item]
+    }
+
+    static func cachedModels(for provider: AIProvider) -> [AIModelOption] {
+        guard let data = UserDefaults.standard.data(forKey: cacheKey(for: provider)),
+              let models = try? JSONDecoder().decode([AIModelOption].self, from: data)
+        else { return [] }
+        return models
+    }
+
+    static func fetchModels(
+        for provider: AIProvider,
+        apiKey: String,
+        session: URLSession = .shared
+    ) async throws -> [AIModelOption] {
+        guard provider != .disabled,
+              let endpoint = modelsEndpoint(for: provider)
+        else { return [] }
+
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 30
+        switch provider {
+        case .disabled:
+            break
+        case .claude:
+            request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
+            request.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
+        case .gemini:
+            request.setValue(apiKey, forHTTPHeaderField: "x-goog-api-key")
+        case .openAI, .deepSeek, .kimi:
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        }
+
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else {
+            throw StrategyAnalysisError.invalidResponse
+        }
+        guard 200..<300 ~= http.statusCode else {
+            let message = (try? JSONDecoder().decode(CatalogErrorEnvelope.self, from: data).error?.message)
+                ?? "HTTP \(http.statusCode)"
+            throw StrategyAnalysisError.provider(message)
+        }
+
+        let models: [AIModelOption]
+        if provider == .gemini {
+            models = try JSONDecoder().decode(GeminiModelList.self, from: data).models
+                .filter { $0.supportedGenerationMethods?.contains("generateContent") != false }
+                .map {
+                    let id = $0.name.replacingOccurrences(of: "models/", with: "")
+                    return AIModelOption(id: id, displayName: $0.displayName ?? friendlyName(for: id))
+                }
+        } else {
+            models = try JSONDecoder().decode(OpenAIModelList.self, from: data).data.map {
+                AIModelOption(id: $0.id, displayName: $0.displayName ?? friendlyName(for: $0.id))
+            }
+        }
+
+        let uniqueModels = Dictionary(grouping: models, by: \.id)
+            .compactMap { $0.value.first }
+            .sorted { $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending }
+        if let encoded = try? JSONEncoder().encode(uniqueModels) {
+            UserDefaults.standard.set(encoded, forKey: cacheKey(for: provider))
+        }
+        return uniqueModels
+    }
+
+    private static func modelsEndpoint(for provider: AIProvider) -> URL? {
+        switch provider {
+        case .disabled: nil
+        case .openAI: URL(string: "https://api.openai.com/v1/models")
+        case .deepSeek: URL(string: "https://api.deepseek.com/models")
+        case .claude: URL(string: "https://api.anthropic.com/v1/models?limit=100")
+        case .gemini: URL(string: "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000")
+        case .kimi: URL(string: "https://api.moonshot.cn/v1/models")
+        }
+    }
+
+    private static func cacheKey(for provider: AIProvider) -> String {
+        "v2.ai-model-catalog.\(provider.rawValue)"
+    }
+
+    private static func friendlyName(for id: String) -> String {
+        id.replacingOccurrences(of: "_", with: " ")
+            .replacingOccurrences(of: "-", with: " ")
+            .split(separator: " ")
+            .map { token in
+                switch token.lowercased() {
+                case "gpt": "GPT"
+                case "ai": "AI"
+                case "deepseek": "DeepSeek"
+                case "kimi": "Kimi"
+                default: token.prefix(1).uppercased() + String(token.dropFirst())
+                }
+            }
+            .joined(separator: " ")
+    }
+}

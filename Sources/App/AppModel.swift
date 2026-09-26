@@ -129,7 +129,7 @@ final class AppModel: ObservableObject {
         aiProvider = initialAIProvider
         aiModel = defaults.string(forKey: Self.aiModelKey(for: initialAIProvider))
             ?? defaults.string(forKey: Keys.aiModel)
-            ?? initialAIProvider.defaultModel
+            ?? ""
         journalTrades = Self.loadJournalTrades(from: defaults)
         migrateLegacyAIKey(to: initialAIProvider)
         refreshCredentialStatus()
@@ -349,7 +349,7 @@ final class AppModel: ObservableObject {
     }
 
     func savedAIModel(for provider: AIProvider) -> String {
-        defaults.string(forKey: Self.aiModelKey(for: provider)) ?? provider.defaultModel
+        defaults.string(forKey: Self.aiModelKey(for: provider)) ?? ""
     }
 
     private static func aiModelKey(for provider: AIProvider) -> String {

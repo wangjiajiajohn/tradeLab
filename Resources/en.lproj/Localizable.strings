@@ -213,7 +213,15 @@
 "provider.ai.disabled" = "Do Not Use AI";
 "provider.ai.description" = "AI only turns natural language into a strategy draft. Backtests still run in the deterministic on-device engine.";
 "provider.ai.api_key" = "API Key";
-"provider.ai.model" = "Model Name";
+"provider.ai.model" = "Model";
+"provider.ai.model_section" = "Model";
+"provider.ai.loading_models" = "Loading available models…";
+"provider.ai.choose_model" = "Choose a Model";
+"provider.ai.no_models" = "Save your API key to load the available models.";
+"provider.ai.refresh_models" = "Refresh Model List";
+"provider.ai.manual_model" = "Enter a Model ID Manually";
+"provider.ai.model_id" = "Model ID";
+"provider.ai.saved_model_unavailable" = "The previously selected model is not in the current list. Choose another model or keep the model ID manually.";
 "provider.keychain_note" = "Credentials are stored in the system Keychain on this device and never written to logs or backtest records.";
 "provider.remove_credentials" = "Remove Saved Credentials";
 "provider.show_secret" = "Show credential";

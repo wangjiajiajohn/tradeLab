@@ -362,10 +362,13 @@ private struct AISettingsView: View {
     @State private var apiKey = ""
     @State private var errorMessage: String?
     @State private var didSave = false
+    @State private var availableModels: [AIModelOption] = []
+    @State private var isLoadingModels = false
+    @State private var modelLoadMessage: String?
+    @State private var showsManualModelEntry = false
 
     private var canSave: Bool {
         !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && !model.aiModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
@@ -386,9 +389,44 @@ private struct AISettingsView: View {
             if model.aiProvider != .disabled {
                 Section("provider.credentials") {
                     SecretEntryField(title: "provider.ai.api_key", text: $apiKey)
-                    TextField("provider.ai.model", text: $model.aiModel)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
+                }
+                Section("provider.ai.model_section") {
+                    if isLoadingModels {
+                        HStack {
+                            ProgressView()
+                            Text("provider.ai.loading_models")
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if !availableModels.isEmpty {
+                        Picker("provider.ai.model", selection: $model.aiModel) {
+                            Text("provider.ai.choose_model").tag("")
+                            ForEach(availableModels) { option in
+                                Text(option.displayName).tag(option.id)
+                            }
+                        }
+                    } else {
+                        Text("provider.ai.no_models")
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Button {
+                        Task { await refreshModels() }
+                    } label: {
+                        Label("provider.ai.refresh_models", systemImage: "arrow.clockwise")
+                    }
+                    .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoadingModels)
+
+                    DisclosureGroup("provider.ai.manual_model", isExpanded: $showsManualModelEntry) {
+                        TextField("provider.ai.model_id", text: $model.aiModel)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                    }
+
+                    if let modelLoadMessage {
+                        Text(modelLoadMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
+                    }
                 }
                 Section {
                     Label("provider.keychain_note", systemImage: "lock.shield")
@@ -443,6 +481,7 @@ private struct AISettingsView: View {
             try CredentialStore.set(apiKey, for: credentialKey)
             model.refreshCredentialStatus()
             didSave = true
+            Task { await refreshModels() }
         } catch {
             errorMessage = (error as? CredentialStoreError)?.localizedDescription(locale: model.language.locale)
                 ?? error.localizedDescription
@@ -465,8 +504,38 @@ private struct AISettingsView: View {
     private func loadConfiguration(for provider: AIProvider) {
         apiKey = provider.credentialKey.flatMap { CredentialStore.value(for: $0) } ?? ""
         model.aiModel = model.savedAIModel(for: provider)
+        availableModels = AIModelCatalogService.cachedModels(for: provider)
+        modelLoadMessage = nil
+        showsManualModelEntry = availableModels.isEmpty && !model.aiModel.isEmpty
         model.refreshCredentialStatus()
         didSave = false
+        if !apiKey.isEmpty {
+            Task { await refreshModels() }
+        }
+    }
+
+    @MainActor
+    private func refreshModels() async {
+        let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedKey.isEmpty, model.aiProvider != .disabled else { return }
+        isLoadingModels = true
+        modelLoadMessage = nil
+        defer { isLoadingModels = false }
+        do {
+            availableModels = try await AIModelCatalogService.fetchModels(
+                for: model.aiProvider,
+                apiKey: trimmedKey
+            )
+            if !model.aiModel.isEmpty,
+               !availableModels.contains(where: { $0.id == model.aiModel }) {
+                modelLoadMessage = AppLocalization.string(
+                    "provider.ai.saved_model_unavailable",
+                    locale: model.language.locale
+                )
+            }
+        } catch {
+            modelLoadMessage = error.localizedDescription
+        }
     }
 
     private var errorPresented: Binding<Bool> {

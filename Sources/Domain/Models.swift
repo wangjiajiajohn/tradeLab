@@ -37,16 +37,6 @@ enum AIProvider: String, CaseIterable, Identifiable, Codable, Sendable {
         }
     }
 
-    var defaultModel: String {
-        switch self {
-        case .disabled: ""
-        case .openAI: "gpt-4.1-mini"
-        case .deepSeek: "deepseek-chat"
-        case .claude: "claude-sonnet-4-6"
-        case .gemini: "gemini-3.8-flash"
-        case .kimi: "kimi-k2.5"
-        }
-    }
 }
 
 struct Security: Identifiable, Hashable, Codable, Sendable {
