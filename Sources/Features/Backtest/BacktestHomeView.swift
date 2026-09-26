@@ -39,8 +39,7 @@ struct BacktestHomeView: View {
                         Task { _ = await model.runBacktest() }
                     } label: {
                         if model.isRunningBacktest {
-                            ProgressView()
-                                .controlSize(.small)
+                            BacktestActivityMark(tint: .accentColor, compact: true)
                         } else {
                             Label("backtest.run", systemImage: "play.fill")
                         }
@@ -48,7 +47,7 @@ struct BacktestHomeView: View {
                     .disabled(!model.canRunBacktest)
                     .allowsHitTesting(!model.isRunningBacktest)
                     .accessibilityLabel(model.language.localized(
-                        model.isRunningBacktest ? "backtest.running" : "backtest.run"
+                        model.isRunningBacktest ? model.backtestRunPhase.localizationKey : "backtest.run"
                     ))
                 }
             }

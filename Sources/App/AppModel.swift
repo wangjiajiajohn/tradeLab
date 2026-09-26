@@ -4,6 +4,22 @@ import SwiftUI
 
 @MainActor
 final class AppModel: ObservableObject {
+    enum BacktestRunPhase {
+        case idle
+        case loadingData
+        case executingStrategy
+        case generatingReport
+
+        var localizationKey: String {
+            switch self {
+            case .idle: "backtest.running"
+            case .loadingData: "backtest.running.loading_data"
+            case .executingStrategy: "backtest.running.executing_strategy"
+            case .generatingReport: "backtest.running.generating_report"
+            }
+        }
+    }
+
     enum MainTab: Hashable {
         case backtest
         case strategies
@@ -95,6 +111,7 @@ final class AppModel: ObservableObject {
     }
     @Published var errorMessage: String?
     @Published private(set) var isRunningBacktest = false
+    @Published private(set) var backtestRunPhase: BacktestRunPhase = .idle
     @Published var selectedTab: MainTab = .backtest
     @Published var hasCompletedFirstBacktest: Bool
     @Published private(set) var backtestHistory: [BacktestRecord]
@@ -282,7 +299,11 @@ final class AppModel: ObservableObject {
         }
 
         isRunningBacktest = true
-        defer { isRunningBacktest = false }
+        backtestRunPhase = .loadingData
+        defer {
+            backtestRunPhase = .idle
+            isRunningBacktest = false
+        }
         do {
             let inputCandles: [Candle]
             if marketDataSource == .offline {
@@ -315,6 +336,15 @@ final class AppModel: ObservableObject {
                 }
                 onlineCandles[security.id] = inputCandles
             }
+            if marketDataSource == .offline {
+                try? await Task.sleep(for: .milliseconds(160))
+            }
+            backtestRunPhase = .executingStrategy
+            if marketDataSource == .offline {
+                try? await Task.sleep(for: .milliseconds(180))
+            } else {
+                await Task.yield()
+            }
             let resultSecurity = marketDataSource != .offline
                 ? Security(
                     id: security.id,
@@ -332,6 +362,12 @@ final class AppModel: ObservableObject {
                 settings: settings,
                 locale: language.locale
             )
+            backtestRunPhase = .generatingReport
+            if marketDataSource == .offline {
+                try? await Task.sleep(for: .milliseconds(260))
+            } else {
+                await Task.yield()
+            }
             result = newResult
             saveToHistory(newResult)
             errorMessage = nil

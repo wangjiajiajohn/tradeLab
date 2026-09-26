@@ -9,6 +9,9 @@
 "backtest.empty.title" = "还没有回测结果";
 "backtest.run" = "运行回测";
 "backtest.running" = "正在回测…";
+"backtest.running.loading_data" = "正在读取行情…";
+"backtest.running.executing_strategy" = "正在执行策略…";
+"backtest.running.generating_report" = "正在生成报告…";
 "backtest.stock" = "股票";
 "backtest.strategy" = "策略";
 "backtest.workflow" = "回测流程";

@@ -230,6 +230,7 @@ struct FirstBacktestFlowView: View {
                 tint: stageTint,
                 disabled: !canContinue,
                 loading: stage == .run && model.isRunningBacktest,
+                loadingTitle: LocalizedStringKey(model.backtestRunPhase.localizationKey),
                 action: performPrimaryAction
             )
             .frame(maxWidth: 600)
@@ -448,6 +449,7 @@ private struct PrimaryActionButton: View {
     let tint: Color
     var disabled = false
     var loading = false
+    var loadingTitle: LocalizedStringKey = "backtest.running"
     let action: () -> Void
 
     var body: some View {
@@ -476,10 +478,9 @@ private struct PrimaryActionButton: View {
         } label: {
             HStack(spacing: 10) {
                 if loading {
-                    ProgressView()
-                        .controlSize(.small)
-                        .tint(.white)
-                    Text("backtest.running")
+                    BacktestActivityMark(tint: .white)
+                    Text(loadingTitle)
+                        .contentTransition(.opacity)
                 } else {
                     Label(title, systemImage: symbol)
                 }
@@ -487,5 +488,52 @@ private struct PrimaryActionButton: View {
             .font(.headline)
             .frame(maxWidth: .infinity)
         }
+    }
+}
+
+struct BacktestActivityMark: View {
+    let tint: Color
+    var compact = false
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private let levels: [CGFloat] = [0.72, 0.32, 0.58, 0.18, 0.48]
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 12.0, paused: reduceMotion)) { timeline in
+            let activeIndex = reduceMotion
+                ? -1
+                : Int(timeline.date.timeIntervalSinceReferenceDate * 3) % levels.count
+
+            GeometryReader { proxy in
+                let spacing = proxy.size.width / CGFloat(levels.count - 1)
+                let points = levels.enumerated().map { index, level in
+                    CGPoint(x: CGFloat(index) * spacing, y: proxy.size.height * level)
+                }
+
+                Path { path in
+                    guard let first = points.first else { return }
+                    path.move(to: first)
+                    for point in points.dropFirst() { path.addLine(to: point) }
+                }
+                .stroke(tint.opacity(0.55), style: StrokeStyle(lineWidth: compact ? 1.6 : 2, lineCap: .round, lineJoin: .round))
+
+                ForEach(points.indices, id: \.self) { index in
+                    Circle()
+                        .fill(tint)
+                        .frame(width: nodeSize(index == activeIndex), height: nodeSize(index == activeIndex))
+                        .position(points[index])
+                        .opacity(reduceMotion || index == activeIndex ? 1 : 0.55)
+                        .animation(.easeInOut(duration: 0.18), value: activeIndex)
+                }
+            }
+        }
+        .frame(width: compact ? 24 : 30, height: compact ? 15 : 18)
+        .accessibilityHidden(true)
+    }
+
+    private func nodeSize(_ active: Bool) -> CGFloat {
+        if compact { return active ? 5 : 3 }
+        return active ? 6 : 3.5
     }
 }

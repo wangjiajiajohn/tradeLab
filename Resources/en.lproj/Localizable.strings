@@ -9,6 +9,9 @@
 "backtest.empty.title" = "No Backtest Yet";
 "backtest.run" = "Run Backtest";
 "backtest.running" = "Running Backtest…";
+"backtest.running.loading_data" = "Loading Market Data…";
+"backtest.running.executing_strategy" = "Running Strategy…";
+"backtest.running.generating_report" = "Preparing Report…";
 "backtest.stock" = "Stock";
 "backtest.strategy" = "Strategy";
 "backtest.workflow" = "Backtest Workflow";
