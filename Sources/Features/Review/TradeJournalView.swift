@@ -15,7 +15,8 @@ struct TradeJournalView: View {
                     Button {
                         showingEntry = true
                     } label: {
-                        Label("trades.add", systemImage: "plus.circle.fill")
+                        Label("trades.add", systemImage: "plus")
+                            .symbolRenderingMode(.monochrome)
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)

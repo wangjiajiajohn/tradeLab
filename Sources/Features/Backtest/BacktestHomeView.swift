@@ -386,6 +386,8 @@ private struct StockPickerView: View {
                                 .foregroundStyle(.tint)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
