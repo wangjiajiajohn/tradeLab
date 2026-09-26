@@ -143,6 +143,8 @@ struct TradingStrategy: Identifiable, Hashable, Codable, Sendable {
 }
 
 struct BacktestSettings: Hashable, Codable, Sendable {
+    static let defaultLookbackYears = 1
+
     var startDate: Date? = nil
     var endDate: Date? = nil
     var initialCapital: Double
