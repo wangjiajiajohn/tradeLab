@@ -26,7 +26,7 @@
 "onboarding.progress.settings" = "Settings";
 "onboarding.progress.stock" = "Stock";
 "onboarding.progress.strategy" = "Strategy";
-"onboarding.question" = "Would your strategy have survived the market?";
+"onboarding.question" = "Does your trading strategy really work in the market?";
 "onboarding.run.button" = "Run My First Backtest";
 "onboarding.run.conditions_ready" = "Backtest settings confirmed";
 "onboarding.run.subtitle" = "Everything stays on this device. Run the simulation and inspect the evidence.";
