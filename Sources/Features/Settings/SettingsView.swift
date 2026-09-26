@@ -116,7 +116,7 @@ struct MarketDataSettingsView: View {
                         }
                     }
                     .buttonStyle(.plain)
-                    .popover(isPresented: $showingProviderPicker, arrowEdge: .bottom) {
+                    .popover(isPresented: $showingProviderPicker, arrowEdge: .top) {
                         providerPickerMenu
                             .presentationCompactAdaptation(.popover)
                     }
