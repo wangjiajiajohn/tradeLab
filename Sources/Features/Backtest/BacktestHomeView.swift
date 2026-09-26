@@ -118,7 +118,7 @@ struct BacktestHomeView: View {
         guard let period = backtestPeriodSummary else {
             return capital + "\n" + costs
         }
-        return period + " · " + capital + "\n" + costs
+        return period + "\n" + capital + "\n" + costs
     }
 
     private var backtestPeriodSummary: String? {
@@ -778,7 +778,7 @@ private struct ConfigurationRow: View {
                     Text(detail)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(2)
+                        .lineLimit(3)
                         .minimumScaleFactor(0.82)
                         .fixedSize(horizontal: false, vertical: true)
                 }
