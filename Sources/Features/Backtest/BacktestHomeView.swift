@@ -1115,10 +1115,14 @@ private struct BacktestSettingsSheet: View {
     }
 
     private var availableRange: ClosedRange<Date>? {
-        guard let first = model.selectedCandles.first?.date,
-              let last = model.selectedCandles.last?.date
+        if let first = model.selectedCandles.first?.date,
+           let last = model.selectedCandles.last?.date {
+            return first...last
+        }
+        guard model.selectedSecurity != nil,
+              model.marketDataSource != .offline
         else { return nil }
-        return first...last
+        return BacktestSettings.defaultPeriod()
     }
 
     private var startDateBinding: Binding<Date> {

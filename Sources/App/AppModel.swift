@@ -289,12 +289,7 @@ final class AppModel: ObservableObject {
             } else {
                 let end = settings.endDate ?? Date()
                 let start = settings.startDate
-                    ?? Calendar(identifier: .gregorian).date(
-                        byAdding: .year,
-                        value: -BacktestSettings.defaultLookbackYears,
-                        to: end
-                    )
-                    ?? end.addingTimeInterval(-365 * 86_400)
+                    ?? BacktestSettings.defaultPeriod(ending: end).lowerBound
                 switch marketDataSource {
                 case .offline:
                     inputCandles = candles(for: security)

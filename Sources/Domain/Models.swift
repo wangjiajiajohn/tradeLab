@@ -145,6 +145,15 @@ struct TradingStrategy: Identifiable, Hashable, Codable, Sendable {
 struct BacktestSettings: Hashable, Codable, Sendable {
     static let defaultLookbackYears = 1
 
+    static func defaultPeriod(ending end: Date = .now) -> ClosedRange<Date> {
+        let start = Calendar(identifier: .gregorian).date(
+            byAdding: .year,
+            value: -defaultLookbackYears,
+            to: end
+        ) ?? end.addingTimeInterval(-365 * 86_400)
+        return start...end
+    }
+
     var startDate: Date? = nil
     var endDate: Date? = nil
     var initialCapital: Double
