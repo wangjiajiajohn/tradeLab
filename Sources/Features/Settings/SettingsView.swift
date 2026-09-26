@@ -17,6 +17,7 @@ struct SettingsView: View {
                         AISettingsView()
                     } label: {
                         LabeledContent("settings.ai_provider", value: aiStatus)
+                            .contentShape(Rectangle())
                     }
                 }
 
@@ -169,10 +170,11 @@ struct MarketDataSettingsView: View {
 
         }
         .scrollDismissesKeyboard(.interactively)
-        .gesture(
-            TapGesture().onEnded { isCredentialFieldFocused = false },
-            including: .gesture
-        )
+        .background {
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture { isCredentialFieldFocused = false }
+        }
         .navigationTitle("settings.market_data_provider")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -498,10 +500,11 @@ private struct AISettingsView: View {
 
         }
         .scrollDismissesKeyboard(.interactively)
-        .gesture(
-            TapGesture().onEnded { isCredentialFieldFocused = false },
-            including: .gesture
-        )
+        .background {
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture { isCredentialFieldFocused = false }
+        }
         .navigationTitle("settings.ai_provider")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) {
