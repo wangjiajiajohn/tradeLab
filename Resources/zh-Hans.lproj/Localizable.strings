@@ -223,6 +223,9 @@
 "provider.ai.model_id" = "模型 ID";
 "provider.ai.saved_model_unavailable" = "之前选择的模型不在当前列表中。请选择其他模型，或继续手动使用该模型 ID。";
 "provider.ai.verify_and_load" = "验证并获取模型";
+"provider.ai.configuration_error" = "AI 服务配置失败";
+"provider.ai.invalid_credentials" = "凭证无效或已过期，请检查后重试。";
+"provider.ai.verification_error_format" = "无法验证凭证：%@";
 "provider.ai.model_auto_save" = "选择模型后，API Key 与模型会一起保存；以后切换模型将自动保存。";
 "provider.keychain_note" = "凭证保存在本机系统钥匙串中，不会写入日志或回测记录。";
 "provider.remove_credentials" = "删除已保存的凭证";

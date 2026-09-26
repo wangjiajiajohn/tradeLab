@@ -22,6 +22,20 @@ struct StrategyDraft: Decodable, Sendable {
     }
 }
 
+enum AIModelCatalogError: LocalizedError {
+    case invalidCredentials
+    case provider(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidCredentials:
+            "The API credential was rejected."
+        case let .provider(message):
+            message
+        }
+    }
+}
+
 enum StrategyAnalysisError: LocalizedError {
     case unavailable
     case invalidResponse
@@ -278,9 +292,12 @@ enum AIModelCatalogService {
             throw StrategyAnalysisError.invalidResponse
         }
         guard 200..<300 ~= http.statusCode else {
+            if http.statusCode == 401 || http.statusCode == 403 {
+                throw AIModelCatalogError.invalidCredentials
+            }
             let message = (try? JSONDecoder().decode(CatalogErrorEnvelope.self, from: data).error?.message)
                 ?? "HTTP \(http.statusCode)"
-            throw StrategyAnalysisError.provider(message)
+            throw AIModelCatalogError.provider(message)
         }
 
         let models: [AIModelOption]

@@ -613,7 +613,7 @@ private struct AISettingsView: View {
             guard availableModels.contains(where: { $0.id == newValue }) else { return }
             saveConfiguration()
         }
-        .alert("error.title", isPresented: errorPresented) {
+        .alert("provider.ai.configuration_error", isPresented: errorPresented) {
             Button("action.ok", role: .cancel) { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
@@ -698,7 +698,24 @@ private struct AISettingsView: View {
                 saveConfiguration()
             }
         } catch {
-            modelLoadMessage = error.localizedDescription
+            availableModels = []
+            validatedAPIKey = ""
+            modelLoadMessage = nil
+            if let catalogError = error as? AIModelCatalogError,
+               case .invalidCredentials = catalogError {
+                errorMessage = AppLocalization.string(
+                    "provider.ai.invalid_credentials",
+                    locale: model.language.locale
+                )
+            } else {
+                errorMessage = String(
+                    format: AppLocalization.string(
+                        "provider.ai.verification_error_format",
+                        locale: model.language.locale
+                    ),
+                    error.localizedDescription
+                )
+            }
         }
     }
 

@@ -223,6 +223,9 @@
 "provider.ai.model_id" = "Model ID";
 "provider.ai.saved_model_unavailable" = "The previously selected model is not in the current list. Choose another model or keep the model ID manually.";
 "provider.ai.verify_and_load" = "Verify and Load Models";
+"provider.ai.configuration_error" = "AI Service Configuration Failed";
+"provider.ai.invalid_credentials" = "The credential is invalid or expired. Check it and try again.";
+"provider.ai.verification_error_format" = "The credential could not be verified: %@";
 "provider.ai.model_auto_save" = "Choose a model to save the API key and model together. Later model changes are saved automatically.";
 "provider.keychain_note" = "Credentials are stored in the system Keychain on this device and never written to logs or backtest records.";
 "provider.remove_credentials" = "Remove Saved Credentials";
