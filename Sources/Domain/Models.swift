@@ -124,9 +124,13 @@ struct BacktestResult: Hashable, Sendable {
     let cumulativeReturn: Double
     let benchmarkReturn: Double
     let maxDrawdown: Double
+    let annualizedReturn: Double
+    let annualizedVolatility: Double
+    let sharpeRatio: Double?
 
     var excessReturn: Double { cumulativeReturn - benchmarkReturn }
     var netProfit: Double { finalValue - settings.initialCapital }
+    var totalFees: Double { trades.reduce(0) { $0 + $1.fee } }
     var totalBuyCost: Double {
         trades
             .filter { $0.side == .buy }
@@ -149,6 +153,10 @@ struct BacktestRecord: Identifiable, Hashable, Codable, Sendable {
     let benchmarkReturn: Double
     let maxDrawdown: Double
     let tradeCount: Int
+    let annualizedReturn: Double?
+    let annualizedVolatility: Double?
+    let sharpeRatio: Double?
+    let totalFees: Double?
 
     init(result: BacktestResult, createdAt: Date = .now) {
         id = UUID()
@@ -165,6 +173,10 @@ struct BacktestRecord: Identifiable, Hashable, Codable, Sendable {
         benchmarkReturn = result.benchmarkReturn
         maxDrawdown = result.maxDrawdown
         tradeCount = result.trades.count
+        annualizedReturn = result.annualizedReturn
+        annualizedVolatility = result.annualizedVolatility
+        sharpeRatio = result.sharpeRatio
+        totalFees = result.totalFees
     }
 
     var excessReturn: Double { cumulativeReturn - benchmarkReturn }

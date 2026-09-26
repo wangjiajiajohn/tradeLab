@@ -37,6 +37,9 @@ final class BacktestEngineTests: XCTestCase {
         XCTAssertEqual(result.trades.last?.side, .sell)
         XCTAssertGreaterThan(result.finalValue, 0)
         XCTAssertGreaterThanOrEqual(result.maxDrawdown, 0)
+        XCTAssertTrue(result.annualizedReturn.isFinite)
+        XCTAssertGreaterThanOrEqual(result.annualizedVolatility, 0)
+        XCTAssertEqual(result.totalFees, result.trades.reduce(0) { $0 + $1.fee }, accuracy: 0.000_001)
     }
 
     func testEveryBuiltInStrategyRunsAndClosesItsPosition() throws {
@@ -118,6 +121,34 @@ final class BacktestEngineTests: XCTestCase {
         XCTAssertEqual(restored.strategyID, result.strategy.id)
         XCTAssertEqual(restored.tradeCount, result.trades.count)
         XCTAssertEqual(restored.excessReturn, result.excessReturn, accuracy: 0.000_001)
+        XCTAssertEqual(restored.annualizedReturn, result.annualizedReturn)
+        XCTAssertEqual(restored.annualizedVolatility, result.annualizedVolatility)
+        XCTAssertEqual(restored.sharpeRatio, result.sharpeRatio)
+        XCTAssertEqual(restored.totalFees, result.totalFees)
+    }
+
+    func testLegacyBacktestRecordWithoutRiskMetricsStillDecodes() throws {
+        let provider = DemoMarketDataProvider()
+        let result = try BacktestEngine.run(
+            security: provider.security,
+            candles: provider.candles(),
+            strategy: .buyAndHoldDemo,
+            settings: .demo
+        )
+        let encoded = try JSONEncoder().encode(BacktestRecord(result: result))
+        var object = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        object.removeValue(forKey: "annualizedReturn")
+        object.removeValue(forKey: "annualizedVolatility")
+        object.removeValue(forKey: "sharpeRatio")
+        object.removeValue(forKey: "totalFees")
+
+        let legacyData = try JSONSerialization.data(withJSONObject: object)
+        let restored = try JSONDecoder().decode(BacktestRecord.self, from: legacyData)
+
+        XCTAssertNil(restored.annualizedReturn)
+        XCTAssertNil(restored.annualizedVolatility)
+        XCTAssertNil(restored.sharpeRatio)
+        XCTAssertNil(restored.totalFees)
     }
 
     @MainActor

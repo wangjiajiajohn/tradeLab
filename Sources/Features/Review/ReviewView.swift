@@ -177,6 +177,18 @@ private struct BacktestRecordDetail: View {
                     Text(-record.maxDrawdown, format: .percent.precision(.fractionLength(1)))
                         .foregroundStyle(.orange)
                 }
+                LabeledContent("result.annualized_return") {
+                    optionalPercent(record.annualizedReturn)
+                }
+                LabeledContent("result.volatility") {
+                    optionalPercent(record.annualizedVolatility)
+                }
+                LabeledContent("result.sharpe") {
+                    Text(record.sharpeRatio?.formatted(.number.precision(.fractionLength(2))) ?? "—")
+                }
+                LabeledContent("result.total_fees") {
+                    Text(record.totalFees?.formatted(.currency(code: record.currency)) ?? "—")
+                }
                 LabeledContent("result.trade_count", value: "\(record.tradeCount)")
             }
 
@@ -219,6 +231,11 @@ private struct BacktestRecordDetail: View {
               let end = record.settings.endDate
         else { return String(localized: "settings.full_period") }
         return "\(start.formatted(date: .abbreviated, time: .omitted)) – \(end.formatted(date: .abbreviated, time: .omitted))"
+    }
+
+    private func optionalPercent(_ value: Double?) -> Text {
+        guard let value else { return Text("—") }
+        return Text(value, format: .percent.precision(.fractionLength(1)))
     }
 }
 
@@ -263,6 +280,30 @@ private struct BacktestComparisonView: View {
                         firstValue: first.maxDrawdown,
                         secondValue: second.maxDrawdown,
                         higherIsBetter: false
+                    )
+                    comparisonRow(
+                        "result.annualized_return",
+                        percent(first.annualizedReturn),
+                        percent(second.annualizedReturn),
+                        firstValue: first.annualizedReturn,
+                        secondValue: second.annualizedReturn,
+                        higherIsBetter: true
+                    )
+                    comparisonRow(
+                        "result.volatility",
+                        percent(first.annualizedVolatility),
+                        percent(second.annualizedVolatility),
+                        firstValue: first.annualizedVolatility,
+                        secondValue: second.annualizedVolatility,
+                        higherIsBetter: false
+                    )
+                    comparisonRow(
+                        "result.sharpe",
+                        number(first.sharpeRatio),
+                        number(second.sharpeRatio),
+                        firstValue: first.sharpeRatio,
+                        secondValue: second.sharpeRatio,
+                        higherIsBetter: true
                     )
                     comparisonRow(
                         "result.trade_count",
@@ -376,5 +417,13 @@ private struct BacktestComparisonView: View {
               let end = record.settings.endDate
         else { return String(localized: "settings.full_period") }
         return "\(start.formatted(date: .numeric, time: .omitted))\n\(end.formatted(date: .numeric, time: .omitted))"
+    }
+
+    private func percent(_ value: Double?) -> String {
+        value?.formatted(.percent.precision(.fractionLength(1))) ?? "—"
+    }
+
+    private func number(_ value: Double?) -> String {
+        value?.formatted(.number.precision(.fractionLength(2))) ?? "—"
     }
 }

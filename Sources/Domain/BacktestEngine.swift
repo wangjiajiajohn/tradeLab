@@ -191,6 +191,13 @@ enum BacktestEngine {
         let finalValue = equityCurve.last?.strategyValue ?? settings.initialCapital
         let cumulativeReturn = finalValue / settings.initialCapital - 1
         let benchmarkReturn = (candles.last?.close ?? firstClose) / firstClose - 1
+        let riskMetrics = riskMetrics(
+            values: equityCurve.map(\.strategyValue),
+            cumulativeReturn: cumulativeReturn,
+            startDate: candles[0].date,
+            endDate: candles[candles.count - 1].date,
+            calendar: calendar
+        )
 
         return BacktestResult(
             security: security,
@@ -202,8 +209,41 @@ enum BacktestEngine {
             finalValue: finalValue,
             cumulativeReturn: cumulativeReturn,
             benchmarkReturn: benchmarkReturn,
-            maxDrawdown: maximumDrawdown(equityCurve.map(\.strategyValue))
+            maxDrawdown: maximumDrawdown(equityCurve.map(\.strategyValue)),
+            annualizedReturn: riskMetrics.annualizedReturn,
+            annualizedVolatility: riskMetrics.annualizedVolatility,
+            sharpeRatio: riskMetrics.sharpeRatio
         )
+    }
+
+    private static func riskMetrics(
+        values: [Double],
+        cumulativeReturn: Double,
+        startDate: Date,
+        endDate: Date,
+        calendar: Calendar
+    ) -> (annualizedReturn: Double, annualizedVolatility: Double, sharpeRatio: Double?) {
+        let elapsedDays = max(calendar.dateComponents([.day], from: startDate, to: endDate).day ?? 0, 1)
+        let years = Double(elapsedDays) / 365.2425
+        let growth = max(1 + cumulativeReturn, 0)
+        let annualizedReturn = growth > 0 ? pow(growth, 1 / years) - 1 : -1
+
+        let returns = zip(values.dropFirst(), values).compactMap { current, previous -> Double? in
+            guard previous > 0 else { return nil }
+            return current / previous - 1
+        }
+        guard returns.count > 1 else {
+            return (annualizedReturn, 0, nil)
+        }
+
+        let mean = returns.reduce(0, +) / Double(returns.count)
+        let variance = returns.reduce(0) { partial, value in
+            partial + pow(value - mean, 2)
+        } / Double(returns.count - 1)
+        let dailyDeviation = sqrt(max(variance, 0))
+        let annualizedVolatility = dailyDeviation * sqrt(252)
+        let sharpeRatio = dailyDeviation > 0 ? mean / dailyDeviation * sqrt(252) : nil
+        return (annualizedReturn, annualizedVolatility, sharpeRatio)
     }
 
     private static func meanClose(in candles: [Candle], endingAt index: Int, window: Int) -> Double {

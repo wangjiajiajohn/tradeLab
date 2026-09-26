@@ -69,6 +69,10 @@
 "result.trades" = "交易记录";
 "result.final_value" = "回测期末资产";
 "result.total_bought" = "累计买入";
+"result.annualized_return" = "年化收益";
+"result.volatility" = "年化波动率";
+"result.sharpe" = "夏普比率";
+"result.total_fees" = "累计费用";
 "result.interpretation" = "如何理解结果";
 "result.benchmark_outperformed_format" = "本次回测跑赢买入并持有 %@。";
 "result.benchmark_underperformed_format" = "本次回测落后买入并持有 %@。";

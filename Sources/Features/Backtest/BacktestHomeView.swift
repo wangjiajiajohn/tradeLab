@@ -265,6 +265,32 @@ private struct ResultOverview: View {
                         symbol: "list.number"
                     )
                 }
+                GridRow {
+                    ResultMetric(
+                        title: "result.annualized_return",
+                        value: result.annualizedReturn.formatted(.percent.precision(.fractionLength(1))),
+                        symbol: "calendar.badge.clock",
+                        tint: result.annualizedReturn >= 0 ? .green : .red
+                    )
+                    ResultMetric(
+                        title: "result.volatility",
+                        value: result.annualizedVolatility.formatted(.percent.precision(.fractionLength(1))),
+                        symbol: "waveform.path.ecg",
+                        tint: .orange
+                    )
+                }
+                GridRow {
+                    ResultMetric(
+                        title: "result.sharpe",
+                        value: result.sharpeRatio?.formatted(.number.precision(.fractionLength(2))) ?? "—",
+                        symbol: "scale.3d"
+                    )
+                    ResultMetric(
+                        title: "result.total_fees",
+                        value: result.totalFees.formatted(.currency(code: result.security.currency)),
+                        symbol: "banknote"
+                    )
+                }
             }
         }
         .padding(20)

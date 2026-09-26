@@ -69,6 +69,10 @@
 "result.trades" = "Trades";
 "result.final_value" = "Ending Value";
 "result.total_bought" = "Total Purchased";
+"result.annualized_return" = "Annualized Return";
+"result.volatility" = "Annualized Volatility";
+"result.sharpe" = "Sharpe Ratio";
+"result.total_fees" = "Total Fees";
 "result.interpretation" = "How to Read This";
 "result.benchmark_outperformed_format" = "This backtest beat buy and hold by %@.";
 "result.benchmark_underperformed_format" = "This backtest trailed buy and hold by %@.";
