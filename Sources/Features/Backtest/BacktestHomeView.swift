@@ -937,29 +937,34 @@ private struct StrategyPickerView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
 
+    private var customStrategies: [TradingStrategy] {
+        model.strategies.filter { !$0.isBuiltIn }
+    }
+
+    private var builtInStrategies: [TradingStrategy] {
+        model.strategies.filter(\.isBuiltIn)
+    }
+
     var body: some View {
         NavigationStack {
-            List(model.strategies) { strategy in
-                Button {
-                    model.selectStrategy(strategy)
-                    dismiss()
-                } label: {
-                    HStack(alignment: .top, spacing: 12) {
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text(strategy.name).font(.headline)
-                            Text(strategy.summary)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        if model.selectedStrategyID == strategy.id {
-                            Image(systemName: "checkmark")
-                                .foregroundStyle(.tint)
+            List {
+                Section("strategies.custom") {
+                    if customStrategies.isEmpty {
+                        Label("strategies.custom.empty_prompt", systemImage: "plus.circle")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(customStrategies) { strategy in
+                            strategyRow(strategy)
                         }
                     }
                 }
-                .buttonStyle(.plain)
-                .padding(.vertical, 4)
+
+                Section("strategies.built_in") {
+                    ForEach(builtInStrategies) { strategy in
+                        strategyRow(strategy)
+                    }
+                }
             }
             .navigationTitle("result.change_strategy")
             .navigationBarTitleDisplayMode(.inline)
@@ -969,6 +974,30 @@ private struct StrategyPickerView: View {
                 }
             }
         }
+    }
+
+    private func strategyRow(_ strategy: TradingStrategy) -> some View {
+        Button {
+            model.selectStrategy(strategy)
+            dismiss()
+        } label: {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(strategy.name).font(.headline)
+                    Text(strategy.summary)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                if model.selectedStrategyID == strategy.id {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(.tint)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .padding(.vertical, 4)
     }
 }
 
