@@ -277,9 +277,8 @@ private struct AISettingsView: View {
     @State private var didSave = false
 
     private var canSave: Bool {
-        model.aiProvider == .disabled
-            || !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                && !model.aiModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !model.aiModel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var body: some View {
@@ -313,7 +312,11 @@ private struct AISettingsView: View {
                 }
             }
 
-            Section {
+        }
+        .navigationTitle("settings.ai_provider")
+        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if model.aiProvider != .disabled {
                 Button {
                     save()
                 } label: {
@@ -321,20 +324,24 @@ private struct AISettingsView: View {
                         LocalizedStringKey(didSave ? "status.saved" : "action.save"),
                         systemImage: didSave ? "checkmark" : "square.and.arrow.down"
                     )
-                        .frame(maxWidth: .infinity)
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, minHeight: 50)
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(!canSave)
+                .padding(.horizontal)
+                .padding(.vertical, 10)
+                .background(.bar)
             }
         }
-        .navigationTitle("settings.ai_provider")
-        .navigationBarTitleDisplayMode(.inline)
         .onAppear { apiKey = CredentialStore.value(for: .aiAPIKey) ?? "" }
         .onChange(of: model.aiProvider) { _, provider in
             if provider == .deepSeek, model.aiModel == "gpt-4.1-mini" { model.aiModel = "deepseek-chat" }
             if provider == .openAI, model.aiModel == "deepseek-chat" { model.aiModel = "gpt-4.1-mini" }
             didSave = false
         }
+        .onChange(of: apiKey) { _, _ in didSave = false }
+        .onChange(of: model.aiModel) { _, _ in didSave = false }
         .alert("error.title", isPresented: errorPresented) {
             Button("action.ok", role: .cancel) { errorMessage = nil }
         } message: {
