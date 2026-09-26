@@ -496,14 +496,15 @@ struct BacktestActivityMark: View {
     var compact = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var animationStart = Date()
 
-    private let levels: [CGFloat] = [0.72, 0.32, 0.58, 0.18, 0.48]
+    private let levels: [CGFloat] = [0.74, 0.38, 0.61, 0.2, 0.45]
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 12.0, paused: reduceMotion)) { timeline in
-            let activeIndex = reduceMotion
-                ? -1
-                : Int(timeline.date.timeIntervalSinceReferenceDate * 3) % levels.count
+            let cycle = timeline.date.timeIntervalSince(animationStart)
+                .truncatingRemainder(dividingBy: 1.45) / 1.45
+            let progress = reduceMotion ? 1 : min(cycle / 0.82, 1)
 
             GeometryReader { proxy in
                 let spacing = proxy.size.width / CGFloat(levels.count - 1)
@@ -511,20 +512,40 @@ struct BacktestActivityMark: View {
                     CGPoint(x: CGFloat(index) * spacing, y: proxy.size.height * level)
                 }
 
-                Path { path in
+                let pricePath = Path { path in
                     guard let first = points.first else { return }
                     path.move(to: first)
                     for point in points.dropFirst() { path.addLine(to: point) }
                 }
-                .stroke(tint.opacity(0.55), style: StrokeStyle(lineWidth: compact ? 1.6 : 2, lineCap: .round, lineJoin: .round))
 
-                ForEach(points.indices, id: \.self) { index in
+                pricePath
+                    .stroke(
+                        tint.opacity(0.16),
+                        style: StrokeStyle(
+                            lineWidth: compact ? 1.5 : 1.8,
+                            lineCap: .round,
+                            lineJoin: .round
+                        )
+                    )
+
+                pricePath
+                    .trim(from: 0, to: progress)
+                    .stroke(
+                        tint,
+                        style: StrokeStyle(
+                            lineWidth: compact ? 2 : 2.4,
+                            lineCap: .round,
+                            lineJoin: .round
+                        )
+                    )
+
+                if !reduceMotion {
                     Circle()
                         .fill(tint)
-                        .frame(width: nodeSize(index == activeIndex), height: nodeSize(index == activeIndex))
-                        .position(points[index])
-                        .opacity(reduceMotion || index == activeIndex ? 1 : 0.55)
-                        .animation(.easeInOut(duration: 0.18), value: activeIndex)
+                        .frame(width: compact ? 5.5 : 7, height: compact ? 5.5 : 7)
+                        .shadow(color: tint.opacity(0.55), radius: compact ? 2 : 3)
+                        .position(point(at: progress, in: points))
+                        .opacity(progress < 1 ? 1 : max(0, 1 - (cycle - 0.82) / 0.18))
                 }
             }
         }
@@ -532,8 +553,16 @@ struct BacktestActivityMark: View {
         .accessibilityHidden(true)
     }
 
-    private func nodeSize(_ active: Bool) -> CGFloat {
-        if compact { return active ? 5 : 3 }
-        return active ? 6 : 3.5
+    private func point(at progress: Double, in points: [CGPoint]) -> CGPoint {
+        guard points.count > 1 else { return .zero }
+        let scaled = min(max(progress, 0), 1) * Double(points.count - 1)
+        let segment = min(Int(scaled), points.count - 2)
+        let fraction = CGFloat(scaled - Double(segment))
+        let start = points[segment]
+        let end = points[segment + 1]
+        return CGPoint(
+            x: start.x + (end.x - start.x) * fraction,
+            y: start.y + (end.y - start.y) * fraction
+        )
     }
 }

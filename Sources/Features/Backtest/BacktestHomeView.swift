@@ -13,6 +13,7 @@ struct BacktestHomeView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.locale) private var locale
     @State private var configurationSheet: ConfigurationSheet?
+    @State private var showsBacktestCompletion = false
 
     var body: some View {
         NavigationStack {
@@ -36,24 +37,43 @@ struct BacktestHomeView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         guard !model.isRunningBacktest else { return }
-                        Task { _ = await model.runBacktest() }
+                        Task {
+                            showsBacktestCompletion = false
+                            guard await model.runBacktest() else { return }
+                            withAnimation(.spring(response: 0.28, dampingFraction: 0.62)) {
+                                showsBacktestCompletion = true
+                            }
+                            try? await Task.sleep(for: .milliseconds(550))
+                            withAnimation(.easeOut(duration: 0.18)) {
+                                showsBacktestCompletion = false
+                            }
+                        }
                     } label: {
                         if model.isRunningBacktest {
                             BacktestActivityMark(tint: .accentColor, compact: true)
+                        } else if showsBacktestCompletion {
+                            Image(systemName: "checkmark")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.green)
+                                .transition(.scale.combined(with: .opacity))
                         } else {
                             Label("backtest.run", systemImage: "play.fill")
                         }
                     }
                     .disabled(!model.canRunBacktest)
-                    .allowsHitTesting(!model.isRunningBacktest)
+                    .allowsHitTesting(!model.isRunningBacktest && !showsBacktestCompletion)
                     .accessibilityLabel(model.language.localized(
                         model.isRunningBacktest ? model.backtestRunPhase.localizationKey : "backtest.run"
                     ))
                     .tabToolbarJellyEffect()
-                    .scaleEffect(model.isRunningBacktest ? 1.32 : 1)
+                    .scaleEffect(model.isRunningBacktest ? 1.32 : showsBacktestCompletion ? 1.12 : 1)
                     .animation(
                         .spring(response: 0.32, dampingFraction: 0.62),
                         value: model.isRunningBacktest
+                    )
+                    .animation(
+                        .spring(response: 0.28, dampingFraction: 0.62),
+                        value: showsBacktestCompletion
                     )
                 }
             }
