@@ -136,7 +136,8 @@ struct FirstBacktestFlowView: View {
                         SelectionRow(
                             title: security.name,
                             subtitle: securitySubtitle(security),
-                            selected: model.selectedSecurityID == security.id
+                            selected: model.selectedSecurityID == security.id,
+                            accent: .blue
                         )
                     }
                     .buttonStyle(.plain)
@@ -160,7 +161,8 @@ struct FirstBacktestFlowView: View {
                         SelectionRow(
                             title: strategy.name,
                             subtitle: strategy.summary,
-                            selected: model.selectedStrategyID == strategy.id
+                            selected: model.selectedStrategyID == strategy.id,
+                            accent: .purple
                         )
                     }
                     .buttonStyle(.plain)
@@ -388,6 +390,7 @@ private struct SelectionRow: View {
     let title: String
     let subtitle: String
     let selected: Bool
+    let accent: Color
 
     var body: some View {
         HStack(spacing: 12) {
@@ -397,15 +400,15 @@ private struct SelectionRow: View {
             }
             Spacer()
             Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(selected ? Color.accentColor : Color.secondary.opacity(0.55))
+                .foregroundStyle(selected ? accent : Color.secondary.opacity(0.55))
                 .font(.title3)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
-        .background(selected ? Color.accentColor.opacity(0.10) : Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 16))
+        .background(selected ? accent.opacity(0.10) : Color(.secondarySystemGroupedBackground), in: .rect(cornerRadius: 16))
         .overlay {
             RoundedRectangle(cornerRadius: 16)
-                .stroke(selected ? Color.accentColor.opacity(0.45) : .clear, lineWidth: 1)
+                .stroke(selected ? accent.opacity(0.45) : .clear, lineWidth: 1)
         }
         .contentShape(.rect)
         .animation(.easeInOut(duration: 0.18), value: selected)
