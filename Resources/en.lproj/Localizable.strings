@@ -36,6 +36,8 @@
 "stock.search.configure.title" = "Configure Market Data";
 "stock.search.configure.description" = "Only bundled stocks are available. Configure an online data source in Settings to search for more stocks.";
 "stock.search.configure.action" = "Open Settings";
+"stock.filter.market" = "Market";
+"stock.filter.all" = "All";
 
 "error.incomplete_setup" = "Choose a stock and strategy, then confirm the backtest settings.";
 "error.insufficient_data" = "There is not enough price data for this strategy.";

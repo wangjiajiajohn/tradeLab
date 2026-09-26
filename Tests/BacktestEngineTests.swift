@@ -311,6 +311,29 @@ final class BacktestEngineTests: XCTestCase {
     }
 
     @MainActor
+    func testSearchedSecurityIsAddedToPersistentStockList() throws {
+        let suiteName = "TradeLabV2Tests.discovered-security.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let nio = Security(
+            id: "NIO.US",
+            symbol: "NIO",
+            name: "NIO",
+            market: .us,
+            currency: "USD",
+            isSyntheticDemo: false
+        )
+
+        let firstModel = AppModel(defaults: defaults)
+        firstModel.selectSecurity(nio)
+        XCTAssertTrue(firstModel.discoveredSecurities.contains(where: { $0.id == nio.id }))
+
+        let restoredModel = AppModel(defaults: defaults)
+        XCTAssertTrue(restoredModel.discoveredSecurities.contains(where: { $0.id == nio.id }))
+        XCTAssertEqual(restoredModel.selectedSecurityID, nio.id)
+    }
+
+    @MainActor
     func testWorkspaceRestoresAfterRelaunch() throws {
         let suiteName = "TradeLabV2Tests.workspace.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))

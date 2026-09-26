@@ -751,6 +751,14 @@ private struct ConfigurationRow: View {
 }
 
 private struct StockPickerView: View {
+    private enum MarketFilter: String, CaseIterable, Identifiable {
+        case all
+        case us
+        case hk
+
+        var id: String { rawValue }
+    }
+
     @EnvironmentObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
@@ -759,6 +767,7 @@ private struct StockPickerView: View {
     @State private var onlineSearchResults: [Security] = []
     @State private var isSearching = false
     @State private var searchError: String?
+    @State private var marketFilter: MarketFilter = .all
 
     var body: some View {
         NavigationStack {
@@ -846,6 +855,18 @@ private struct StockPickerView: View {
 
     private var stockList: some View {
         List {
+            Section {
+                Picker("stock.filter.market", selection: $marketFilter) {
+                    Text("stock.filter.all").tag(MarketFilter.all)
+                    Text("market.us").tag(MarketFilter.us)
+                    Text("market.hk").tag(MarketFilter.hk)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+            }
+            .listRowBackground(Color.clear)
+            .listRowInsets(.init(top: 4, leading: 0, bottom: 4, trailing: 0))
+
             if needsDataSourceSetup {
                 Section {
                     VStack(alignment: .leading, spacing: 14) {
@@ -912,15 +933,29 @@ private struct StockPickerView: View {
 
     private var filteredSecurities: [Security] {
         let query = normalizedQuery(searchText)
-        guard !query.isEmpty else { return model.securities }
-        let localMatches = (model.securities + model.discoveredSecurities).filter { security in
-            security.name.localizedStandardContains(query)
-                || security.symbol.localizedStandardContains(query)
-                || security.id.localizedStandardContains(query)
-                || marketName(security.market).localizedStandardContains(query)
+        let available = model.securities + model.discoveredSecurities
+        let matches: [Security]
+        if query.isEmpty {
+            matches = available
+        } else {
+            let localMatches = available.filter { security in
+                security.name.localizedStandardContains(query)
+                    || security.symbol.localizedStandardContains(query)
+                    || security.id.localizedStandardContains(query)
+                    || marketName(security.market).localizedStandardContains(query)
+            }
+            matches = localMatches + onlineSearchResults
         }
-        return (localMatches + onlineSearchResults).reduce(into: []) { result, security in
+
+        let unique = matches.reduce(into: [Security]()) { result, security in
             if !result.contains(where: { $0.id == security.id }) { result.append(security) }
+        }
+        return unique.filter { security in
+            switch marketFilter {
+            case .all: true
+            case .us: security.market == .us
+            case .hk: security.market == .hk
+            }
         }
     }
 
