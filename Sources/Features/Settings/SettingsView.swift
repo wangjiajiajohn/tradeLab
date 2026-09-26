@@ -323,10 +323,9 @@ struct MarketDataSettingsView: View {
         } message: {
             Text(errorMessage ?? "")
         }
-        .confirmationDialog(
+        .alert(
             "provider.remove_credentials",
-            isPresented: $showingRemoveCredentialsConfirmation,
-            titleVisibility: .visible
+            isPresented: $showingRemoveCredentialsConfirmation
         ) {
             Button("provider.remove_credentials", role: .destructive) { removeCredentials() }
             Button("action.cancel", role: .cancel) {}
@@ -743,10 +742,9 @@ private struct AISettingsView: View {
         } message: {
             Text(errorMessage ?? "")
         }
-        .confirmationDialog(
+        .alert(
             "provider.remove_credentials",
-            isPresented: $showingRemoveCredentialsConfirmation,
-            titleVisibility: .visible
+            isPresented: $showingRemoveCredentialsConfirmation
         ) {
             Button("provider.remove_credentials", role: .destructive) { removeCredential() }
             Button("action.cancel", role: .cancel) {}
