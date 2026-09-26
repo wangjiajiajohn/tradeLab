@@ -88,15 +88,21 @@ private struct ScrollDisclosureInstaller: UIViewRepresentable {
 
 private final class ScrollDisclosureInstallerView: UIView {
     var text = "" {
-        didSet { updateTitle() }
+        didSet { disclosureLabel.text = text }
     }
 
     private weak var observedScrollView: UIScrollView?
-    private lazy var disclosureControl: UIRefreshControl = {
-        let control = UIRefreshControl()
-        control.tintColor = .secondaryLabel
-        control.addTarget(self, action: #selector(endDisclosure), for: .valueChanged)
-        return control
+    private let disclosureHeight: CGFloat = 36
+    private lazy var disclosureLabel: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .caption1)
+        label.textColor = .secondaryLabel
+        label.textAlignment = .center
+        label.adjustsFontForContentSizeCategory = true
+        label.numberOfLines = 1
+        label.isAccessibilityElement = false
+        label.autoresizingMask = [.flexibleWidth]
+        return label
     }()
 
     override func didMoveToWindow() {
@@ -110,32 +116,20 @@ private final class ScrollDisclosureInstallerView: UIView {
 
     func attachIfNeeded() {
         guard observedScrollView == nil, let scrollView = nearestVerticalScrollView() else { return }
-        guard scrollView.refreshControl == nil || scrollView.refreshControl === disclosureControl else { return }
         observedScrollView = scrollView
-        scrollView.refreshControl = disclosureControl
-        updateTitle()
+        disclosureLabel.text = text
+        disclosureLabel.frame = CGRect(
+            x: 16,
+            y: -scrollView.adjustedContentInset.top - disclosureHeight,
+            width: max(0, scrollView.bounds.width - 32),
+            height: disclosureHeight
+        )
+        scrollView.addSubview(disclosureLabel)
     }
 
     func detach() {
-        if observedScrollView?.refreshControl === disclosureControl {
-            observedScrollView?.refreshControl = nil
-        }
+        disclosureLabel.removeFromSuperview()
         observedScrollView = nil
-    }
-
-    private func updateTitle() {
-        disclosureControl.attributedTitle = NSAttributedString(
-            string: text,
-            attributes: [
-                .font: UIFont.preferredFont(forTextStyle: .caption1),
-                .foregroundColor: UIColor.secondaryLabel
-            ]
-        )
-        disclosureControl.accessibilityLabel = text
-    }
-
-    @objc private func endDisclosure() {
-        disclosureControl.endRefreshing()
     }
 
     private func nearestVerticalScrollView() -> UIScrollView? {
