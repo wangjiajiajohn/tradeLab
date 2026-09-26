@@ -222,6 +222,8 @@
 "provider.ai.manual_model" = "手動填寫模型 ID";
 "provider.ai.model_id" = "模型 ID";
 "provider.ai.saved_model_unavailable" = "之前選擇的模型不在目前列表中。請選擇其他模型，或繼續手動使用該模型 ID。";
+"provider.ai.verify_and_load" = "驗證並取得模型";
+"provider.ai.model_auto_save" = "選擇模型後，API Key 與模型會一起儲存；之後切換模型將自動儲存。";
 "provider.keychain_note" = "憑證儲存在本機系統鑰匙圈中，不會寫入記錄或回測紀錄。";
 "provider.remove_credentials" = "刪除已儲存的憑證";
 "provider.show_secret" = "顯示憑證";

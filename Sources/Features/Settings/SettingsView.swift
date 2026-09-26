@@ -366,9 +366,16 @@ private struct AISettingsView: View {
     @State private var isLoadingModels = false
     @State private var modelLoadMessage: String?
     @State private var showsManualModelEntry = false
+    @State private var selectedModelID = ""
+    @State private var validatedAPIKey = ""
 
-    private var canSave: Bool {
-        !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    private var trimmedAPIKey: String {
+        apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var needsModelVerification: Bool {
+        !trimmedAPIKey.isEmpty
+            && (validatedAPIKey != trimmedAPIKey || availableModels.isEmpty)
     }
 
     var body: some View {
@@ -398,7 +405,7 @@ private struct AISettingsView: View {
                                 .foregroundStyle(.secondary)
                         }
                     } else if !availableModels.isEmpty {
-                        Picker("provider.ai.model", selection: $model.aiModel) {
+                        Picker("provider.ai.model", selection: $selectedModelID) {
                             Text("provider.ai.choose_model").tag("")
                             ForEach(availableModels) { option in
                                 Text(option.displayName).tag(option.id)
@@ -410,9 +417,17 @@ private struct AISettingsView: View {
                     }
 
                     DisclosureGroup("provider.ai.manual_model", isExpanded: $showsManualModelEntry) {
-                        TextField("provider.ai.model_id", text: $model.aiModel)
+                        TextField("provider.ai.model_id", text: $selectedModelID)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
+                            .submitLabel(.done)
+                            .onSubmit { saveConfiguration() }
+                    }
+
+                    if didSave {
+                        Label("status.saved", systemImage: "checkmark.circle.fill")
+                            .font(.footnote)
+                            .foregroundStyle(.green)
                     }
 
                     if let modelLoadMessage {
@@ -436,6 +451,8 @@ private struct AISettingsView: View {
                         )
                         .accessibilityLabel(Text("provider.ai.refresh_models"))
                     }
+                } footer: {
+                    Text("provider.ai.model_auto_save")
                 }
                 Section {
                     Label("provider.keychain_note", systemImage: "lock.shield")
@@ -453,19 +470,19 @@ private struct AISettingsView: View {
         .navigationTitle("settings.ai_provider")
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            if model.aiProvider != .disabled {
+            if model.aiProvider != .disabled && needsModelVerification {
                 Button {
-                    save()
+                    Task { await refreshModels() }
                 } label: {
                     Label(
-                        LocalizedStringKey(didSave ? "status.saved" : "action.save"),
-                        systemImage: didSave ? "checkmark" : "square.and.arrow.down"
+                        "provider.ai.verify_and_load",
+                        systemImage: "checkmark.shield"
                     )
                     .font(.headline)
                     .frame(maxWidth: .infinity, minHeight: 50)
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(!canSave)
+                .disabled(trimmedAPIKey.isEmpty || isLoadingModels)
                 .padding(.horizontal)
                 .padding(.vertical, 10)
                 .background(.bar)
@@ -476,7 +493,10 @@ private struct AISettingsView: View {
             loadConfiguration(for: provider)
         }
         .onChange(of: apiKey) { _, _ in didSave = false }
-        .onChange(of: model.aiModel) { _, _ in didSave = false }
+        .onChange(of: selectedModelID) { _, newValue in
+            guard availableModels.contains(where: { $0.id == newValue }) else { return }
+            saveConfiguration()
+        }
         .alert("error.title", isPresented: errorPresented) {
             Button("action.ok", role: .cancel) { errorMessage = nil }
         } message: {
@@ -484,13 +504,19 @@ private struct AISettingsView: View {
         }
     }
 
-    private func save() {
+    private func saveConfiguration() {
         do {
-            guard let credentialKey = model.aiProvider.credentialKey else { return }
-            try CredentialStore.set(apiKey, for: credentialKey)
+            let trimmedModel = selectedModelID.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard let credentialKey = model.aiProvider.credentialKey,
+                  !trimmedAPIKey.isEmpty,
+                  !trimmedModel.isEmpty,
+                  validatedAPIKey == trimmedAPIKey || showsManualModelEntry
+            else { return }
+            try CredentialStore.set(trimmedAPIKey, for: credentialKey)
+            validatedAPIKey = trimmedAPIKey
+            model.aiModel = trimmedModel
             model.refreshCredentialStatus()
             didSave = true
-            Task { await refreshModels() }
         } catch {
             errorMessage = (error as? CredentialStoreError)?.localizedDescription(locale: model.language.locale)
                 ?? error.localizedDescription
@@ -502,6 +528,8 @@ private struct AISettingsView: View {
             guard let credentialKey = model.aiProvider.credentialKey else { return }
             try CredentialStore.remove(credentialKey)
             apiKey = ""
+            validatedAPIKey = ""
+            selectedModelID = ""
             model.refreshCredentialStatus()
             didSave = false
         } catch {
@@ -512,20 +540,18 @@ private struct AISettingsView: View {
 
     private func loadConfiguration(for provider: AIProvider) {
         apiKey = provider.credentialKey.flatMap { CredentialStore.value(for: $0) } ?? ""
-        model.aiModel = model.savedAIModel(for: provider)
+        selectedModelID = model.savedAIModel(for: provider)
         availableModels = AIModelCatalogService.cachedModels(for: provider)
+        validatedAPIKey = availableModels.isEmpty ? "" : apiKey
         modelLoadMessage = nil
-        showsManualModelEntry = availableModels.isEmpty && !model.aiModel.isEmpty
+        showsManualModelEntry = availableModels.isEmpty && !selectedModelID.isEmpty
         model.refreshCredentialStatus()
         didSave = false
-        if !apiKey.isEmpty {
-            Task { await refreshModels() }
-        }
     }
 
     @MainActor
     private func refreshModels() async {
-        let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedKey = trimmedAPIKey
         guard !trimmedKey.isEmpty, model.aiProvider != .disabled else { return }
         isLoadingModels = true
         modelLoadMessage = nil
@@ -535,12 +561,15 @@ private struct AISettingsView: View {
                 for: model.aiProvider,
                 apiKey: trimmedKey
             )
-            if !model.aiModel.isEmpty,
-               !availableModels.contains(where: { $0.id == model.aiModel }) {
+            validatedAPIKey = trimmedKey
+            if !selectedModelID.isEmpty,
+               !availableModels.contains(where: { $0.id == selectedModelID }) {
                 modelLoadMessage = AppLocalization.string(
                     "provider.ai.saved_model_unavailable",
                     locale: model.language.locale
                 )
+            } else if !selectedModelID.isEmpty {
+                saveConfiguration()
             }
         } catch {
             modelLoadMessage = error.localizedDescription
