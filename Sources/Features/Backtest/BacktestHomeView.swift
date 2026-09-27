@@ -52,25 +52,26 @@ struct BacktestHomeView: View {
                             Task {
                                 showsBacktestCompletion = false
                                 guard await model.runBacktest() else { return }
-                                withAnimation(.spring(response: 0.28, dampingFraction: 0.62)) {
-                                    showsBacktestCompletion = true
-                                }
+                                showsBacktestCompletion = true
                                 try? await Task.sleep(for: .milliseconds(550))
-                                withAnimation(.easeOut(duration: 0.18)) {
-                                    showsBacktestCompletion = false
-                                }
+                                showsBacktestCompletion = false
                             }
                         } label: {
-                            if model.isRunningBacktest {
-                                BacktestActivityMark(tint: .accentColor, compact: true)
-                            } else if showsBacktestCompletion {
-                                Image(systemName: "checkmark")
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(.green)
-                                    .transition(.scale.combined(with: .opacity))
-                            } else {
-                                Label("backtest.run", systemImage: "play.fill")
+                            Group {
+                                if model.isRunningBacktest {
+                                    BacktestActivityMark(tint: .accentColor, compact: true)
+                                } else if showsBacktestCompletion {
+                                    Image(systemName: "checkmark")
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(.green)
+                                } else {
+                                    Label("backtest.run", systemImage: "play.fill")
+                                }
                             }
+                            // The button itself still springs between sizes, but its
+                            // glyph changes atomically so the activity curve and
+                            // completion checkmark can never coexist on screen.
+                            .transaction { $0.disablesAnimations = true }
                         }
                         .disabled(!model.canRunBacktest)
                         .allowsHitTesting(!model.isRunningBacktest && !showsBacktestCompletion)
